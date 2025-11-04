@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { authOptions } from '../../../../lib/auth'
+import { prisma } from '../../../../lib/prisma'
 
 // GET /api/events/invitations - Liste des invitations en attente
 export async function GET(req: NextRequest) {

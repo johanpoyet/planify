@@ -2,7 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { useEffect } from 'react';
-import { registerServiceWorker } from '@/lib/pwa';
+import { registerServiceWorker } from '../lib/pwa';
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   useEffect(() => {

@@ -6,7 +6,7 @@ import {
   getNotificationPermission, 
   sendLocalNotification,
   requestNotificationPermission 
-} from '@/lib/pwa';
+} from '../lib/pwa';
 
 function getPermissionStyle(permission: NotificationPermission): string {
   if (permission === 'granted') {
