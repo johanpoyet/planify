@@ -6,26 +6,52 @@ export function usePushNotifications() {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Vérifier si les notifications push sont supportées
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true);
       checkSubscription();
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
   const checkSubscription = async () => {
     try {
+      setIsLoading(true);
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.getSubscription();
       
       if (sub) {
-        setSubscription(sub);
-        setIsSubscribed(true);
+        // Vérifier si cette subscription existe dans la base de données
+        const response = await fetch('/api/push/check-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+          }),
+        });
+        
+        const { exists } = await response.json();
+        
+        if (exists) {
+          setSubscription(sub);
+          setIsSubscribed(true);
+        } else {
+          // La subscription existe localement mais pas en BDD, la nettoyer
+          await sub.unsubscribe();
+          setSubscription(null);
+          setIsSubscribed(false);
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la vérification de l\'abonnement:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,6 +136,7 @@ export function usePushNotifications() {
     subscription,
     subscribe,
     unsubscribe,
+    isLoading,
   };
 }
 

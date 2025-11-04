@@ -3,7 +3,7 @@
 import { usePushNotifications } from '@/lib/usePushNotifications';
 
 export default function PushNotificationSettings() {
-  const { isSupported, isSubscribed, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, isSubscribed, subscribe, unsubscribe, isLoading } = usePushNotifications();
 
   if (!isSupported) {
     return (
@@ -11,6 +11,24 @@ export default function PushNotificationSettings() {
         <p className="text-sm text-yellow-800 dark:text-yellow-200">
           ⚠️ Les notifications push ne sont pas supportées par votre navigateur.
         </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-lg">Notifications Push</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Vérification du statut...
+            </p>
+          </div>
+          <div className="px-4 py-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          </div>
+        </div>
       </div>
     );
   }
