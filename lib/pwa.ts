@@ -69,17 +69,21 @@ export function areNotificationsSupported(): boolean {
  * Demande la permission pour les notifications
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
+  console.log('🔍 Vérification du support des notifications...');
+  
   if (!areNotificationsSupported()) {
-    console.log('Les notifications ne sont pas supportées');
+    console.warn('⚠️ Les notifications ne sont pas supportées');
     return 'denied';
   }
 
+  console.log('✅ Notifications supportées, demande de permission...');
+
   try {
     const permission = await Notification.requestPermission();
-    console.log('Permission de notification:', permission);
+    console.log('📋 Permission de notification reçue:', permission);
     return permission;
   } catch (error) {
-    console.error('Erreur lors de la demande de permission:', error);
+    console.error('❌ Erreur lors de la demande de permission:', error);
     return 'denied';
   }
 }

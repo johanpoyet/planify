@@ -65,16 +65,28 @@ export default function NotificationTest() {
   }, []);
 
   const handleRequestPermission = async () => {
-    const newPermission = await requestNotificationPermission();
-    setPermission(newPermission);
+    console.log('🔔 Demande de permission...');
+    try {
+      const newPermission = await requestNotificationPermission();
+      console.log('✅ Permission reçue:', newPermission);
+      setPermission(newPermission);
+    } catch (error) {
+      console.error('❌ Erreur lors de la demande de permission:', error);
+    }
   };
 
   const handleSendNotification = async () => {
-    await sendLocalNotification('Test de notification', {
-      body: 'Ceci est une notification de test depuis Planify ! 🎉',
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-96x96.png',
-    });
+    console.log('📬 Envoi de notification test...');
+    try {
+      await sendLocalNotification('Test de notification', {
+        body: 'Ceci est une notification de test depuis Planify ! 🎉',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-96x96.png',
+      });
+      console.log('✅ Notification envoyée');
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi:', error);
+    }
   };
 
   if (!isSupported) {
