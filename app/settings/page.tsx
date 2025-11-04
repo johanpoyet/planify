@@ -4,7 +4,6 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import NotificationTest from "@/components/NotificationTest";
 import PushNotificationSettings from "@/components/PushNotificationSettings";
 
 interface UserSettings {
@@ -179,9 +178,6 @@ export default function SettingsPage() {
           </h2>
           <PushNotificationSettings />
         </div>
-
-        {/* Test de notifications (dev) */}
-        <NotificationTest />
 
         {/* Déconnexion */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
