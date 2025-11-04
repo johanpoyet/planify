@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Générateur d'icônes Planify</title>
+</head>
+<body>
+  <h1>Générateur d'icônes Planify</h1>
+  <p>Cliquez sur les boutons pour télécharger les icônes</p>
+  <div id="icons"></div>
+
+  <script>
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+    
+    function createIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // Fond bleu avec coins arrondis
+      const radius = size * 0.15;
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fill();
+      
+      // Lettre P blanche
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.6}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('P', size / 2, size / 2);
+      
+      return canvas;
+    }
+    
+    const container = document.getElementById('icons');
+    
+    sizes.forEach(size => {
+      const canvas = createIcon(size);
+      const link = document.createElement('a');
+      link.download = `icon-${size}x${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.textContent = `Télécharger ${size}x${size}`;
+      link.style.display = 'block';
+      link.style.margin = '10px';
+      container.appendChild(link);
+      container.appendChild(canvas);
+    });
+  </script>
+</body>
+</html>

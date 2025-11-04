@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////
+// 🧑 Utilisateur
+//////////////////////////////////////////
+
+model User {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  password           String?   // Pour l'auth par credentials
+  image              String?
+  calendarVisibility Boolean   @default(true) // true = visible aux amis
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+//////////////////////////////////////////
+// 📅 Événements
+//////////////////////////////////////////
+
+model Event {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  visibility  String   @default("friends") // "public" | "friends" | "private"
+  createdById String   @db.ObjectId // Référence sans relation Prisma
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("events")
+}
+
+//////////////////////////////////////////
+// 👥 Participants d'événements
+//////////////////////////////////////////
+
+model EventParticipant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventId   String   @db.ObjectId // Référence à l'événement
+  userId    String   @db.ObjectId // Référence à l'utilisateur invité
+  status    String   @default("pending") // "pending" | "accepted" | "declined"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, userId]) // Un utilisateur ne peut être qu'une fois par événement
+  @@map("event_participants")
+}
+
+//////////////////////////////////////////
+// 👥 Amis
+//////////////////////////////////////////
+
+model Friend {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId // Référence sans relation Prisma
+  friendId  String   @db.ObjectId // Référence sans relation Prisma
+  status    String   @default("pending") // "pending" | "accepted" | "blocked"
+
+  createdAt DateTime @default(now())
+
+  @@map("friends")
+}
+
+
