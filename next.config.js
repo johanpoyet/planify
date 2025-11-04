@@ -3,19 +3,37 @@ const nextConfig = {
   reactStrictMode: true,
   // Configuration Turbopack pour Next.js 16
   turbopack: {},
+  // Assurer que les fichiers publics sont bien servis
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json',
+          },
+        ],
+      },
+    ];
+  },
 };
-
-// Pour activer PWA plus tard, décommentez les lignes ci-dessous
-// et installez @ducanh2912/next-pwa (compatible Next.js 15+)
-/*
-const withPWA = require('@ducanh2912/next-pwa').default({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-});
-
-module.exports = withPWA(nextConfig);
-*/
 
 module.exports = nextConfig;
