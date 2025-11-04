@@ -77,4 +77,21 @@ model Friend {
   @@map("friends")
 }
 
+//////////////////////////////////////////
+// 🔔 Abonnements Push
+//////////////////////////////////////////
+
+model PushSubscription {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId // Référence à l'utilisateur
+  endpoint     String   @unique
+  p256dh       String   // Clé publique pour le chiffrement
+  auth         String   // Secret d'authentification
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("push_subscriptions")
+}
+
 

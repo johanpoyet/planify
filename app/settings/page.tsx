@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import NotificationTest from "@/components/NotificationTest";
+import PushNotificationSettings from "@/components/PushNotificationSettings";
 
 interface UserSettings {
   id: string;
@@ -172,6 +173,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Notifications */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            🔔 Notifications
+          </h2>
+          <PushNotificationSettings />
+        </div>
+
+        {/* Test de notifications (dev) */}
         <NotificationTest />
 
         {/* Déconnexion */}

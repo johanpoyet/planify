@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendPushNotification } from "@/lib/push";
 
 // GET /api/friends - Liste des amis et demandes
 export async function GET(req: NextRequest) {
@@ -157,6 +158,17 @@ export async function POST(req: NextRequest) {
         friendId: friend.id,
         status: "pending",
       },
+    });
+
+    // Envoyer une notification push à l'ami
+    const senderName = user.name || user.email;
+    await sendPushNotification(friend.id, {
+      title: '👋 Nouvelle demande d\'ami',
+      body: `${senderName} vous a envoyé une demande d'ami`,
+      url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/friends`,
+      tag: `friend-request-${friendship.id}`,
+    }).catch(error => {
+      console.error('Erreur lors de l\'envoi de la notification push:', error);
     });
 
     return NextResponse.json(friendship, { status: 201 });

@@ -101,6 +101,7 @@ self.addEventListener('push', (event) => {
     body: 'Nouvelle notification',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-96x96.png',
+    data: { url: '/' },
   };
 
   // Si des données sont envoyées avec le push
@@ -112,7 +113,8 @@ self.addEventListener('push', (event) => {
         body: data.body || notificationData.body,
         icon: data.icon || notificationData.icon,
         badge: data.badge || notificationData.badge,
-        data: data.data || {},
+        data: data.data || { url: '/' },
+        tag: data.tag || 'planify-notification',
       };
     } catch (e) {
       notificationData.body = event.data.text();
@@ -126,7 +128,7 @@ self.addEventListener('push', (event) => {
       badge: notificationData.badge,
       data: notificationData.data,
       vibrate: [200, 100, 200],
-      tag: 'planify-notification',
+      tag: notificationData.tag || 'planify-notification',
       requireInteraction: false,
     })
   );
@@ -138,19 +140,30 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
 
+  // Récupérer l'URL de la notification
+  const urlToOpen = event.notification.data?.url || '/';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // Si une fenêtre est déjà ouverte, la mettre au premier plan
-        for (let i = 0; i < clientList.length; i++) {
-          const client = clientList[i];
-          if ('focus' in client) {
+        // Chercher une fenêtre déjà ouverte avec la bonne URL
+        for (const client of clientList) {
+          if (client.url.includes(urlToOpen) && 'focus' in client) {
             return client.focus();
           }
         }
+        
+        // Si une fenêtre est ouverte, naviguer vers l'URL
+        for (const client of clientList) {
+          if ('focus' in client && 'navigate' in client) {
+            client.focus();
+            return client.navigate(urlToOpen);
+          }
+        }
+        
         // Sinon, ouvrir une nouvelle fenêtre
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          return clients.openWindow(urlToOpen);
         }
       })
   );
