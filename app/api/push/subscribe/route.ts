@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { authOptions } from '../../../../lib/auth';
+import { prisma } from '../../../../lib/prisma';
 
 // POST /api/push/subscribe - Enregistrer un abonnement push
 export async function POST(req: NextRequest) {
