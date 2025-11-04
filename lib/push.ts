@@ -41,7 +41,6 @@ export async function sendPushNotification(userId: string, payload: PushPayload)
     });
 
     if (subscriptions.length === 0) {
-      console.info(`sendPushNotification: No subscriptions found for userId=${userId}`);
       return { ok: false, reason: 'no_subscriptions' };
     }
 
@@ -88,10 +87,6 @@ export async function sendPushNotification(userId: string, payload: PushPayload)
 
     const successCount = results.filter(r => r.status === 'fulfilled').length;
     const failureCount = results.filter(r => r.status === 'rejected').length;
-
-    console.info(
-      `sendPushNotification: userId=${userId}, sent=${successCount}, failed=${failureCount}`
-    );
 
     return {
       ok: successCount > 0,
