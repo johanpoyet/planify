@@ -108,14 +108,14 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
           setShowCalendar(!showCalendar);
           if (!showCalendar) onFocus?.();
         }}
-        className="w-full pl-4 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-left text-white focus:outline-none focus:border-2 transition flex items-center justify-between"
+        className="w-full pl-4 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-left text-white focus:outline-none focus:border-2 transition flex items-center gap-3"
       >
-        <span className={value ? 'text-white' : 'text-slate-500'}>
-          {formatDisplayDate()}
-        </span>
         <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
+        <span className={value ? 'text-white' : 'text-slate-500'}>
+          {formatDisplayDate()}
+        </span>
       </button>
 
       {showCalendar && (

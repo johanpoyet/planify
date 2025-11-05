@@ -36,6 +36,7 @@ export default function FriendsPage() {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedFriendship, setSelectedFriendship] = useState<Friendship | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [hiddenFriendships, setHiddenFriendships] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -93,6 +94,9 @@ export default function FriendsPage() {
   };
 
   const handleAccept = async (friendshipId: string) => {
+    // Masquer immédiatement la demande
+    setHiddenFriendships(prev => new Set(prev).add(friendshipId));
+    
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
         method: "PUT",
@@ -101,16 +105,37 @@ export default function FriendsPage() {
       });
 
       if (res.ok) {
-        fetchFriends();
+        showToast("Demande d'ami acceptée !", "success");
+        setTimeout(() => {
+          fetchFriends();
+        }, 300);
+      } else {
+        // En cas d'erreur, réafficher la demande
+        setHiddenFriendships(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(friendshipId);
+          return newSet;
+        });
+        showToast("Erreur lors de l'acceptation", "error");
       }
     } catch (error) {
       console.error("Erreur lors de l'acceptation:", error);
+      // En cas d'erreur, réafficher la demande
+      setHiddenFriendships(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(friendshipId);
+        return newSet;
+      });
+      showToast("Erreur lors de l'acceptation", "error");
     }
   };
 
   const handleReject = async (friendshipId: string) => {
     setActionLoading(true);
     setShowRejectModal(false);
+    
+    // Masquer immédiatement la demande
+    setHiddenFriendships(prev => new Set(prev).add(friendshipId));
 
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
@@ -121,12 +146,26 @@ export default function FriendsPage() {
 
       if (res.ok) {
         showToast("Demande d'ami refusée", "success");
-        fetchFriends();
+        setTimeout(() => {
+          fetchFriends();
+        }, 300);
       } else {
+        // En cas d'erreur, réafficher la demande
+        setHiddenFriendships(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(friendshipId);
+          return newSet;
+        });
         showToast("Erreur lors du refus", "error");
       }
     } catch (error) {
       console.error("Erreur lors du refus:", error);
+      // En cas d'erreur, réafficher la demande
+      setHiddenFriendships(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(friendshipId);
+        return newSet;
+      });
       showToast("Erreur lors du refus", "error");
     } finally {
       setActionLoading(false);
@@ -286,7 +325,7 @@ export default function FriendsPage() {
               </h2>
             </div>
             <div className="space-y-3">
-              {pendingReceived.map((friendship) => (
+              {pendingReceived.filter(f => !hiddenFriendships.has(f.id)).map((friendship) => (
                 <div
                   key={friendship.id}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-950/50 border border-blue-500/20 rounded-2xl hover:border-blue-500/40 transition"

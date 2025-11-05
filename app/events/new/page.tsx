@@ -369,46 +369,84 @@ export default function NewEventPage() {
                 </div>
               ) : (
                 <div className="space-y-2 max-h-60 overflow-y-auto bg-slate-950/50 border border-slate-700 rounded-2xl p-3">
-                  {friends.map((friendship) => (
-                    <label
-                      key={friendship.friend.id}
-                      className="flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl cursor-pointer transition group"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedFriends.includes(friendship.friend.id)}
-                        onChange={() => toggleFriend(friendship.friend.id)}
-                        className="w-5 h-5 rounded border-slate-600 bg-slate-900 focus:ring-2 transition cursor-pointer"
-                        style={{
-                          accentColor: primaryColor
-                        }}
-                      />
-                      <div className="flex items-center gap-3 flex-1">
-                        {friendship.friend.image ? (
-                          <img
-                            src={friendship.friend.image}
-                            alt={friendship.friend.name || ''}
-                            className="w-10 h-10 rounded-2xl ring-2 ring-slate-700 group-hover:ring-slate-600 transition"
-                          />
-                        ) : (
+                  {friends.map((friendship) => {
+                    const isSelected = selectedFriends.includes(friendship.friend.id);
+                    return (
+                      <label
+                        key={friendship.friend.id}
+                        className="flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all group"
+                      >
+                        {/* Input checkbox caché mais accessible */}
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleFriend(friendship.friend.id)}
+                          className="sr-only"
+                        />
+                        
+                        {/* Checkbox personnalisée animée */}
+                        <div className="relative flex items-center justify-center">
                           <div 
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold ring-2 ring-slate-700 group-hover:ring-slate-600 transition"
-                            style={{ backgroundColor: primaryColor }}
+                            className={`w-6 h-6 rounded-lg border-2 transition-all duration-300 ease-out flex items-center justify-center ${
+                              isSelected 
+                                ? 'scale-100 rotate-0' 
+                                : 'scale-95'
+                            }`}
+                            style={{
+                              borderColor: isSelected ? primaryColor : '#475569',
+                              backgroundColor: isSelected ? primaryColor : 'transparent'
+                            }}
                           >
-                            {friendship.friend.name?.[0]?.toUpperCase() || friendship.friend.email[0].toUpperCase()}
+                            <svg 
+                              className={`w-4 h-4 text-white transition-all duration-300 ${
+                                isSelected 
+                                  ? 'opacity-100 scale-100 rotate-0' 
+                                  : 'opacity-0 scale-50 -rotate-90'
+                              }`}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              strokeWidth={3}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-medium text-white">
-                            {friendship.friend.name || friendship.friend.email}
-                          </p>
-                          {friendship.friend.name && (
-                            <p className="text-xs text-slate-500">{friendship.friend.email}</p>
+                          {/* Effet de pulse lors de la sélection */}
+                          {isSelected && (
+                            <div 
+                              className="absolute inset-0 rounded-lg animate-ping opacity-75"
+                              style={{ backgroundColor: primaryColor }}
+                            />
                           )}
                         </div>
-                      </div>
-                    </label>
-                  ))}
+
+                        <div className="flex items-center gap-3 flex-1">
+                          {friendship.friend.image ? (
+                            <img
+                              src={friendship.friend.image}
+                              alt={friendship.friend.name || ''}
+                              className="w-10 h-10 rounded-2xl ring-2 ring-slate-700 group-hover:ring-slate-600 transition"
+                            />
+                          ) : (
+                            <div 
+                              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold ring-2 ring-slate-700 group-hover:ring-slate-600 transition"
+                              style={{ backgroundColor: primaryColor }}
+                            >
+                              {friendship.friend.name?.[0]?.toUpperCase() || friendship.friend.email[0].toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-white">
+                              {friendship.friend.name || friendship.friend.email}
+                            </p>
+                            {friendship.friend.name && (
+                              <p className="text-xs text-slate-500">{friendship.friend.email}</p>
+                            )}
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
               )}
               {selectedFriends.length > 0 && (

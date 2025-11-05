@@ -32,6 +32,7 @@ export default function InvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<string | null>(null)
+  const [hiddenInvitations, setHiddenInvitations] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -66,6 +67,9 @@ export default function InvitationsPage() {
     action: 'accept' | 'decline'
   ) => {
     setProcessing(eventId)
+    // Masquer immédiatement l'invitation
+    setHiddenInvitations(prev => new Set(prev).add(eventId))
+    
     try {
       const res = await fetch(`/api/events/${eventId}/participants/${userId}`, {
         method: 'PUT',
@@ -74,18 +78,32 @@ export default function InvitationsPage() {
       })
 
       if (res.ok) {
-        // Retirer l'invitation de la liste avec animation
-        setInvitations((prev) => prev.filter((inv) => inv.eventId !== eventId))
+        // Retirer l'invitation de la liste après un court délai
+        setTimeout(() => {
+          setInvitations((prev) => prev.filter((inv) => inv.eventId !== eventId))
+        }, 300)
         
         // Si acceptée, afficher un message de succès
         if (action === 'accept') {
           setTimeout(() => router.push('/events'), 1000)
         }
       } else {
+        // En cas d'erreur, réafficher l'invitation
+        setHiddenInvitations(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(eventId)
+          return newSet
+        })
         alert('Erreur lors de la réponse à l\'invitation')
       }
     } catch (error) {
       console.error('Erreur:', error)
+      // En cas d'erreur, réafficher l'invitation
+      setHiddenInvitations(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(eventId)
+        return newSet
+      })
       alert('Erreur lors de la réponse à l\'invitation')
     } finally {
       setProcessing(null)
@@ -180,6 +198,11 @@ export default function InvitationsPage() {
               {invitations.map((invitation) => {
                 const event = invitation.event
                 if (!event) return null
+
+                // Ne pas afficher les invitations masquées
+                if (hiddenInvitations.has(event.id)) {
+                  return null
+                }
 
                 const isProcessing = processing === event.id
                 const eventDate = new Date(event.date)
