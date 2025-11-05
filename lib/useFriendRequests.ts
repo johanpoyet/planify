@@ -19,7 +19,9 @@ export function useFriendRequests() {
         const res = await fetch('/api/friends?status=pending');
         if (res.ok) {
           const data = await res.json();
-          setPendingCount(data.length);
+          // Ne compter que les demandes reçues (isReceiver: true)
+          const receivedRequests = data.filter((request: any) => request.isReceiver === true);
+          setPendingCount(receivedRequests.length);
         }
       } catch (error) {
         console.error('Error fetching friend requests:', error);

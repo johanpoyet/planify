@@ -32,6 +32,10 @@ export default function FriendsPage() {
   const [searchError, setSearchError] = useState("");
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState<"all" | "accepted" | "pending">("all");
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [selectedFriendship, setSelectedFriendship] = useState<Friendship | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -105,9 +109,8 @@ export default function FriendsPage() {
   };
 
   const handleReject = async (friendshipId: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir refuser cette demande ?")) {
-      return;
-    }
+    setActionLoading(true);
+    setShowRejectModal(false);
 
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
@@ -117,17 +120,23 @@ export default function FriendsPage() {
       });
 
       if (res.ok) {
+        showToast("Demande d'ami refusée", "success");
         fetchFriends();
+      } else {
+        showToast("Erreur lors du refus", "error");
       }
     } catch (error) {
       console.error("Erreur lors du refus:", error);
+      showToast("Erreur lors du refus", "error");
+    } finally {
+      setActionLoading(false);
+      setSelectedFriendship(null);
     }
   };
 
   const handleRemove = async (friendshipId: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir retirer cet ami ?")) {
-      return;
-    }
+    setActionLoading(true);
+    setShowRemoveModal(false);
 
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
@@ -135,10 +144,17 @@ export default function FriendsPage() {
       });
 
       if (res.ok) {
+        showToast("Ami retiré avec succès", "success");
         fetchFriends();
+      } else {
+        showToast("Erreur lors de la suppression", "error");
       }
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
+      showToast("Erreur lors de la suppression", "error");
+    } finally {
+      setActionLoading(false);
+      setSelectedFriendship(null);
     }
   };
 
@@ -296,7 +312,10 @@ export default function FriendsPage() {
                       ✓ Accepter
                     </button>
                     <button
-                      onClick={() => handleReject(friendship.id)}
+                      onClick={() => {
+                        setSelectedFriendship(friendship);
+                        setShowRejectModal(true);
+                      }}
                       className="flex-1 sm:flex-none px-4 py-2 bg-slate-800/80 text-slate-300 font-medium rounded-xl hover:bg-slate-700 transition border border-slate-700"
                     >
                       ✗ Refuser
@@ -340,7 +359,10 @@ export default function FriendsPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleRemove(friendship.id)}
+                    onClick={() => {
+                      setSelectedFriendship(friendship);
+                      setShowRemoveModal(true);
+                    }}
                     className="w-full sm:w-auto px-4 py-2 bg-slate-800/80 text-slate-300 font-medium rounded-xl hover:bg-slate-700 transition border border-slate-700 text-sm"
                   >
                     Annuler
@@ -382,7 +404,10 @@ export default function FriendsPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleRemove(friendship.id)}
+                    onClick={() => {
+                      setSelectedFriendship(friendship);
+                      setShowRemoveModal(true);
+                    }}
                     className="w-full px-4 py-2 bg-slate-800/80 text-slate-300 font-medium rounded-xl hover:bg-slate-700 hover:text-red-400 transition border border-slate-700 text-sm"
                   >
                     Retirer
@@ -405,6 +430,114 @@ export default function FriendsPage() {
           )
         )}
       </div>
+
+      {/* Modal de confirmation pour refuser une demande */}
+      {showRejectModal && selectedFriendship && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-slate-900 rounded-3xl shadow-2xl border border-slate-700/50 max-w-md w-full p-6 animate-slide-up">
+            {/* Icon d'avertissement */}
+            <div className="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            {/* Titre */}
+            <h3 className="text-xl font-bold text-white text-center mb-2">
+              Refuser cette demande ?
+            </h3>
+
+            {/* Message */}
+            <p className="text-slate-400 text-center mb-6">
+              Vous êtes sur le point de refuser la demande d'ami de{" "}
+              <span className="text-white font-medium">
+                {selectedFriendship.friend.name || selectedFriendship.friend.email}
+              </span>.
+            </p>
+
+            {/* Boutons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setSelectedFriendship(null);
+                }}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-3 bg-slate-800/50 hover:bg-slate-800 text-white rounded-2xl font-semibold transition-all border border-slate-700 disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleReject(selectedFriendship.id)}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? "Refus..." : "Refuser"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmation pour retirer/annuler */}
+      {showRemoveModal && selectedFriendship && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-slate-900 rounded-3xl shadow-2xl border border-slate-700/50 max-w-md w-full p-6 animate-slide-up">
+            {/* Icon d'avertissement */}
+            <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            {/* Titre */}
+            <h3 className="text-xl font-bold text-white text-center mb-2">
+              {selectedFriendship.status === "accepted" ? "Retirer cet ami ?" : "Annuler cette demande ?"}
+            </h3>
+
+            {/* Message */}
+            <p className="text-slate-400 text-center mb-6">
+              {selectedFriendship.status === "accepted" ? (
+                <>
+                  Vous êtes sur le point de retirer{" "}
+                  <span className="text-white font-medium">
+                    {selectedFriendship.friend.name || selectedFriendship.friend.email}
+                  </span>{" "}
+                  de votre liste d'amis.
+                </>
+              ) : (
+                <>
+                  Vous êtes sur le point d'annuler votre demande d'ami envoyée à{" "}
+                  <span className="text-white font-medium">
+                    {selectedFriendship.friend.name || selectedFriendship.friend.email}
+                  </span>.
+                </>
+              )}
+            </p>
+
+            {/* Boutons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRemoveModal(false);
+                  setSelectedFriendship(null);
+                }}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-3 bg-slate-800/50 hover:bg-slate-800 text-white rounded-2xl font-semibold transition-all border border-slate-700 disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleRemove(selectedFriendship.id)}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? "Suppression..." : selectedFriendship.status === "accepted" ? "Retirer" : "Confirmer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
