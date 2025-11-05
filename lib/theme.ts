@@ -54,7 +54,7 @@ export const themeColors = {
     gradient: 'from-red-500 to-red-600',
     shadow: 'shadow-red-500/30',
     border: 'border-red-500/30',
-    emoji: '�'
+    emoji: '🔴'
   },
   orange: {
     name: 'Orange',
