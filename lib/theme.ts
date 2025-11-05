@@ -36,17 +36,6 @@ export const themeColors = {
   },
   rose: {
     name: 'Rose',
-    primary: '#e11d48',    // rose-600
-    primaryHover: '#be123c', // rose-700
-    primaryLight: '#fb7185', // rose-400
-    ring: 'ring-rose-500/30',
-    gradient: 'from-rose-500 to-rose-600',
-    shadow: 'shadow-rose-500/30',
-    border: 'border-rose-500/30',
-    emoji: '🌹'
-  },
-  pink: {
-    name: 'Rose vif',
     primary: '#db2777',    // pink-600
     primaryHover: '#be185d', // pink-700
     primaryLight: '#f472b6', // pink-400
@@ -55,6 +44,17 @@ export const themeColors = {
     shadow: 'shadow-pink-500/30',
     border: 'border-pink-500/30',
     emoji: '💖'
+  },
+  red: {
+    name: 'Rouge',
+    primary: '#dc2626',    // red-600
+    primaryHover: '#b91c1c', // red-700
+    primaryLight: '#f87171', // red-400
+    ring: 'ring-red-500/30',
+    gradient: 'from-red-500 to-red-600',
+    shadow: 'shadow-red-500/30',
+    border: 'border-red-500/30',
+    emoji: '�'
   },
   orange: {
     name: 'Orange',
@@ -67,15 +67,15 @@ export const themeColors = {
     border: 'border-orange-500/30',
     emoji: '🟠'
   },
-  amber: {
-    name: 'Ambre',
-    primary: '#d97706',    // amber-600
-    primaryHover: '#b45309', // amber-700
-    primaryLight: '#fbbf24', // amber-400
-    ring: 'ring-amber-500/30',
-    gradient: 'from-amber-500 to-amber-600',
-    shadow: 'shadow-amber-500/30',
-    border: 'border-amber-500/30',
+  yellow: {
+    name: 'Jaune',
+    primary: '#ca8a04',    // yellow-600
+    primaryHover: '#a16207', // yellow-700
+    primaryLight: '#facc15', // yellow-400
+    ring: 'ring-yellow-500/30',
+    gradient: 'from-yellow-500 to-yellow-600',
+    shadow: 'shadow-yellow-500/30',
+    border: 'border-yellow-500/30',
     emoji: '🟡'
   },
 } as const;
