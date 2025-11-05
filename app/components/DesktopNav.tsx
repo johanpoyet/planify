@@ -1,14 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
+import { useState } from 'react'
 
 export default function DesktopNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const { data: session } = useSession()
   const { primaryColor, primaryHoverColor } = useTheme()
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
   // Ne pas afficher la nav sur les pages d'authentification
   if (!session || pathname?.startsWith('/auth')) {
@@ -107,25 +110,51 @@ export default function DesktopNav() {
           </div>
 
           {/* User profile */}
-          <div className="flex items-center gap-3">
-            {session.user?.image ? (
-              <img
-                src={session.user.image}
-                alt={session.user.name || ''}
-                className="w-10 h-10 rounded-2xl ring-2 ring-slate-700"
-              />
-            ) : (
-              <div 
-                className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
-                style={{ backgroundColor: primaryColor }}
-              >
-                {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+          <div className="relative flex items-center gap-3">
+            <button
+              onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+              className="flex items-center gap-3 hover:opacity-80 transition"
+            >
+              {session.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name || ''}
+                  className="w-10 h-10 rounded-2xl ring-2 ring-slate-700"
+                />
+              ) : (
+                <div 
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+              )}
+              <div className="hidden lg:block text-left">
+                <p className="text-sm font-medium text-white">{session.user?.name || 'Utilisateur'}</p>
+                <p className="text-xs text-slate-400">{session.user?.email}</p>
+              </div>
+              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Logout dropdown */}
+            {showLogoutMenu && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden z-50">
+                <button
+                  onClick={async () => {
+                    await signOut({ redirect: false })
+                    router.push('/auth/login')
+                  }}
+                  className="w-full px-4 py-3 text-left text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Déconnexion</span>
+                </button>
               </div>
             )}
-            <div className="hidden lg:block">
-              <p className="text-sm font-medium text-white">{session.user?.name || 'Utilisateur'}</p>
-              <p className="text-xs text-slate-400">{session.user?.email}</p>
-            </div>
           </div>
         </div>
       </div>

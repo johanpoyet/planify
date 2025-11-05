@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PushNotificationSettings from "@/components/PushNotificationSettings";
@@ -223,27 +223,6 @@ export default function SettingsPage() {
             </h2>
           </div>
           <PushNotificationSettings />
-        </div>
-
-        {/* Déconnexion */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.3s" }}>
-          <div className="flex items-center gap-2 mb-4">
-            <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <h2 className="text-2xl font-bold text-white">
-              Session
-            </h2>
-          </div>
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="w-full px-6 py-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition font-medium shadow-xl flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Se déconnecter
-          </button>
         </div>
       </div>
     </div>
