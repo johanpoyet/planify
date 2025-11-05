@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from '@/lib/themeContext';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -83,13 +85,13 @@ export default function RegisterPage() {
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         {/* Logo/Brand */}
         <div className="mb-8 text-center animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/50 mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl shadow-2xl mb-4" style={{ backgroundColor: primaryColor }}>
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">Planify</h1>
-          <p className="text-purple-200 text-sm">Organisez vos moments ensemble</p>
+          <p className="text-slate-400 text-sm">Organisez vos moments ensemble</p>
         </div>
 
         {/* Register card */}
@@ -121,7 +123,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className={`w-5 h-5 transition-colors ${focusedInput === 'name' ? 'text-purple-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'name' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -132,9 +134,15 @@ export default function RegisterPage() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    onFocus={() => setFocusedInput('name')}
-                    onBlur={() => setFocusedInput(null)}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    onFocus={(e) => {
+                      setFocusedInput('name');
+                      e.currentTarget.style.borderColor = primaryColor;
+                    }}
+                    onBlur={(e) => {
+                      setFocusedInput(null);
+                      e.currentTarget.style.borderColor = '#334155';
+                    }}
+                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                     placeholder="Votre nom"
                   />
                 </div>
@@ -147,7 +155,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className={`w-5 h-5 transition-colors ${focusedInput === 'email' ? 'text-purple-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'email' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                     </svg>
                   </div>
@@ -158,9 +166,15 @@ export default function RegisterPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    onFocus={() => setFocusedInput('email')}
-                    onBlur={() => setFocusedInput(null)}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    onFocus={(e) => {
+                      setFocusedInput('email');
+                      e.currentTarget.style.borderColor = primaryColor;
+                    }}
+                    onBlur={(e) => {
+                      setFocusedInput(null);
+                      e.currentTarget.style.borderColor = '#334155';
+                    }}
+                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                     placeholder="votre@email.com"
                   />
                 </div>
@@ -173,7 +187,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className={`w-5 h-5 transition-colors ${focusedInput === 'password' ? 'text-purple-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'password' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
@@ -184,9 +198,15 @@ export default function RegisterPage() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    onFocus={() => setFocusedInput('password')}
-                    onBlur={() => setFocusedInput(null)}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    onFocus={(e) => {
+                      setFocusedInput('password');
+                      e.currentTarget.style.borderColor = primaryColor;
+                    }}
+                    onBlur={(e) => {
+                      setFocusedInput(null);
+                      e.currentTarget.style.borderColor = '#334155';
+                    }}
+                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                     placeholder="Min. 6 caractères"
                   />
                 </div>
@@ -199,7 +219,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className={`w-5 h-5 transition-colors ${focusedInput === 'confirmPassword' ? 'text-purple-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'confirmPassword' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -210,9 +230,15 @@ export default function RegisterPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    onFocus={() => setFocusedInput('confirmPassword')}
-                    onBlur={() => setFocusedInput(null)}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    onFocus={(e) => {
+                      setFocusedInput('confirmPassword');
+                      e.currentTarget.style.borderColor = primaryColor;
+                    }}
+                    onBlur={(e) => {
+                      setFocusedInput(null);
+                      e.currentTarget.style.borderColor = '#334155';
+                    }}
+                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                     placeholder="Confirmer le mot de passe"
                   />
                 </div>
@@ -222,10 +248,12 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="relative w-full group mt-8"
+                className="w-full px-6 py-4 text-white rounded-2xl font-semibold text-lg shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed mt-8"
+                style={{ backgroundColor: primaryColor }}
+                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = primaryHoverColor)}
+                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = primaryColor)}
               >
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
-                <div className="relative flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl leading-none">
+                <div className="flex items-center justify-center">
                   {loading ? (
                     <>
                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
