@@ -1,5 +1,5 @@
 // Service Worker pour Planify
-const CACHE_NAME = 'planify-v1';
+const CACHE_NAME = 'planify-v2'; // Incrémenter la version pour forcer la mise à jour
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.json',
@@ -51,6 +51,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Ne jamais mettre en cache les fichiers CSS, JS et autres assets Next.js
+  const noCacheExtensions = ['.css', '.js', '.json'];
+  const shouldNotCache = noCacheExtensions.some(ext => url.pathname.endsWith(ext)) ||
+                         url.pathname.includes('/_next/') ||
+                         url.pathname.includes('/static/');
+
   // Stratégie: Network First pour les API, Cache First pour les assets
   if (url.pathname.startsWith('/api/')) {
     // Pour les API: toujours essayer le réseau en premier
@@ -70,15 +76,23 @@ self.addEventListener('fetch', (event) => {
           );
         })
     );
+  } else if (shouldNotCache) {
+    // Pour CSS, JS et assets Next.js: toujours aller chercher la version réseau
+    event.respondWith(
+      fetch(request).catch(() => {
+        // Si hors ligne, essayer le cache en dernier recours
+        return caches.match(request);
+      })
+    );
   } else {
-    // Pour les assets: Cache First, Network Fallback
+    // Pour les autres assets: Cache First, Network Fallback
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;
         }
         return fetch(request).then((response) => {
-          // Cache les nouvelles ressources récupérées
+          // Cache les nouvelles ressources récupérées (sauf CSS/JS)
           if (response && response.status === 200 && response.type === 'basic') {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {

@@ -6,6 +6,7 @@ import ConditionalNav from './components/ConditionalNav';
 import BodyWrapper from './components/BodyWrapper';
 import DesktopNav from './components/DesktopNav';
 import ServiceWorkerUpdater from './components/ServiceWorkerUpdater';
+import CacheBuster from './components/CacheBuster';
 
 // Force dynamic rendering - disable all caching
 export const dynamic = 'force-dynamic';
@@ -42,6 +43,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <CacheBuster />
           <ServiceWorkerUpdater />
           <DesktopNav />
           <BodyWrapper>
