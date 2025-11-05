@@ -61,20 +61,20 @@ const colorToClasses: Record<ThemeColor, {
     ring: 'ring-emerald-500',
   },
   rose: {
-    bg: 'bg-rose-600',
-    bgHover: 'hover:bg-rose-700',
-    text: 'text-rose-600',
-    textLight: 'text-rose-400',
-    border: 'border-rose-500',
-    ring: 'ring-rose-500',
-  },
-  pink: {
     bg: 'bg-pink-600',
     bgHover: 'hover:bg-pink-700',
     text: 'text-pink-600',
     textLight: 'text-pink-400',
     border: 'border-pink-500',
     ring: 'ring-pink-500',
+  },
+  red: {
+    bg: 'bg-red-600',
+    bgHover: 'hover:bg-red-700',
+    text: 'text-red-600',
+    textLight: 'text-red-400',
+    border: 'border-red-500',
+    ring: 'ring-red-500',
   },
   orange: {
     bg: 'bg-orange-600',
@@ -84,13 +84,13 @@ const colorToClasses: Record<ThemeColor, {
     border: 'border-orange-500',
     ring: 'ring-orange-500',
   },
-  amber: {
-    bg: 'bg-amber-600',
-    bgHover: 'hover:bg-amber-700',
-    text: 'text-amber-600',
-    textLight: 'text-amber-400',
-    border: 'border-amber-500',
-    ring: 'ring-amber-500',
+  yellow: {
+    bg: 'bg-yellow-600',
+    bgHover: 'hover:bg-yellow-700',
+    text: 'text-yellow-600',
+    textLight: 'text-yellow-400',
+    border: 'border-yellow-500',
+    ring: 'ring-yellow-500',
   },
 };
 
