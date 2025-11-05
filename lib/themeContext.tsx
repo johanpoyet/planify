@@ -1,0 +1,146 @@
+'use client';
+
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { themeColors, ThemeColor, defaultThemeColor } from './theme';
+
+interface ThemeContextType {
+  themeColor: ThemeColor;
+  setThemeColor: (color: ThemeColor) => void;
+  primaryColor: string;
+  primaryHoverColor: string;
+  primaryLightColor: string;
+  // Classes Tailwind pour utilisation directe
+  classes: {
+    bg: string;
+    bgHover: string;
+    text: string;
+    textLight: string;
+    border: string;
+    ring: string;
+  };
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+interface ThemeProviderProps {
+  readonly children: React.ReactNode;
+  readonly initialColor?: ThemeColor;
+}
+
+// Mapping des couleurs vers les classes Tailwind
+const colorToClasses: Record<ThemeColor, {
+  bg: string;
+  bgHover: string;
+  text: string;
+  textLight: string;
+  border: string;
+  ring: string;
+}> = {
+  blue: {
+    bg: 'bg-blue-600',
+    bgHover: 'hover:bg-blue-700',
+    text: 'text-blue-600',
+    textLight: 'text-blue-400',
+    border: 'border-blue-500',
+    ring: 'ring-blue-500',
+  },
+  purple: {
+    bg: 'bg-purple-600',
+    bgHover: 'hover:bg-purple-700',
+    text: 'text-purple-600',
+    textLight: 'text-purple-400',
+    border: 'border-purple-500',
+    ring: 'ring-purple-500',
+  },
+  emerald: {
+    bg: 'bg-emerald-600',
+    bgHover: 'hover:bg-emerald-700',
+    text: 'text-emerald-600',
+    textLight: 'text-emerald-400',
+    border: 'border-emerald-500',
+    ring: 'ring-emerald-500',
+  },
+  rose: {
+    bg: 'bg-rose-600',
+    bgHover: 'hover:bg-rose-700',
+    text: 'text-rose-600',
+    textLight: 'text-rose-400',
+    border: 'border-rose-500',
+    ring: 'ring-rose-500',
+  },
+  pink: {
+    bg: 'bg-pink-600',
+    bgHover: 'hover:bg-pink-700',
+    text: 'text-pink-600',
+    textLight: 'text-pink-400',
+    border: 'border-pink-500',
+    ring: 'ring-pink-500',
+  },
+  orange: {
+    bg: 'bg-orange-600',
+    bgHover: 'hover:bg-orange-700',
+    text: 'text-orange-600',
+    textLight: 'text-orange-400',
+    border: 'border-orange-500',
+    ring: 'ring-orange-500',
+  },
+  amber: {
+    bg: 'bg-amber-600',
+    bgHover: 'hover:bg-amber-700',
+    text: 'text-amber-600',
+    textLight: 'text-amber-400',
+    border: 'border-amber-500',
+    ring: 'ring-amber-500',
+  },
+};
+
+export function ThemeProvider({ children, initialColor }: ThemeProviderProps) {
+  const [themeColor, setThemeColorState] = useState<ThemeColor>(initialColor || defaultThemeColor);
+
+  useEffect(() => {
+    // Appliquer les variables CSS sur le document root
+    const root = document.documentElement;
+    const colors = themeColors[themeColor];
+    
+    root.style.setProperty('--color-primary', colors.primary);
+    root.style.setProperty('--color-primary-hover', colors.primaryHover);
+    root.style.setProperty('--color-primary-light', colors.primaryLight);
+    
+    // Ajouter aussi l'attribut data-theme pour le CSS
+    root.setAttribute('data-theme', themeColor);
+  }, [themeColor]);
+
+  const setThemeColor = async (color: ThemeColor) => {
+    setThemeColorState(color);
+    
+    // Sauvegarder dans la base de données
+    try {
+      await fetch('/api/user/theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeColor: color }),
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du thème:', error);
+    }
+  };
+
+  const value = useMemo(() => ({
+    themeColor,
+    setThemeColor,
+    primaryColor: themeColors[themeColor].primary,
+    primaryHoverColor: themeColors[themeColor].primaryHover,
+    primaryLightColor: themeColors[themeColor].primaryLight,
+    classes: colorToClasses[themeColor],
+  }), [themeColor]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}

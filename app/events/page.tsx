@@ -1,10 +1,9 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import CalendarView from "../components/CalendarView";
+import { useTheme } from "@/lib/themeContext";
 
 interface Event {
   id: string;
@@ -14,15 +13,21 @@ interface Event {
   location: string | null;
   visibility: string;
   createdById: string;
+  createdBy?: {
+    name: string | null;
+    email: string;
+  };
 }
 
 export default function EventsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  const [invitationsCount, setInvitationsCount] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -33,7 +38,6 @@ export default function EventsPage() {
   useEffect(() => {
     if (status === "authenticated") {
       fetchEvents();
-      fetchInvitationsCount();
     }
   }, [status]);
 
@@ -51,22 +55,17 @@ export default function EventsPage() {
     }
   };
 
-  const fetchInvitationsCount = async () => {
-    try {
-      const res = await fetch("/api/events/invitations/count");
-      if (res.ok) {
-        const data = await res.json();
-        setInvitationsCount(data.count || 0);
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement du compteur d'invitations:", error);
-    }
-  };
-
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Chargement...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl shadow-lg mb-4 animate-pulse" style={{ backgroundColor: primaryColor }}>
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p className="text-slate-300 text-lg">Chargement...</p>
+        </div>
       </div>
     );
   }
@@ -75,179 +74,269 @@ export default function EventsPage() {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("fr-FR", {
       weekday: "long",
-      year: "numeric",
-      month: "long",
       day: "numeric",
+      month: "long",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
   };
 
-  const getVisibilityIcon = (visibility: string) => {
-    switch (visibility) {
-      case "public":
-        return "🌍";
-      case "friends":
-        return "👥";
-      case "private":
-        return "🔒";
-      default:
-        return "📅";
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
+
+  // Fonctions pour le calendrier
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    return { daysInMonth, startingDayOfWeek };
+  };
+
+  const getEventsForDate = (date: Date) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return (
+        eventDate.getDate() === date.getDate() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getFullYear() === date.getFullYear()
+      );
+    });
+  };
+
+  const handleDateClick = (day: number) => {
+    const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    setSelectedDate(clickedDate);
+    
+    const dayEvents = getEventsForDate(clickedDate);
+    if (dayEvents.length > 0) {
+      setSelectedEvent(dayEvents[0]);
+    } else {
+      setSelectedEvent(null);
     }
   };
 
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+  };
+
+  const previousMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+  };
+
+  const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentDate);
+  const monthName = currentDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const weekDays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 pb-4">
-      {/* Header Responsive */}
-      <div className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+    <div className="min-h-screen bg-slate-950">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-slate-900/50 to-transparent"></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="px-4 py-6 sm:px-6 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-                📅 Mes événements
-              </h1>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Calendrier</h1>
+              <p className="text-slate-400 text-sm mt-1">
                 {session?.user?.name || session?.user?.email}
               </p>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link
-                href="/events/new"
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg"
-              >
-                <span className="text-lg">➕</span>
-                <span>Nouvel événement</span>
-              </Link>
-              <Link
-                href="/events/invitations"
-                className="relative px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm font-medium flex items-center gap-2 shadow-sm hover:shadow"
-              >
-                <span className="text-lg">📬</span>
-                <span>Invitations</span>
-                {invitationsCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center px-1.5">
-                    {invitationsCount > 9 ? '9+' : invitationsCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/events/shared"
-                className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium flex items-center gap-2 shadow-sm hover:shadow"
-              >
-                <span className="text-lg">🌐</span>
-                <span>Partagés</span>
-              </Link>
-              <Link
-                href="/friends"
-                className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm font-medium flex items-center gap-2 shadow-sm hover:shadow"
-              >
-                <span className="text-lg">👥</span>
-                <span>Amis</span>
-              </Link>
-              <Link
-                href="/settings"
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium flex items-center gap-2 shadow-sm hover:shadow"
-              >
-                <span className="text-lg">⚙️</span>
-                <span>Paramètres</span>
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/auth/login" })}
-                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium flex items-center gap-2 shadow-sm hover:shadow"
-              >
-                <span className="text-lg">🚪</span>
-                <span>Déconnexion</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Toggle vue liste/calendrier */}
-          <div className="flex gap-2 max-w-xs">
             <button
-              onClick={() => setViewMode("list")}
-              className={`flex-1 px-4 py-2 rounded-lg transition text-sm font-medium ${
-                viewMode === "list"
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              onClick={() => router.push('/events/new')}
+              className="relative group md:hidden"
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = primaryHoverColor}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = primaryColor}
             >
-              📋 Liste
-            </button>
-            <button
-              onClick={() => setViewMode("calendar")}
-              className={`flex-1 px-4 py-2 rounded-lg transition text-sm font-medium ${
-                viewMode === "calendar"
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              📆 Calendrier
+              <div className="relative px-4 py-2 sm:px-6 sm:py-3 rounded-2xl flex items-center gap-2 transition shadow-lg" style={{ backgroundColor: primaryColor }}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="text-white font-semibold hidden sm:inline">Nouvel événement</span>
+              </div>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Contenu */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {viewMode === "list" ? (
-          events.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow p-8 text-center">
-              <div className="text-5xl mb-3">📭</div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                Aucun événement
-              </h2>
-              <p className="text-gray-600 text-sm mb-4">
-                Commencez par créer votre premier événement !
-              </p>
+        {/* Content Layout - Mobile: Stack / Desktop: Side by side */}
+        <div className="px-4 sm:px-6 pb-24 md:pb-8 max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Calendar Section */}
+            <div className="md:w-1/2">
+              <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-700/50 p-4 sm:p-6 md:h-[600px] flex flex-col">
+                {/* Calendar Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white capitalize">{monthName}</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={previousMonth}
+                      className="p-2 bg-slate-800/50 hover:bg-slate-800 rounded-xl transition-colors border border-slate-700"
+                    >
+                      <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={nextMonth}
+                      className="p-2 bg-slate-800/50 hover:bg-slate-800 rounded-xl transition-colors border border-slate-700"
+                    >
+                      <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 flex-1">
+              {/* Week days */}
+              {weekDays.map(day => (
+                <div key={day} className="text-center text-xs sm:text-sm font-medium text-slate-400 py-2">
+                  {day}
+                </div>
+              ))}
+
+              {/* Empty cells before first day */}
+              {Array.from({ length: startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1 }).map((_, index) => (
+                <div key={`empty-${index}`} className="aspect-square" />
+              ))}
+
+              {/* Days */}
+              {Array.from({ length: daysInMonth }).map((_, index) => {
+                const day = index + 1;
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dayEvents = getEventsForDate(date);
+                const isSelected = selectedDate && 
+                  selectedDate.getDate() === day && 
+                  selectedDate.getMonth() === currentDate.getMonth() &&
+                  selectedDate.getFullYear() === currentDate.getFullYear();
+                const isToday = 
+                  new Date().getDate() === day && 
+                  new Date().getMonth() === currentDate.getMonth() &&
+                  new Date().getFullYear() === currentDate.getFullYear();
+
+                return (
+                  <button
+                    key={day}
+                    onClick={() => handleDateClick(day)}
+                    className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
+                      ${dayEvents.length > 0 && !isSelected
+                        ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
+                        : !isSelected
+                        ? 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/50'
+                        : ''
+                      }
+                      ${isToday && !isSelected ? 'ring-2' : ''}
+                    `}
+                    style={isSelected ? { backgroundColor: primaryColor, color: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } : isToday ? { borderColor: primaryColor } : {}}
+                  >
+                    <span>{day}</span>
+                    {dayEvents.length > 0 && (
+                      <div className="flex gap-0.5 mt-1">
+                        {dayEvents.slice(0, 3).map((_, i) => (
+                          <div key={i} className="w-1 h-1 rounded-full" style={{ backgroundColor: isSelected ? 'white' : primaryLightColor }} />
+                        ))}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            // Vue liste - Responsive
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {events.map((event) => (
-                <Link
-                  key={event.id}
-                  href={`/events/${event.id}`}
-                  className="block bg-white rounded-xl shadow-sm hover:shadow-md p-4 transition-all hover:scale-[1.02]"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl flex-shrink-0">
-                      {getVisibilityIcon(event.visibility)}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-800 mb-1 truncate">
-                        {event.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-1">
-                        🕒 {formatDate(event.date)}
-                      </p>
-                      {event.location && (
-                        <p className="text-sm text-gray-600 mb-1 truncate">
-                          📍 {event.location}
-                        </p>
-                      )}
-                      {event.description && (
-                        <p className="text-sm text-gray-700 line-clamp-2 mt-2">
-                          {event.description}
-                        </p>
+              </div>
+            </div>
+
+            {/* Event Details Section */}
+            <div className="md:w-1/2">
+              <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-700/50 p-4 sm:p-6 min-h-[300px] md:h-[600px] flex flex-col">
+                {selectedEvent ? (
+              <div className="animate-fade-in">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-white mb-2">{selectedEvent.title}</h3>
+                    <div className="flex flex-wrap gap-2 text-sm text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {formatDate(selectedEvent.date)}
+                      </span>
+                      {selectedEvent.location && (
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {selectedEvent.location}
+                        </span>
                       )}
                     </div>
-                    <svg 
-                      className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
+                  </div>
+                  <button
+                    onClick={() => router.push(`/events/${selectedEvent.id}`)}
+                    className="px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-white rounded-xl transition-colors border border-slate-700 flex items-center gap-2"
+                  >
+                    <span className="text-sm font-medium">Détails</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
+                  </button>
+                </div>
+
+                {selectedEvent.description && (
+                  <div className="bg-slate-800/30 rounded-2xl p-4 mb-4">
+                    <p className="text-slate-300 leading-relaxed">{selectedEvent.description}</p>
                   </div>
-                </Link>
-              ))}
+                )}
+
+                <div className="flex gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedEvent.visibility === 'public' ? 'bg-green-500/20 text-green-400' :
+                    selectedEvent.visibility === 'private' ? 'bg-purple-500/20 text-purple-400' : ''
+                  }`}
+                  style={selectedEvent.visibility === 'friends' ? { 
+                    backgroundColor: `${primaryColor}33`,
+                    color: primaryLightColor 
+                  } : {}}
+                  >
+                    {selectedEvent.visibility === 'public' ? '🌍 Public' :
+                      selectedEvent.visibility === 'friends' ? '👥 Amis' :
+                      '🔒 Privé'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                <div className="w-20 h-20 rounded-3xl bg-slate-800/50 flex items-center justify-center mb-4">
+                  <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">Sélectionnez un événement</h3>
+                <p className="text-slate-500 text-sm max-w-md">
+                  Cliquez sur une date du calendrier pour voir les détails de l'événement
+                </p>
+              </div>
+            )}
+              </div>
             </div>
-          )
-        ) : (
-          // Vue calendrier
-          <CalendarView events={events} />
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

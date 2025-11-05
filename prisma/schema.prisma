@@ -19,6 +19,7 @@ model User {
   password           String?   // Pour l'auth par credentials
   image              String?
   calendarVisibility Boolean   @default(true) // true = visible aux amis
+  themeColor         String    @default("blue") // "blue" | "purple" | "emerald" | "rose" | "pink" | "orange" | "amber"
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
