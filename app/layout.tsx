@@ -5,6 +5,7 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import ConditionalNav from './components/ConditionalNav';
 import BodyWrapper from './components/BodyWrapper';
 import DesktopNav from './components/DesktopNav';
+import ServiceWorkerUpdater from './components/ServiceWorkerUpdater';
 
 // Force dynamic rendering - disable all caching
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <ServiceWorkerUpdater />
           <DesktopNav />
           <BodyWrapper>
             {children}
