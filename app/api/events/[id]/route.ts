@@ -140,8 +140,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 
     // Vérifier que l'utilisateur est le créateur
     if (event.createdById !== user.id) {
+      console.error("Accès refusé:", {
+        eventCreatorId: event.createdById,
+        currentUserId: user.id,
+        userEmail: user.email,
+      });
       return NextResponse.json(
-        { error: "Non autorisé" },
+        { error: "Vous n'êtes pas autorisé à modifier cet événement" },
         { status: 403 }
       );
     }
@@ -151,11 +156,11 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     // Préparer les données à mettre à jour
     const updateData: any = {};
     
-    if (title) updateData.title = title;
+    if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description || null;
-    if (date) updateData.date = new Date(date);
+    if (date !== undefined) updateData.date = new Date(date);
     if (location !== undefined) updateData.location = location || null;
-    if (visibility) updateData.visibility = visibility;
+    if (visibility !== undefined) updateData.visibility = visibility;
 
     const updatedEvent = await prisma.event.update({
       where: { id },

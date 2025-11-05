@@ -38,6 +38,26 @@ export async function GET(
         user,
       };
     });
+    
+      // Ajout du créateur si absent
+      const event = await prisma.event.findUnique({ where: { id: eventId } });
+      if (event) {
+        const alreadyParticipant = participants.some(p => p.userId === event.createdById);
+        if (!alreadyParticipant) {
+          const creator = await prisma.user.findUnique({
+            where: { id: event.createdById },
+            select: { id: true, name: true, email: true, image: true },
+          });
+          if (creator) {
+            participantsWithInfo.unshift({
+              id: "creator",
+              userId: creator.id,
+              status: "creator",
+              user: creator,
+            });
+          }
+        }
+      }
 
     return NextResponse.json(participantsWithInfo);
   } catch (error) {
