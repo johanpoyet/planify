@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/themeContext";
+import { useToast } from "@/lib/toastContext";
 
 interface Friend {
   id: string;
@@ -20,6 +21,7 @@ interface Friendship {
 export default function NewEventPage() {
   const router = useRouter();
   const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [friends, setFriends] = useState<Friendship[]>([]);
@@ -84,14 +86,22 @@ export default function NewEventPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userIds: selectedFriends }),
         });
-        
-        console.log(`✉️ ${selectedFriends.length} invitation(s) envoyée(s) !`);
       }
 
-      // Rediriger vers la liste des événements
-      router.push("/events");
+      // Afficher le toast de succès
+      const toastMessage = selectedFriends.length > 0
+        ? `Événement créé et ${selectedFriends.length} invitation(s) envoyée(s) !`
+        : "Événement créé avec succès !";
+      
+      showToast(toastMessage, "success");
+
+      // Rediriger vers la liste des événements après un court délai pour voir le toast
+      setTimeout(() => {
+        router.push("/events");
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
+      showToast(err.message || "Erreur lors de la création de l'événement", "error");
     } finally {
       setLoading(false);
     }

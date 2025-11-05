@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/themeContext";
+import { useToast } from "@/lib/toastContext";
 
 interface Friend {
   id: string;
@@ -24,6 +25,7 @@ export default function FriendsPage() {
   const { status } = useSession();
   const router = useRouter();
   const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
+  const { showToast } = useToast();
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchEmail, setSearchEmail] = useState("");
@@ -77,9 +79,10 @@ export default function FriendsPage() {
 
       setSearchEmail("");
       fetchFriends();
-      alert("Demande envoyée avec succès !");
+      showToast("Demande d'ami envoyée avec succès !", "success");
     } catch (err: any) {
       setSearchError(err.message);
+      showToast(err.message || "Erreur lors de l'envoi de la demande", "error");
     } finally {
       setSearching(false);
     }

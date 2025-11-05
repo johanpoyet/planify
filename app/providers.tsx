@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { registerServiceWorker } from '../lib/pwa';
 import { ThemeProvider } from '../lib/themeContext';
+import { ToastProvider } from '../lib/toastContext';
 import { ThemeColor } from '../lib/theme';
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -37,7 +38,9 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
 
   return (
     <SessionProvider>
-      <ThemeProvider initialColor={themeColor}>{children}</ThemeProvider>
+      <ThemeProvider initialColor={themeColor}>
+        <ToastProvider>{children}</ToastProvider>
+      </ThemeProvider>
     </SessionProvider>
   );
 }

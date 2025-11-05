@@ -59,6 +59,17 @@
   }
 }
 
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Optimisations mobile */
 @layer utilities {
   /* Animations */
@@ -84,6 +95,10 @@
   
   .animate-shake {
     animation: shake 0.5s ease-in-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.4s ease-out;
   }
 
   /* Gestion de la safe area pour les téléphones avec encoche */
