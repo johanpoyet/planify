@@ -6,6 +6,11 @@ import ConditionalNav from './components/ConditionalNav';
 import BodyWrapper from './components/BodyWrapper';
 import DesktopNav from './components/DesktopNav';
 
+// Force dynamic rendering - disable all caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 export const metadata: Metadata = {
   title: 'Planify - Planification d\'événements',
   description: 'Application de planification d\'événements avec calendrier partagé',
@@ -30,6 +35,9 @@ export default function RootLayout({
         <link rel="icon" href="/icons/icon-192x192.png" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </head>
       <body>
         <Providers>

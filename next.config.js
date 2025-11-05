@@ -3,6 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
   // Configuration Turbopack pour Next.js 16
   turbopack: {},
+  // Désactiver la génération de pages statiques pour éviter les problèmes de cache
+  output: 'standalone',
+  // Désactiver complètement l'optimisation CSS
+  experimental: {
+    optimizeCss: false,
+  },
   // Assurer que les fichiers publics sont bien servis
   async headers() {
     return [
@@ -29,6 +35,24 @@ const nextConfig = {
           {
             key: 'Content-Type',
             value: 'application/manifest+json',
+          },
+        ],
+      },
+      {
+        // Désactiver le cache pour tous les fichiers
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
           },
         ],
       },
