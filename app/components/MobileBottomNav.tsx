@@ -2,46 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useTheme } from '@/lib/themeContext';
+import { useFriendRequests } from '@/lib/useFriendRequests';
+import { useEventInvitations } from '@/lib/useEventInvitations';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const [invitationsCount, setInvitationsCount] = useState(0);
+  const { pendingCount } = useFriendRequests();
+  const { invitationsCount } = useEventInvitations();
   const { primaryColor, primaryLightColor } = useTheme();
-
-  useEffect(() => {
-    fetchInvitationsCount();
-    
-    // Rafraîchir toutes les 10 secondes
-    const interval = setInterval(fetchInvitationsCount, 10000);
-    
-    // Rafraîchir aussi quand la page redevient visible
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchInvitationsCount();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  const fetchInvitationsCount = async () => {
-    try {
-      const res = await fetch('/api/events/invitations/count');
-      if (res.ok) {
-        const data = await res.json();
-        setInvitationsCount(data.count || 0);
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération du nombre d\'invitations:', error);
-    }
-  };
 
   const navItems = [
     {
@@ -92,6 +61,7 @@ export default function MobileBottomNav() {
       href: '/friends',
       label: 'Amis',
       active: pathname === '/friends',
+      badge: pendingCount,
       svg: (isActive: boolean) => (
         <svg 
           className="w-6 h-6" 

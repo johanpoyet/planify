@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
+import { useFriendRequests } from '@/lib/useFriendRequests'
+import { useEventInvitations } from '@/lib/useEventInvitations'
 import { useState } from 'react'
 
 export default function DesktopNav() {
@@ -11,6 +13,8 @@ export default function DesktopNav() {
   const router = useRouter()
   const { data: session } = useSession()
   const { primaryColor, primaryHoverColor } = useTheme()
+  const { pendingCount } = useFriendRequests()
+  const { invitationsCount } = useEventInvitations()
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
   // Ne pas afficher la nav sur les pages d'authentification
@@ -62,9 +66,19 @@ export default function DesktopNav() {
               className="relative flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition text-slate-300 hover:text-white hover:bg-slate-800/50"
               style={isActive('/events/invitations') ? { backgroundColor: primaryColor, color: 'white' } : {}}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
+              <div className="relative">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {invitationsCount > 0 && (
+                  <div 
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse"
+                    style={{ backgroundColor: '#dc2626' }}
+                  >
+                    {invitationsCount > 9 ? '9+' : invitationsCount}
+                  </div>
+                )}
+              </div>
               <span>Notifications</span>
             </Link>
 
@@ -87,12 +101,22 @@ export default function DesktopNav() {
 
             <Link
               href="/friends"
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition text-slate-300 hover:text-white hover:bg-slate-800/50"
+              className="relative flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition text-slate-300 hover:text-white hover:bg-slate-800/50"
               style={isActive('/friends') ? { backgroundColor: primaryColor, color: 'white' } : {}}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <div className="relative">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {pendingCount > 0 && (
+                  <div 
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse"
+                    style={{ backgroundColor: '#dc2626' }}
+                  >
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </div>
+                )}
+              </div>
               <span>Amis</span>
             </Link>
 
