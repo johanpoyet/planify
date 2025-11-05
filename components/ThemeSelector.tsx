@@ -63,23 +63,7 @@ export default function ThemeSelector() {
         })}
       </div>
 
-      {/* Prévisualisation */}
-      <div className="mt-6 p-4 bg-slate-900/50 rounded-2xl border border-slate-700/50">
-        <p className="text-sm text-slate-400 mb-3">Aperçu :</p>
-        <div className="flex gap-2">
-          <button
-            className="px-4 py-2 rounded-xl text-white font-medium transition"
-            style={{ backgroundColor: themeColors[themeColor].primary }}
-          >
-            Bouton principal
-          </button>
-          <button
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition"
-          >
-            Bouton secondaire
-          </button>
-        </div>
-      </div>
+      {/* Aperçu supprimé — section retirée volontairement */}
     </div>
   );
 }
