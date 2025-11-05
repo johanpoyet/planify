@@ -209,3 +209,59 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.5) rgba(51, 65, 85, 0.3);
 }
+
+/* Custom datetime picker styling */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Style pour le popup du calendrier (webkit/chrome) */
+input[type="datetime-local"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: #94a3b8;
+  padding: 0 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+  color: #fff;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus {
+  background-color: rgba(59, 130, 246, 0.3);
+  outline: none;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: #fff;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
+  background-color: rgba(59, 130, 246, 0.3);
+  outline: none;
+}

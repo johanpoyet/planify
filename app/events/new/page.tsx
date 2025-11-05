@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/themeContext";
 import { useToast } from "@/lib/toastContext";
+import DateTimePicker from "@/components/DateTimePicker";
 
 interface Friend {
   id: string;
@@ -194,32 +195,13 @@ export default function NewEventPage() {
               <label htmlFor="date" className="block text-sm font-medium text-slate-300 mb-2">
                 Date et heure *
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg 
-                    className="w-5 h-5 transition-colors" 
-                    style={{ color: focusedInput === 'date' ? primaryLightColor : '#64748b' }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <input
-                  id="date"
-                  type="datetime-local"
-                  required
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  onFocus={() => setFocusedInput('date')}
-                  onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition"
-                  style={{ 
-                    borderColor: focusedInput === 'date' ? primaryLightColor : undefined 
-                  }}
-                />
-              </div>
+              <DateTimePicker
+                value={formData.date}
+                onChange={(value) => setFormData({ ...formData, date: value })}
+                onFocus={() => setFocusedInput('date')}
+                onBlur={() => setFocusedInput(null)}
+                required
+              />
             </div>
 
             {/* Lieu */}
@@ -294,39 +276,66 @@ export default function NewEventPage() {
               <label htmlFor="visibility" className="block text-sm font-medium text-slate-300 mb-2">
                 Visibilité
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg 
-                    className="w-5 h-5 transition-colors" 
-                    style={{ color: focusedInput === 'visibility' ? primaryLightColor : '#64748b' }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-                <select
-                  id="visibility"
-                  value={formData.visibility}
-                  onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
-                  onFocus={() => setFocusedInput('visibility')}
-                  onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white focus:outline-none focus:border-2 transition appearance-none cursor-pointer"
-                  style={{ 
-                    borderColor: focusedInput === 'visibility' ? primaryLightColor : undefined 
-                  }}
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, visibility: 'private' })}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    formData.visibility === 'private'
+                      ? 'border-purple-500 bg-purple-500/20'
+                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
+                  }`}
                 >
-                  <option value="private" className="bg-slate-900">🔒 Privé (seulement moi)</option>
-                  <option value="friends" className="bg-slate-900">👥 Amis seulement</option>
-                  <option value="public" className="bg-slate-900">🌍 Public (tout le monde)</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                  <div className="text-2xl mb-2">🔒</div>
+                  <div className={`text-sm font-medium ${
+                    formData.visibility === 'private' ? 'text-purple-400' : 'text-slate-300'
+                  }`}>
+                    Privé
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">Seulement moi</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, visibility: 'friends' })}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    formData.visibility === 'friends'
+                      ? 'border-2 bg-opacity-20'
+                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
+                  }`}
+                  style={formData.visibility === 'friends' ? {
+                    borderColor: primaryColor,
+                    backgroundColor: `${primaryColor}33`
+                  } : {}}
+                >
+                  <div className="text-2xl mb-2">👥</div>
+                  <div className={`text-sm font-medium ${
+                    formData.visibility === 'friends' ? '' : 'text-slate-300'
+                  }`}
+                  style={formData.visibility === 'friends' ? { color: primaryLightColor } : {}}
+                  >
+                    Amis
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">Amis seulement</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, visibility: 'public' })}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    formData.visibility === 'public'
+                      ? 'border-green-500 bg-green-500/20'
+                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">🌍</div>
+                  <div className={`text-sm font-medium ${
+                    formData.visibility === 'public' ? 'text-green-400' : 'text-slate-300'
+                  }`}>
+                    Public
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">Tout le monde</div>
+                </button>
               </div>
             </div>
 
