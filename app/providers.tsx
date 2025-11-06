@@ -12,8 +12,15 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Enregistrer le Service Worker au chargement
-    registerServiceWorker();
+    // Enregistrer le Service Worker uniquement en production (évite les caches SW en dev)
+    if (process.env.NODE_ENV === 'production') {
+      // registerServiceWorker peut échouer dans certains environnements,
+      // on l'entoure d'un try/catch pour éviter de casser l'app en dev
+      registerServiceWorker().catch((err) => {
+        // eslint-disable-next-line no-console
+        console.warn('Service Worker registration failed:', err);
+      });
+    }
 
     // Charger la couleur de thème de l'utilisateur
     fetch('/api/user/theme')

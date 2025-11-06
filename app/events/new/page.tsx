@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/themeContext";
 import { useToast } from "@/lib/toastContext";
 import DateTimePicker from "@/components/DateTimePicker";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Friend {
   id: string;
@@ -27,7 +28,13 @@ export default function NewEventPage() {
   const [error, setError] = useState("");
   const [friends, setFriends] = useState<Friendship[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const [conflicts, setConflicts] = useState<Record<string, { id: string; title: string; date: string }[]>>({});
+  const [loadingConflicts, setLoadingConflicts] = useState(false);
+  const [conflictsChecked, setConflictsChecked] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+  const totalConflicts = Object.values(conflicts).reduce((acc, arr) => acc + (arr?.length || 0), 0);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -40,6 +47,53 @@ export default function NewEventPage() {
   useEffect(() => {
     fetchFriends();
   }, []);
+
+  // Vérifier les conflits quand la date ou la sélection d'amis change (debounce)
+  useEffect(() => {
+    let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const shouldFetch = formData.date && selectedFriends.length > 0;
+
+    const fetchConflicts = async () => {
+      setLoadingConflicts(true);
+      setConflictsChecked(false);
+      try {
+        const res = await fetch('/api/events/conflicts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userIds: selectedFriends, date: formData.date }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted) setConflicts(data.conflicts || {});
+        } else {
+          setConflicts({});
+        }
+      } catch (err) {
+        console.error('Erreur fetch conflits', err);
+        if (mounted) setConflicts({});
+      } finally {
+        if (mounted) setLoadingConflicts(false);
+        if (mounted) setConflictsChecked(true);
+      }
+    };
+
+    if (shouldFetch) {
+      // debounce 300ms
+      timer = setTimeout(fetchConflicts, 300);
+    } else {
+      // clear conflicts if no date or no selected friends
+      setConflicts({});
+      setConflictsChecked(false);
+    }
+
+    return () => {
+      mounted = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [formData.date, selectedFriends]);
 
   const fetchFriends = async () => {
     try {
@@ -64,10 +118,23 @@ export default function NewEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    // Ne pas démarrer la création tout de suite — vérifier s'il y a des conflits
+    const totalConflicts = Object.values(conflicts).reduce((acc, arr) => acc + (arr?.length || 0), 0);
+    if (totalConflicts > 0) {
+      // afficher modal de confirmation
+      setShowConfirmModal(true);
+      return;
+    }
 
+    // pas de conflit -> procéder à la création
+    await proceedCreateEvent();
+  };
+
+  // Fonction qui exécute la création réelle de l'événement
+  const proceedCreateEvent = async () => {
+    setLoading(true);
+    setError("");
     try {
-      // Créer l'événement
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,6 +172,7 @@ export default function NewEventPage() {
       showToast(err.message || "Erreur lors de la création de l'événement", "error");
     } finally {
       setLoading(false);
+      setShowConfirmModal(false);
     }
   };
 
@@ -471,6 +539,51 @@ export default function NewEventPage() {
                   </span>
                 </div>
               )}
+
+              {/* Conflits d'agenda des amis sélectionnés pour la date choisie */}
+              {totalConflicts > 0 && (
+                <div className="mt-3 p-3 rounded-2xl border" style={{ backgroundColor: '#2b2b2b' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium text-white">Conflits détectés</div>
+                    <div className="text-xs text-slate-400">{loadingConflicts ? 'Chargement...' : 'Même jour'}</div>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {friends
+                      .filter(f => selectedFriends.includes(f.friend.id))
+                      .map(f => {
+                        const list = conflicts[f.friend.id] || [];
+                        if (list.length === 0) return null;
+                        return (
+                          <div key={f.friend.id} className="p-2 rounded-lg bg-slate-800/40">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-medium text-white">{f.friend.name || f.friend.email}</div>
+                              <div className="text-xs text-slate-400">{list.length} événement(s)</div>
+                            </div>
+                            <div className="mt-2 text-xs text-slate-300">
+                              {list.map(ev => (
+                                <div key={ev.id} className="flex items-center justify-between">
+                                  <div>{new Date(ev.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                  <div className="ml-3 truncate">{ev.title}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Message lorsque tous les amis sélectionnés sont disponibles */}
+              {selectedFriends.length > 0 && formData.date && !loadingConflicts && totalConflicts === 0 && (
+                <div className="mt-3 p-3 rounded-2xl border flex items-center gap-2" style={{ backgroundColor: '#063f1a', borderColor: '#065f3a' }}>
+                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-sm text-green-200">Tous les amis sélectionnés sont disponibles à la date choisie.</span>
+                </div>
+              )}
             </div>
 
             {/* Boutons */}
@@ -522,6 +635,20 @@ export default function NewEventPage() {
               </button>
             </div>
           </form>
+
+          {/* Confirmation modal when conflicts exist */}
+          <ConfirmModal
+            isOpen={showConfirmModal}
+            title="Conflits détectés"
+            description={totalConflicts > 0 ? `Attention : ${totalConflicts} conflit(s) détecté(s) pour les amis sélectionnés le même jour. Voulez-vous quand même créer l'événement ?` : undefined}
+            confirmLabel="Créer quand même"
+            cancelLabel="Annuler"
+            loading={loading}
+            onConfirm={async () => {
+              await proceedCreateEvent();
+            }}
+            onCancel={() => setShowConfirmModal(false)}
+          />
         </div>
       </div>
     </div>
