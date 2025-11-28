@@ -26,7 +26,6 @@ export default async function PollPage({ params }: Props) {
         </div>
 
         <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-8">
-          {/* @ts-expect-error Server -> Client */}
           <PollCard pollId={id} />
         </div>
       </div>
