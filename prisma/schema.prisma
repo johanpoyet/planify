@@ -28,6 +28,24 @@ model User {
 }
 
 //////////////////////////////////////////
+// 📅 Types d'événements
+//////////////////////////////////////////
+
+model EventType {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   // Nom du type (ex: "Travail", "Perso", "Important")
+  color       String   // Couleur en hex (ex: "#ff5733")
+  userId      String   @db.ObjectId // Chaque utilisateur a ses propres types
+
+  events      Event[]  @relation("EventToEventType")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("event_types")
+}
+
+//////////////////////////////////////////
 // 📅 Événements
 //////////////////////////////////////////
 
@@ -39,7 +57,10 @@ model Event {
   location    String?
   visibility  String   @default("friends") // "public" | "friends" | "private"
   createdById String   @db.ObjectId // Référence sans relation Prisma
-  
+  eventTypeId String?  @db.ObjectId // Type d'événement (optionnel)
+
+  eventType   EventType? @relation("EventToEventType", fields: [eventTypeId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -93,6 +114,65 @@ model PushSubscription {
   updatedAt    DateTime @updatedAt
 
   @@map("push_subscriptions")
+}
+
+//////////////////////////////////////////
+// 🗳️ Sondages (Polls)
+//////////////////////////////////////////
+
+model Poll {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  question     String
+  createdById  String    @db.ObjectId
+  recipientIds String[]  @db.ObjectId
+  status       String    @default("open") // "open" | "resolved" | "cancelled"
+  deadline     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("polls")
+}
+
+model PollOption {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  pollId  String @db.ObjectId
+  text    String
+
+  createdAt DateTime @default(now())
+
+  @@map("poll_options")
+}
+
+model PollVote {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  pollId   String   @db.ObjectId
+  optionId String   @db.ObjectId
+  userId   String   @db.ObjectId
+
+  createdAt DateTime @default(now())
+
+  @@unique([pollId, userId]) // Un utilisateur ne peut voter qu'une fois par sondage
+  @@map("poll_votes")
+}
+
+//////////////////////////////////////////
+// 🔔 Notifications
+//////////////////////////////////////////
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId // Destinataire de la notification
+  type      String   // "friend_request" | "event_invitation" | "poll" | "event_update"
+  title     String
+  message   String
+  link      String?  // URL vers la ressource concernée
+  read      Boolean  @default(false)
+  fromUserId String? @db.ObjectId // ID de l'utilisateur qui a déclenché la notification
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
 }
 
 

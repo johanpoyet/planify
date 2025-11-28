@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import PushNotificationSettings from "@/components/PushNotificationSettings";
 import ThemeSelector from "@/components/ThemeSelector";
 import { useTheme } from "@/lib/themeContext";
@@ -199,8 +200,36 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Thème de couleur */}
+        {/* Types d'événements */}
         <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-6 h-6" style={{ color: primaryLightColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-white">
+              Événements
+            </h2>
+          </div>
+          <Link
+            href="/settings/event-types"
+            className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-700 hover:border-slate-600 rounded-2xl transition-colors group"
+          >
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-slate-100">
+                Types d'événements
+              </h3>
+              <p className="text-sm text-slate-400">
+                Gérez vos catégories d'événements et leurs couleurs
+              </p>
+            </div>
+            <svg className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Thème de couleur */}
+        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="flex items-center gap-2 mb-6">
             <svg className="w-6 h-6" style={{ color: primaryLightColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -213,7 +242,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Notifications */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.25s" }}>
           <div className="flex items-center gap-2 mb-6">
             <svg className="w-6 h-6" style={{ color: primaryLightColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />

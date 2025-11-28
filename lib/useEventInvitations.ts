@@ -30,8 +30,8 @@ export function useEventInvitations() {
 
     fetchInvitations();
 
-    // Polling toutes les 30 secondes pour mettre à jour le compteur
-    const interval = setInterval(fetchInvitations, 30000);
+    // Polling toutes les 5 secondes pour mettre à jour le compteur en temps quasi-réel
+    const interval = setInterval(fetchInvitations, 5000);
 
     return () => clearInterval(interval);
   }, [session]);

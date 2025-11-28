@@ -72,8 +72,8 @@ export async function GET(req: NextRequest) {
       },
     })
 
-    // Combiner les données
-    const result = validInvitations.map((invitation) => {
+    // Combiner les données des événements
+    const eventInvitations = validInvitations.map((invitation) => {
       const event = events.find((e) => e.id === invitation.eventId)
       const creator = event ? creators.find((c) => c.id === event.createdById) : null
 
@@ -81,6 +81,7 @@ export async function GET(req: NextRequest) {
         id: invitation.id,
         eventId: invitation.eventId,
         status: invitation.status,
+        type: 'event',
         event: event
           ? {
               id: event.id,
@@ -99,6 +100,66 @@ export async function GET(req: NextRequest) {
             }
           : null,
       }
+    })
+
+    // Récupérer les sondages en attente (où l'utilisateur n'a pas encore voté)
+    const polls = await prisma.poll.findMany({
+      where: {
+        recipientIds: { has: user.id },
+        status: 'open',
+      },
+    })
+
+    // Vérifier quels sondages l'utilisateur n'a pas encore voté
+    const pollsWithoutVote = await Promise.all(
+      polls.map(async (poll) => {
+        const hasVoted = await prisma.pollVote.findFirst({
+          where: { pollId: poll.id, userId: user.id },
+        })
+        return hasVoted ? null : poll
+      })
+    ).then(results => results.filter(p => p !== null))
+
+    // Récupérer les créateurs des sondages
+    const pollCreatorIds = pollsWithoutVote.map((p) => p!.createdById)
+    const pollCreators = await prisma.user.findMany({
+      where: { id: { in: pollCreatorIds } },
+      select: { id: true, name: true, email: true, image: true },
+    })
+
+    // Formater les sondages comme des invitations
+    const pollInvitations = pollsWithoutVote.map((poll) => {
+      const creator = pollCreators.find((c) => c.id === poll!.createdById)
+      return {
+        id: poll!.id,
+        eventId: poll!.id,
+        pollId: poll!.id,
+        status: 'pending',
+        type: 'poll',
+        createdAt: poll!.createdAt, // Ajouter la date de création
+        event: {
+          id: poll!.id,
+          title: poll!.question,
+          description: 'Sondage en attente de votre vote',
+          date: poll!.deadline || poll!.createdAt,
+          location: null,
+          creator: creator
+            ? {
+                id: creator.id,
+                name: creator.name,
+                email: creator.email,
+                image: creator.image,
+              }
+            : null,
+        },
+      }
+    })
+
+    // Combiner événements et sondages, triés par date de création (plus récents en premier)
+    const result = [...eventInvitations, ...pollInvitations].sort((a, b) => {
+      const dateA = new Date(a.event?.date || 0).getTime()
+      const dateB = new Date(b.event?.date || 0).getTime()
+      return dateB - dateA
     })
 
     return NextResponse.json(result)

@@ -7,6 +7,12 @@ import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useToast } from "@/lib/toastContext";
 
+interface EventType {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -15,6 +21,7 @@ interface Event {
   location: string | null;
   visibility: string;
   createdById: string;
+  eventType?: EventType | null;
 }
 
 interface Participant {
@@ -238,6 +245,25 @@ export default function EventDetailPage({ params }: PageProps) {
                     <div className="flex-1">
                       <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Lieu</p>
                       <p className="text-white font-medium">{event.location}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Type d'événement */}
+                {event.eventType && (
+                  <div className="flex items-start gap-4 bg-slate-800/40 rounded-2xl p-4 border border-slate-700/30">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: `${event.eventType.color}33` }}
+                    >
+                      <div
+                        className="w-6 h-6 rounded-full"
+                        style={{ backgroundColor: event.eventType.color }}
+                      ></div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Type</p>
+                      <p className="text-white font-medium">{event.eventType.name}</p>
                     </div>
                   </div>
                 )}

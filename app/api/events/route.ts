@@ -34,6 +34,9 @@ export async function GET(req: NextRequest) {
       orderBy: {
         date: "asc",
       },
+      include: {
+        eventType: true,
+      },
     });
 
     // Récupérer les événements où l'utilisateur est participant (status = accepted uniquement)
@@ -52,6 +55,9 @@ export async function GET(req: NextRequest) {
           },
           orderBy: {
             date: "asc",
+          },
+          include: {
+            eventType: true,
           },
         })
       : [];
@@ -98,7 +104,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, date, location, visibility } = await req.json();
+    const { title, description, date, location, visibility, eventTypeId } = await req.json();
 
     // Validation
     if (!title || !date) {
@@ -117,6 +123,7 @@ export async function POST(req: NextRequest) {
         location: location || null,
         visibility: visibility || "friends",
         createdById: user.id,
+        eventTypeId: eventTypeId || null,
       },
     });
 

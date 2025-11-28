@@ -9,7 +9,10 @@ import { useTheme } from '@/lib/themeContext'
 interface Invitation {
   id: string
   eventId: string
+  pollId?: string
   status: string
+  type?: 'event' | 'poll'
+  createdAt?: string
   event: {
     id: string
     title: string
@@ -43,6 +46,10 @@ export default function InvitationsPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchInvitations()
+
+      // Polling toutes les 5 secondes pour détecter les nouveaux sondages/invitations
+      const interval = setInterval(fetchInvitations, 5000)
+      return () => clearInterval(interval)
     }
   }, [status])
 
@@ -206,6 +213,7 @@ export default function InvitationsPage() {
 
                 const isProcessing = processing === event.id
                 const eventDate = new Date(event.date)
+                const isPoll = invitation.type === 'poll'
 
                 return (
                   <div
@@ -213,7 +221,7 @@ export default function InvitationsPage() {
                     className="bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 overflow-hidden animate-slide-up"
                   >
                     {/* Colored bar */}
-                    <div className="h-1 bg-blue-500"></div>
+                    <div className="h-1" style={{ backgroundColor: primaryColor }}></div>
 
                     <div className="p-6">
                       {/* Creator info */}
@@ -235,10 +243,18 @@ export default function InvitationsPage() {
                             <span className="font-semibold text-white">
                               {event.creator?.name || event.creator?.email}
                             </span>{' '}
-                            vous invite à un événement
+                            {isPoll ? 'vous a envoyé un sondage' : 'vous invite à un événement'}
                           </p>
                           <p className="text-slate-500 text-xs mt-1">
-                            Il y a {Math.floor((Date.now() - new Date(invitation.id).getTime()) / (1000 * 60 * 60))}h
+                            Il y a {(() => {
+                              const diffMs = Date.now() - new Date(invitation.createdAt || invitation.id).getTime()
+                              const hours = Math.floor(diffMs / (1000 * 60 * 60))
+                              if (hours < 1) {
+                                const minutes = Math.floor(diffMs / (1000 * 60))
+                                return `${minutes} min`
+                              }
+                              return `${hours}h`
+                            })()}
                           </p>
                         </div>
                       </div>
@@ -285,39 +301,57 @@ export default function InvitationsPage() {
 
                       {/* Action buttons */}
                       <div className="flex gap-3">
-                        <button
-                          onClick={async () => {
-                            const userId = await getCurrentUserId()
-                            if (userId) {
-                              handleResponse(event.id, userId, 'decline')
-                            }
-                          }}
-                          disabled={isProcessing}
-                          className="flex-1 px-6 py-3 bg-slate-800/50 hover:bg-slate-800 text-white rounded-2xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700 flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          {isProcessing ? 'Traitement...' : 'Refuser'}
-                        </button>
-                        <button
-                          onClick={async () => {
-                            const userId = await getCurrentUserId()
-                            if (userId) {
-                              handleResponse(event.id, userId, 'accept')
-                            }
-                          }}
-                          disabled={isProcessing}
-                          className="flex-1 px-6 py-3 rounded-2xl font-medium text-white flex items-center justify-center gap-2 shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
-                          style={{ backgroundColor: primaryColor }}
-                          onMouseEnter={(e) => !isProcessing && (e.currentTarget.style.backgroundColor = primaryHoverColor)}
-                          onMouseLeave={(e) => !isProcessing && (e.currentTarget.style.backgroundColor = primaryColor)}
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {isProcessing ? 'Traitement...' : 'Accepter'}
-                        </button>
+                        {isPoll ? (
+                          // Bouton pour aller voter sur le sondage
+                          <button
+                            onClick={() => router.push(`/polls/${invitation.pollId}`)}
+                            className="flex-1 px-6 py-3 rounded-2xl font-medium text-white flex items-center justify-center gap-2 shadow-xl transition"
+                            style={{ backgroundColor: primaryColor }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = primaryHoverColor)}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = primaryColor)}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            Voter maintenant
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={async () => {
+                                const userId = await getCurrentUserId()
+                                if (userId) {
+                                  handleResponse(event.id, userId, 'decline')
+                                }
+                              }}
+                              disabled={isProcessing}
+                              className="flex-1 px-6 py-3 bg-slate-800/50 hover:bg-slate-800 text-white rounded-2xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700 flex items-center justify-center gap-2"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              {isProcessing ? 'Traitement...' : 'Refuser'}
+                            </button>
+                            <button
+                              onClick={async () => {
+                                const userId = await getCurrentUserId()
+                                if (userId) {
+                                  handleResponse(event.id, userId, 'accept')
+                                }
+                              }}
+                              disabled={isProcessing}
+                              className="flex-1 px-6 py-3 rounded-2xl font-medium text-white flex items-center justify-center gap-2 shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ backgroundColor: primaryColor }}
+                              onMouseEnter={(e) => !isProcessing && (e.currentTarget.style.backgroundColor = primaryHoverColor)}
+                              onMouseLeave={(e) => !isProcessing && (e.currentTarget.style.backgroundColor = primaryColor)}
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              {isProcessing ? 'Traitement...' : 'Accepter'}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/themeContext";
 
+interface EventType {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -13,6 +19,7 @@ interface Event {
   location: string | null;
   visibility: string;
   createdById: string;
+  eventType?: EventType | null;
   createdBy?: {
     name: string | null;
     email: string;
@@ -245,8 +252,18 @@ export default function EventsPage() {
                     <span>{day}</span>
                     {dayEvents.length > 0 && (
                       <div className="flex gap-0.5 mt-1">
-                        {dayEvents.slice(0, 3).map((_, i) => (
-                          <div key={i} className="w-1 h-1 rounded-full" style={{ backgroundColor: isSelected ? 'white' : primaryLightColor }} />
+                        {dayEvents.slice(0, 3).map((event, i) => (
+                          <div
+                            key={i}
+                            className="w-1 h-1 rounded-full"
+                            style={{
+                              backgroundColor: isSelected
+                                ? 'white'
+                                : event.eventType
+                                ? event.eventType.color
+                                : primaryLightColor
+                            }}
+                          />
                         ))}
                       </div>
                     )}
@@ -285,6 +302,12 @@ export default function EventsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                   </svg>
                                   <span className="truncate">{event.location}</span>
+                                </span>
+                              )}
+                              {event.eventType && (
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ backgroundColor: `${event.eventType.color}20`, color: event.eventType.color, borderColor: `${event.eventType.color}40`, borderWidth: '1px' }}>
+                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: event.eventType.color }}></div>
+                                  <span className="font-medium">{event.eventType.name}</span>
                                 </span>
                               )}
                             </div>

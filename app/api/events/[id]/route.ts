@@ -25,6 +25,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const event = await prisma.event.findUnique({
       where: { id },
+      include: {
+        eventType: true,
+      },
     });
 
     if (!event) {
@@ -151,16 +154,17 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { title, description, date, location, visibility } = await req.json();
+    const { title, description, date, location, visibility, eventTypeId } = await req.json();
 
     // Préparer les données à mettre à jour
     const updateData: any = {};
-    
+
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description || null;
     if (date !== undefined) updateData.date = new Date(date);
     if (location !== undefined) updateData.location = location || null;
     if (visibility !== undefined) updateData.visibility = visibility;
+    if (eventTypeId !== undefined) updateData.eventTypeId = eventTypeId || null;
 
     const updatedEvent = await prisma.event.update({
       where: { id },

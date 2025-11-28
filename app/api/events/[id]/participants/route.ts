@@ -29,35 +29,39 @@ export async function GET(
       select: { id: true, name: true, email: true, image: true },
     });
 
+    // Récupérer l'événement pour identifier le créateur
+    const event = await prisma.event.findUnique({ where: { id: eventId } });
+
     const participantsWithInfo = participants.map(p => {
       const user = users.find(u => u.id === p.userId);
+      // Si c'est le créateur, forcer le statut à "creator"
+      const isCreator = event && p.userId === event.createdById;
       return {
         id: p.id,
         userId: p.userId,
-        status: p.status,
+        status: isCreator ? "creator" : p.status,
         user,
       };
     });
-    
-      // Ajout du créateur si absent
-      const event = await prisma.event.findUnique({ where: { id: eventId } });
-      if (event) {
-        const alreadyParticipant = participants.some(p => p.userId === event.createdById);
-        if (!alreadyParticipant) {
-          const creator = await prisma.user.findUnique({
-            where: { id: event.createdById },
-            select: { id: true, name: true, email: true, image: true },
+
+    // Ajout du créateur si absent
+    if (event) {
+      const alreadyParticipant = participants.some(p => p.userId === event.createdById);
+      if (!alreadyParticipant) {
+        const creator = await prisma.user.findUnique({
+          where: { id: event.createdById },
+          select: { id: true, name: true, email: true, image: true },
+        });
+        if (creator) {
+          participantsWithInfo.unshift({
+            id: "creator",
+            userId: creator.id,
+            status: "creator",
+            user: creator,
           });
-          if (creator) {
-            participantsWithInfo.unshift({
-              id: "creator",
-              userId: creator.id,
-              status: "creator",
-              user: creator,
-            });
-          }
         }
       }
+    }
 
     return NextResponse.json(participantsWithInfo);
   } catch (error) {
