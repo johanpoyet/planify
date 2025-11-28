@@ -9,6 +9,15 @@ const nextConfig = {
   experimental: {
     optimizeCss: false,
   },
+  // Désactiver le cache en développement
+  onDemandEntries: {
+    maxInactiveAge: 0,
+    pagesBufferLength: 0,
+  },
+  // Désactiver la génération de buildId statique
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
+  },
   // Assurer que les fichiers publics sont bien servis
   async headers() {
     return [

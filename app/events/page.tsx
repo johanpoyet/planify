@@ -35,6 +35,7 @@ export default function EventsPage() {
   const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -140,9 +141,89 @@ export default function EventsPage() {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
   };
 
+  const previousWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentDate(newDate);
+  };
+
+  const nextWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentDate(newDate);
+  };
+
+  const previousDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setCurrentDate(newDate);
+  };
+
+  const nextDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setCurrentDate(newDate);
+  };
+
+  const getWeekDays = (date: Date) => {
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    const monday = new Date(date);
+    monday.setDate(diff);
+
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      weekDays.push(day);
+    }
+    return weekDays;
+  };
+
+  const getHoursOfDay = () => {
+    return Array.from({ length: 24 }, (_, i) => i);
+  };
+
+  const getEventsForHour = (hour: number, date: Date) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return (
+        eventDate.getDate() === date.getDate() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getFullYear() === date.getFullYear() &&
+        eventDate.getHours() === hour
+      );
+    });
+  };
+
   const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentDate);
   const monthName = currentDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   const weekDays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  const weekDaysFull = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+  const getViewTitle = () => {
+    if (viewMode === 'month') {
+      return monthName;
+    } else if (viewMode === 'week') {
+      const weekStart = getWeekDays(currentDate)[0];
+      const weekEnd = getWeekDays(currentDate)[6];
+      return `${weekStart.getDate()} ${weekStart.toLocaleDateString('fr-FR', { month: 'short' })} - ${weekEnd.getDate()} ${weekEnd.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}`;
+    } else {
+      return currentDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+  };
+
+  const handlePrevious = () => {
+    if (viewMode === 'month') previousMonth();
+    else if (viewMode === 'week') previousWeek();
+    else previousDay();
+  };
+
+  const handleNext = () => {
+    if (viewMode === 'month') nextMonth();
+    else if (viewMode === 'week') nextWeek();
+    else nextDay();
+  };
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -184,11 +265,11 @@ export default function EventsPage() {
             <div className="md:w-1/2">
               <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-700/50 p-4 sm:p-6 md:h-[600px] flex flex-col">
                 {/* Calendar Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-white capitalize">{monthName}</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-white capitalize">{getViewTitle()}</h2>
                   <div className="flex gap-2">
                     <button
-                      onClick={previousMonth}
+                      onClick={handlePrevious}
                       className="p-2 bg-slate-800/50 hover:bg-slate-800 rounded-xl transition-colors border border-slate-700"
                     >
                       <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +277,7 @@ export default function EventsPage() {
                       </svg>
                     </button>
                     <button
-                      onClick={nextMonth}
+                      onClick={handleNext}
                       className="p-2 bg-slate-800/50 hover:bg-slate-800 rounded-xl transition-colors border border-slate-700"
                     >
                       <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,71 +287,229 @@ export default function EventsPage() {
                   </div>
                 </div>
 
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 flex-1">
-              {/* Week days */}
-              {weekDays.map(day => (
-                <div key={day} className="text-center text-xs sm:text-sm font-medium text-slate-400 py-2">
-                  {day}
-                </div>
-              ))}
-
-              {/* Empty cells before first day */}
-              {Array.from({ length: startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1 }).map((_, index) => (
-                <div key={`empty-${index}`} className="aspect-square" />
-              ))}
-
-              {/* Days */}
-              {Array.from({ length: daysInMonth }).map((_, index) => {
-                const day = index + 1;
-                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                const dayEvents = getEventsForDate(date);
-                const isSelected = selectedDate && 
-                  selectedDate.getDate() === day && 
-                  selectedDate.getMonth() === currentDate.getMonth() &&
-                  selectedDate.getFullYear() === currentDate.getFullYear();
-                const isToday = 
-                  new Date().getDate() === day && 
-                  new Date().getMonth() === currentDate.getMonth() &&
-                  new Date().getFullYear() === currentDate.getFullYear();
-
-                return (
+                {/* View Mode Selector */}
+                <div className="flex gap-1 mb-4 p-1 bg-slate-800/50 rounded-xl border border-slate-700/50">
                   <button
-                    key={day}
-                    onClick={() => handleDateClick(day)}
-                    className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
-                      ${dayEvents.length > 0 && !isSelected
-                        ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
-                        : !isSelected
-                        ? 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/50'
-                        : ''
-                      }
-                      ${isToday && !isSelected ? 'ring-2' : ''}
-                    `}
-                    style={isSelected ? { backgroundColor: primaryColor, color: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } : isToday ? { borderColor: primaryColor } : {}}
+                    onClick={() => setViewMode('month')}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      viewMode === 'month'
+                        ? 'text-white shadow-lg'
+                        : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/30'
+                    }`}
+                    style={viewMode === 'month' ? { backgroundColor: primaryColor } : {}}
                   >
-                    <span>{day}</span>
-                    {dayEvents.length > 0 && (
-                      <div className="flex gap-0.5 mt-1">
-                        {dayEvents.slice(0, 3).map((event, i) => (
-                          <div
-                            key={i}
-                            className="w-1 h-1 rounded-full"
-                            style={{
-                              backgroundColor: isSelected
-                                ? 'white'
-                                : event.eventType
-                                ? event.eventType.color
-                                : primaryLightColor
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    Mois
                   </button>
-                );
-              })}
-            </div>
+                  <button
+                    onClick={() => setViewMode('week')}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      viewMode === 'week'
+                        ? 'text-white shadow-lg'
+                        : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/30'
+                    }`}
+                    style={viewMode === 'week' ? { backgroundColor: primaryColor } : {}}
+                  >
+                    Semaine
+                  </button>
+                  <button
+                    onClick={() => setViewMode('day')}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      viewMode === 'day'
+                        ? 'text-white shadow-lg'
+                        : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/30'
+                    }`}
+                    style={viewMode === 'day' ? { backgroundColor: primaryColor } : {}}
+                  >
+                    Jour
+                  </button>
+                </div>
+
+            {/* Calendar Grid */}
+            {viewMode === 'month' && (
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 flex-1">
+                {/* Week days */}
+                {weekDays.map(day => (
+                  <div key={day} className="text-center text-xs sm:text-sm font-medium text-slate-400 py-2">
+                    {day}
+                  </div>
+                ))}
+
+                {/* Empty cells before first day */}
+                {Array.from({ length: startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1 }).map((_, index) => (
+                  <div key={`empty-${index}`} className="aspect-square" />
+                ))}
+
+                {/* Days */}
+                {Array.from({ length: daysInMonth }).map((_, index) => {
+                  const day = index + 1;
+                  const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                  const dayEvents = getEventsForDate(date);
+                  const isSelected = selectedDate &&
+                    selectedDate.getDate() === day &&
+                    selectedDate.getMonth() === currentDate.getMonth() &&
+                    selectedDate.getFullYear() === currentDate.getFullYear();
+                  const isToday =
+                    new Date().getDate() === day &&
+                    new Date().getMonth() === currentDate.getMonth() &&
+                    new Date().getFullYear() === currentDate.getFullYear();
+
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => handleDateClick(day)}
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
+                        ${dayEvents.length > 0 && !isSelected
+                          ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
+                          : !isSelected
+                          ? 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/50'
+                          : ''
+                        }
+                        ${isToday && !isSelected ? 'ring-2' : ''}
+                      `}
+                      style={isSelected ? { backgroundColor: primaryColor, color: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } : isToday ? { borderColor: primaryColor } : {}}
+                    >
+                      <span>{day}</span>
+                      {dayEvents.length > 0 && (
+                        <div className="flex gap-0.5 mt-1">
+                          {dayEvents.slice(0, 3).map((event, i) => (
+                            <div
+                              key={i}
+                              className="w-1 h-1 rounded-full"
+                              style={{
+                                backgroundColor: isSelected
+                                  ? 'white'
+                                  : event.eventType
+                                  ? event.eventType.color
+                                  : primaryLightColor
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Week View */}
+            {viewMode === 'week' && (
+              <div className="flex-1 overflow-auto">
+                <div className="grid grid-cols-7 gap-2 min-h-full">
+                  {getWeekDays(currentDate).map((day, index) => {
+                    const dayEvents = getEventsForDate(day);
+                    const isToday =
+                      new Date().getDate() === day.getDate() &&
+                      new Date().getMonth() === day.getMonth() &&
+                      new Date().getFullYear() === day.getFullYear();
+                    const isSelected = selectedDate &&
+                      selectedDate.getDate() === day.getDate() &&
+                      selectedDate.getMonth() === day.getMonth() &&
+                      selectedDate.getFullYear() === day.getFullYear();
+
+                    return (
+                      <div key={index} className="flex flex-col">
+                        {/* Day header */}
+                        <div className="text-center mb-2">
+                          <div className="text-xs text-slate-400 mb-1">{weekDays[index]}</div>
+                          <button
+                            onClick={() => handleDateClick(day.getDate())}
+                            className={`w-full px-2 py-1 rounded-lg text-sm font-medium transition-all ${
+                              isSelected
+                                ? 'text-white shadow-lg'
+                                : isToday
+                                ? 'bg-slate-800/50 text-white border'
+                                : 'text-slate-300 hover:bg-slate-800/30'
+                            }`}
+                            style={
+                              isSelected
+                                ? { backgroundColor: primaryColor }
+                                : isToday
+                                ? { borderColor: primaryColor }
+                                : {}
+                            }
+                          >
+                            {day.getDate()}
+                          </button>
+                        </div>
+                        {/* Events for this day */}
+                        <div className="flex-1 space-y-1">
+                          {dayEvents.map((event) => (
+                            <button
+                              key={event.id}
+                              onClick={() => {
+                                setSelectedDate(day);
+                                setSelectedEvents([event]);
+                              }}
+                              className="w-full px-1.5 py-1 rounded-lg text-left transition-all hover:shadow-md text-xs"
+                              style={{
+                                backgroundColor: event.eventType?.color || primaryColor,
+                                opacity: 0.9
+                              }}
+                            >
+                              <div className="text-white font-medium truncate">{event.title}</div>
+                              <div className="text-white/80 text-[10px] truncate">{formatTime(event.date)}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Day View */}
+            {viewMode === 'day' && (
+              <div className="flex-1 overflow-auto custom-scrollbar">
+                <div className="space-y-1 pr-2">
+                  {getHoursOfDay().map((hour) => {
+                    const hourEvents = getEventsForHour(hour, currentDate);
+                    const hourLabel = `${hour.toString().padStart(2, '0')}:00`;
+
+                    return (
+                      <div key={hour} className="flex gap-2 min-h-[60px]">
+                        {/* Hour label */}
+                        <div className="w-14 flex-shrink-0 text-xs text-slate-400 pt-1">
+                          {hourLabel}
+                        </div>
+                        {/* Events for this hour */}
+                        <div className="flex-1 border-l border-slate-700/50 pl-2 space-y-1">
+                          {hourEvents.map((event) => (
+                            <button
+                              key={event.id}
+                              onClick={() => {
+                                setSelectedDate(currentDate);
+                                setSelectedEvents([event]);
+                              }}
+                              className="w-full px-3 py-2 rounded-xl text-left transition-all hover:shadow-lg"
+                              style={{
+                                backgroundColor: event.eventType?.color || primaryColor,
+                                opacity: 0.95
+                              }}
+                            >
+                              <div className="text-white font-semibold text-sm mb-0.5">{event.title}</div>
+                              <div className="text-white/90 text-xs">{formatTime(event.date)}</div>
+                              {event.location && (
+                                <div className="text-white/80 text-xs mt-1 flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  </svg>
+                                  <span className="truncate">{event.location}</span>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                          {hourEvents.length === 0 && (
+                            <div className="h-full min-h-[50px] border-b border-slate-800/30"></div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 // Service Worker pour Planify
-const CACHE_NAME = 'planify-v2'; // Incrémenter la version pour forcer la mise à jour
-const STATIC_CACHE_URLS = [
+const CACHE_NAME = `planify-${Date.now()}`; // Version dynamique pour forcer la mise à jour
+const IS_DEVELOPMENT = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('192.168');
+const STATIC_CACHE_URLS = IS_DEVELOPMENT ? [] : [
   '/',
   '/manifest.json',
   '/icons/icon-192x192.png',
@@ -48,6 +49,21 @@ self.addEventListener('fetch', (event) => {
 
   // Ignore les requêtes non-HTTP (chrome-extension://, etc.)
   if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // En développement, désactiver complètement le cache
+  if (IS_DEVELOPMENT) {
+    event.respondWith(
+      fetch(request, {
+        cache: 'no-store',
+        headers: {
+          ...request.headers,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        }
+      })
+    );
     return;
   }
 

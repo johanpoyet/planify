@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/themeContext";
 import Link from "next/link";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface EventType {
   id: string;
@@ -46,6 +47,9 @@ export default function EventTypesPage() {
   const [name, setName] = useState("");
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
   const [saving, setSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [typeToDelete, setTypeToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -121,19 +125,29 @@ export default function EventTypesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer ce type d'événement ? Les événements associés ne seront pas supprimés.")) return;
+  const openDeleteModal = (id: string) => {
+    setTypeToDelete(id);
+    setShowDeleteModal(true);
+  };
 
+  const handleDelete = async () => {
+    if (!typeToDelete) return;
+
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/event-types/${id}`, {
+      const res = await fetch(`/api/event-types/${typeToDelete}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
         await fetchEventTypes();
+        setShowDeleteModal(false);
+        setTypeToDelete(null);
       }
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -252,7 +266,7 @@ export default function EventTypesPage() {
                     Modifier
                   </button>
                   <button
-                    onClick={() => handleDelete(type.id)}
+                    onClick={() => openDeleteModal(type.id)}
                     className="px-4 py-2 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-xl font-medium transition-all border border-red-500/30 hover:border-red-500"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,6 +353,22 @@ export default function EventTypesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmation de suppression */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Supprimer le type d'événement"
+        description="Les événements associés à ce type ne seront pas supprimés, mais n'auront plus de type assigné."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        loading={deleting}
+        loadingLabel="Suppression..."
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setTypeToDelete(null);
+        }}
+      />
     </div>
   );
 }

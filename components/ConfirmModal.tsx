@@ -10,6 +10,7 @@ interface ConfirmModalProps {
   readonly confirmLabel?: string;
   readonly cancelLabel?: string;
   readonly loading?: boolean;
+  readonly loadingLabel?: string;
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
 }
@@ -21,6 +22,7 @@ export default function ConfirmModal({
   confirmLabel = "Oui",
   cancelLabel = "Annuler",
   loading = false,
+  loadingLabel = "Chargement...",
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -70,7 +72,7 @@ export default function ConfirmModal({
             onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.backgroundColor = primaryHoverColor; }}
             onMouseLeave={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.backgroundColor = primaryColor; }}
           >
-            {loading ? "Création..." : confirmLabel}
+            {loading ? loadingLabel : confirmLabel}
           </button>
         </div>
       </div>
