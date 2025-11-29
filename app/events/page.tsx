@@ -130,8 +130,10 @@ export default function EventsPage() {
   };
 
   const handleDateDoubleClick = (day: number) => {
-    const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    const dateString = clickedDate.toISOString().split('T')[0];
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateString = `${year}-${month}-${dayStr}`;
     router.push(`/events/new?date=${dateString}`);
   };
 
