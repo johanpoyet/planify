@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/lib/themeContext";
 import { useToast } from "@/lib/toastContext";
 import DateTimePicker from "@/components/DateTimePicker";
@@ -31,6 +31,7 @@ interface EventType {
 
 export default function NewEventPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -46,10 +47,13 @@ export default function NewEventPage() {
 
   const totalConflicts = Object.values(conflicts).reduce((acc, arr) => acc + (arr?.length || 0), 0);
 
+  // Récupérer la date depuis l'URL si elle existe
+  const dateFromUrl = searchParams.get('date');
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    date: "",
+    date: dateFromUrl ? `${dateFromUrl}T12:00` : "",
     location: "",
     visibility: "friends", // par défaut : visible aux amis
     eventTypeId: "", // Type d'événement (optionnel)

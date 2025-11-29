@@ -124,9 +124,15 @@ export default function EventsPage() {
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     setSelectedDate(clickedDate);
-    
+
     const dayEvents = getEventsForDate(clickedDate);
     setSelectedEvents(dayEvents);
+  };
+
+  const handleDateDoubleClick = (day: number) => {
+    const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const dateString = clickedDate.toISOString().split('T')[0];
+    router.push(`/events/new?date=${dateString}`);
   };
 
   const handleEventClick = (event: Event) => {
@@ -357,6 +363,7 @@ export default function EventsPage() {
                     <button
                       key={day}
                       onClick={() => handleDateClick(day)}
+                      onDoubleClick={() => handleDateDoubleClick(day)}
                       className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
                         ${dayEvents.length > 0 && !isSelected
                           ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
@@ -414,6 +421,7 @@ export default function EventsPage() {
                           <div className="text-xs text-slate-400 mb-1">{weekDays[index]}</div>
                           <button
                             onClick={() => handleDateClick(day.getDate())}
+                            onDoubleClick={() => handleDateDoubleClick(day.getDate())}
                             className={`w-full px-2 py-1 rounded-lg text-sm font-medium transition-all ${
                               isSelected
                                 ? 'text-white shadow-lg'

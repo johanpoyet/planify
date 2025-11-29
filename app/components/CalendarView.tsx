@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Event {
   id: string;
@@ -19,6 +20,7 @@ interface CalendarViewProps {
 
 export default function CalendarView({ events }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const router = useRouter();
 
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
@@ -110,6 +112,16 @@ export default function CalendarView({ events }: CalendarViewProps) {
 
   const weekDays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
+  const handleDayDoubleClick = (day: number) => {
+    const selectedDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+    const dateString = selectedDate.toISOString().split('T')[0];
+    router.push(`/events/new?date=${dateString}`);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
       {/* Header du calendrier */}
@@ -164,7 +176,15 @@ export default function CalendarView({ events }: CalendarViewProps) {
           return (
             <div
               key={day}
-              className={`min-h-[80px] md:min-h-[120px] border rounded-lg p-1 md:p-2 ${
+              role="button"
+              tabIndex={0}
+              onDoubleClick={() => handleDayDoubleClick(day)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleDayDoubleClick(day);
+                }
+              }}
+              className={`min-h-[80px] md:min-h-[120px] border rounded-lg p-1 md:p-2 cursor-pointer ${
                 today
                   ? "bg-blue-50 border-blue-400 border-2"
                   : "bg-gray-50 border-gray-200"

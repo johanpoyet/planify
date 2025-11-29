@@ -3,12 +3,13 @@
 import { SessionProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { registerServiceWorker } from '../lib/pwa';
-import { ThemeProvider } from '../lib/themeContext';
+import { ThemeProvider, ThemeMode } from '../lib/themeContext';
 import { ToastProvider } from '../lib/toastContext';
 import { ThemeColor } from '../lib/theme';
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   const [themeColor, setThemeColor] = useState<ThemeColor>('blue');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,12 +23,17 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
       });
     }
 
-    // Charger la couleur de thème de l'utilisateur
-    fetch('/api/user/theme')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.themeColor) {
-          setThemeColor(data.themeColor);
+    // Charger la couleur de thème et le mode de l'utilisateur
+    Promise.all([
+      fetch('/api/user/theme').then((res) => res.json()),
+      fetch('/api/user/theme-mode').then((res) => res.json()),
+    ])
+      .then(([themeData, modeData]) => {
+        if (themeData.themeColor) {
+          setThemeColor(themeData.themeColor);
+        }
+        if (modeData.themeMode) {
+          setThemeMode(modeData.themeMode);
         }
       })
       .catch(() => {
@@ -45,7 +51,7 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
 
   return (
     <SessionProvider>
-      <ThemeProvider initialColor={themeColor}>
+      <ThemeProvider initialColor={themeColor} initialMode={themeMode}>
         <ToastProvider>{children}</ToastProvider>
       </ThemeProvider>
     </SessionProvider>

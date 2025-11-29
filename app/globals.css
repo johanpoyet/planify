@@ -7,6 +7,8 @@
   --color-primary: #2563eb;       /* blue-600 par défaut */
   --color-primary-hover: #1d4ed8; /* blue-700 par défaut */
   --color-primary-light: #60a5fa; /* blue-400 par défaut */
+  --background: #0f172a;
+  --foreground: #f8fafc;
 }
 
 /* Animations modernes */
@@ -163,9 +165,32 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-:root {
+/* Mode sombre (défaut) */
+body.dark-mode {
   --background: #0f172a;
   --foreground: #f8fafc;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-hover: #475569;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+}
+
+/* Mode clair */
+body.light-mode {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --bg-primary: #ffffff;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-tertiary: #6b7280;
 }
 
 body {
@@ -176,92 +201,274 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Classes utilitaires pour le mode clair/sombre */
+  .bg-app-primary {
+    background-color: var(--bg-primary);
+  }
+
+  .bg-app-secondary {
+    background-color: var(--bg-secondary);
+  }
+
+  .bg-app-tertiary {
+    background-color: var(--bg-tertiary);
+  }
+
+  .bg-app-hover:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .text-app-primary {
+    color: var(--text-primary);
+  }
+
+  .text-app-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-app-tertiary {
+    color: var(--text-tertiary);
+  }
+
+  .border-app {
+    border-color: var(--border-color);
+  }
+
+  /* Cartes et conteneurs avec adaptation automatique */
+  .card-app {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .card-app-glass {
+    background-color: var(--bg-secondary);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
 }
 
-/* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
+/* Overrides pour les classes Tailwind courantes en mode clair */
+body.light-mode .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+
+body.light-mode .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+body.light-mode .bg-slate-900\/60,
+body.light-mode .bg-slate-900\/95 {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05) !important;
+}
+
+body.light-mode .bg-slate-800 {
+  background-color: #f9fafb !important;
+}
+
+body.light-mode .bg-slate-800\/50 {
+  background-color: rgba(249, 250, 251, 0.9) !important;
+}
+
+body.light-mode .bg-slate-700 {
+  background-color: #f3f4f6 !important;
+}
+
+body.light-mode .text-white {
+  color: #111827 !important;
+}
+
+body.light-mode .text-slate-300 {
+  color: #374151 !important;
+}
+
+body.light-mode .text-slate-400 {
+  color: #6b7280 !important;
+}
+
+body.light-mode .text-slate-500 {
+  color: #9ca3af !important;
+}
+
+body.light-mode .text-slate-600 {
+  color: #4b5563 !important;
+}
+
+body.light-mode .border-slate-700 {
+  border-color: #e5e7eb !important;
+}
+
+body.light-mode .border-slate-700\/50 {
+  border-color: rgba(229, 231, 235, 0.6) !important;
+}
+
+body.light-mode .border-slate-800 {
+  border-color: #d1d5db !important;
+}
+
+body.light-mode .border-slate-800\/50 {
+  border-color: rgba(209, 213, 219, 0.5) !important;
+}
+
+body.light-mode .ring-slate-700 {
+  --tw-ring-color: #e5e7eb !important;
+}
+
+/* Inputs et zones de texte en mode clair */
+body.light-mode input:not([type="checkbox"]):not([type="radio"]),
+body.light-mode textarea,
+body.light-mode select {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+body.light-mode input:not([type="checkbox"]):not([type="radio"]):disabled,
+body.light-mode textarea:disabled,
+body.light-mode select:disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+}
+
+body.light-mode input:not([type="checkbox"]):not([type="radio"]):focus,
+body.light-mode textarea:focus,
+body.light-mode select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+}
+
+/* Custom Scrollbar - Mode sombre */
+body.dark-mode .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(51, 65, 85, 0.3);
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.5);
   border-radius: 10px;
   transition: background 0.2s;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.7);
 }
 
-/* Firefox */
-.custom-scrollbar {
+body.dark-mode .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.5) rgba(51, 65, 85, 0.3);
 }
 
-/* Custom datetime picker styling */
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+/* Custom Scrollbar - Mode clair */
+body.light-mode .custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+body.light-mode .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.5);
+  border-radius: 10px;
+}
+
+body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}
+
+body.light-mode .custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) rgba(226, 232, 240, 0.5);
+}
+
+/* Custom datetime picker styling - Mode sombre */
+body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
-/* Style pour le popup du calendrier (webkit/chrome) */
-input[type="datetime-local"]::-webkit-datetime-edit {
-  padding: 0;
-}
-
-input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
-  padding: 0;
-}
-
-input[type="datetime-local"]::-webkit-datetime-edit-text {
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-text {
   color: #94a3b8;
   padding: 0 2px;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-month-field,
-input[type="datetime-local"]::-webkit-datetime-edit-day-field,
-input[type="datetime-local"]::-webkit-datetime-edit-year-field,
-input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
-input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
   color: #fff;
   padding: 2px;
   border-radius: 4px;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus {
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus,
+body.dark-mode input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   background-color: rgba(59, 130, 246, 0.3);
   outline: none;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
-  color: #fff;
+/* Custom datetime picker styling - Mode clair */
+body.light-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+body.light-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: #64748b;
+  padding: 0 2px;
+}
+
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: #0f172a;
   padding: 2px;
   border-radius: 4px;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
-  background-color: rgba(59, 130, 246, 0.3);
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus,
+body.light-mode input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
+  background-color: rgba(59, 130, 246, 0.2);
   outline: none;
 }

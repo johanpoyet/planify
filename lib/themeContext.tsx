@@ -3,9 +3,13 @@
 import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { themeColors, ThemeColor, defaultThemeColor } from './theme';
 
+export type ThemeMode = 'dark' | 'light';
+
 interface ThemeContextType {
   themeColor: ThemeColor;
   setThemeColor: (color: ThemeColor) => void;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
   primaryColor: string;
   primaryHoverColor: string;
   primaryLightColor: string;
@@ -25,6 +29,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 interface ThemeProviderProps {
   readonly children: React.ReactNode;
   readonly initialColor?: ThemeColor;
+  readonly initialMode?: ThemeMode;
 }
 
 // Mapping des couleurs vers les classes Tailwind
@@ -94,25 +99,36 @@ const colorToClasses: Record<ThemeColor, {
   },
 };
 
-export function ThemeProvider({ children, initialColor }: ThemeProviderProps) {
+export function ThemeProvider({ children, initialColor, initialMode }: ThemeProviderProps) {
   const [themeColor, setThemeColorState] = useState<ThemeColor>(initialColor || defaultThemeColor);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(initialMode || 'dark');
 
   useEffect(() => {
     // Appliquer les variables CSS sur le document root
     const root = document.documentElement;
     const colors = themeColors[themeColor];
-    
+
     root.style.setProperty('--color-primary', colors.primary);
     root.style.setProperty('--color-primary-hover', colors.primaryHover);
     root.style.setProperty('--color-primary-light', colors.primaryLight);
-    
+
     // Ajouter aussi l'attribut data-theme pour le CSS
     root.setAttribute('data-theme', themeColor);
-  }, [themeColor]);
+    root.setAttribute('data-mode', themeMode);
+
+    // Appliquer la classe au body pour le mode clair/sombre
+    if (themeMode === 'light') {
+      document.body.classList.add('light-mode');
+      document.body.classList.remove('dark-mode');
+    } else {
+      document.body.classList.add('dark-mode');
+      document.body.classList.remove('light-mode');
+    }
+  }, [themeColor, themeMode]);
 
   const setThemeColor = async (color: ThemeColor) => {
     setThemeColorState(color);
-    
+
     // Sauvegarder dans la base de données
     try {
       await fetch('/api/user/theme', {
@@ -125,14 +141,31 @@ export function ThemeProvider({ children, initialColor }: ThemeProviderProps) {
     }
   };
 
+  const setThemeMode = async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+
+    // Sauvegarder dans la base de données
+    try {
+      await fetch('/api/user/theme-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeMode: mode }),
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du mode:', error);
+    }
+  };
+
   const value = useMemo(() => ({
     themeColor,
     setThemeColor,
+    themeMode,
+    setThemeMode,
     primaryColor: themeColors[themeColor].primary,
     primaryHoverColor: themeColors[themeColor].primaryHover,
     primaryLightColor: themeColors[themeColor].primaryLight,
     classes: colorToClasses[themeColor],
-  }), [themeColor]);
+  }), [themeColor, themeMode]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
