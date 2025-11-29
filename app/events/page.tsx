@@ -36,6 +36,10 @@ export default function EventsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -108,6 +112,39 @@ export default function EventsPage() {
     const startingDayOfWeek = firstDay.getDay();
 
     return { daysInMonth, startingDayOfWeek };
+  };
+
+  // Helper to get previous/next month dates
+  const getPreviousMonthDate = () => {
+    return new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+  };
+
+  const getNextMonthDate = () => {
+    return new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+  };
+
+  const getPreviousWeekDate = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    return newDate;
+  };
+
+  const getNextWeekDate = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    return newDate;
+  };
+
+  const getPreviousDayDate = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
+    return newDate;
+  };
+
+  const getNextDayDate = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 1);
+    return newDate;
   };
 
   const getEventsForDate = (date: Date) => {
@@ -209,6 +246,79 @@ export default function EventsPage() {
   const weekDays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
   const weekDaysFull = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
+  // Render a complete month grid
+  const renderMonthGrid = (date: Date) => {
+    const { daysInMonth: monthDays, startingDayOfWeek: monthStart } = getDaysInMonth(date);
+
+    return (
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
+        {/* Week days header */}
+        {weekDays.map(day => (
+          <div key={day} className="text-center text-xs sm:text-sm font-medium text-slate-400 py-2">
+            {day}
+          </div>
+        ))}
+
+        {/* Empty cells before first day */}
+        {Array.from({ length: monthStart === 0 ? 6 : monthStart - 1 }).map((_, index) => (
+          <div key={`empty-${index}`} className="aspect-square" />
+        ))}
+
+        {/* Days */}
+        {Array.from({ length: monthDays }).map((_, index) => {
+          const day = index + 1;
+          const dayDate = new Date(date.getFullYear(), date.getMonth(), day);
+          const dayEvents = getEventsForDate(dayDate);
+          const isSelected = selectedDate &&
+            selectedDate.getDate() === day &&
+            selectedDate.getMonth() === date.getMonth() &&
+            selectedDate.getFullYear() === date.getFullYear();
+          const isToday =
+            new Date().getDate() === day &&
+            new Date().getMonth() === date.getMonth() &&
+            new Date().getFullYear() === date.getFullYear();
+
+          return (
+            <button
+              key={day}
+              onClick={() => handleDateClick(day)}
+              onDoubleClick={() => handleDateDoubleClick(day)}
+              className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
+                ${dayEvents.length > 0 && !isSelected
+                  ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
+                  : !isSelected
+                  ? 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/50'
+                  : ''
+                }
+                ${isToday && !isSelected ? 'ring-2' : ''}
+              `}
+              style={isSelected ? { backgroundColor: primaryColor, color: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } : isToday ? { borderColor: primaryColor } : {}}
+            >
+              <span>{day}</span>
+              {dayEvents.length > 0 && (
+                <div className="flex gap-0.5 mt-1">
+                  {dayEvents.slice(0, 3).map((event, i) => (
+                    <div
+                      key={i}
+                      className="w-1 h-1 rounded-full"
+                      style={{
+                        backgroundColor: isSelected
+                          ? 'white'
+                          : event.eventType
+                          ? event.eventType.color
+                          : primaryLightColor
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   const getViewTitle = () => {
     if (viewMode === 'month') {
       return monthName;
@@ -231,6 +341,59 @@ export default function EventsPage() {
     if (viewMode === 'month') nextMonth();
     else if (viewMode === 'week') nextWeek();
     else nextDay();
+  };
+
+  // Swipe detection for mobile
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsTransitioning(false);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+
+    // Calculate offset for visual feedback (smooth dragging)
+    const offset = currentTouch - touchStart;
+    setSwipeOffset(offset);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) {
+      setSwipeOffset(0);
+      setIsTransitioning(false);
+      return;
+    }
+
+    const distance = touchStart - touchEnd;
+    const absDistance = Math.abs(distance);
+
+    setIsTransitioning(true);
+
+    // Determine if we should snap to next/previous or return to current
+    if (absDistance > minSwipeDistance) {
+      // Swipe was strong enough - navigate
+      if (distance > 0) {
+        // Swiped left - go to next
+        handleNext();
+      } else {
+        // Swiped right - go to previous
+        handlePrevious();
+      }
+    }
+
+    // Always snap back to position
+    setTimeout(() => {
+      setSwipeOffset(0);
+      setIsTransitioning(false);
+      setTouchStart(null);
+      setTouchEnd(null);
+    }, 300);
   };
 
   return (
@@ -334,77 +497,48 @@ export default function EventsPage() {
 
             {/* Calendar Grid */}
             {viewMode === 'month' && (
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 flex-1">
-                {/* Week days */}
-                {weekDays.map(day => (
-                  <div key={day} className="text-center text-xs sm:text-sm font-medium text-slate-400 py-2">
-                    {day}
+              <div className="flex-1 overflow-hidden relative">
+                <div
+                  className="flex"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  style={{
+                    transform: `translateX(calc(-100% + ${swipeOffset}px))`,
+                    transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                  }}
+                >
+                  {/* Previous Month */}
+                  <div className="w-full flex-shrink-0 px-1">
+                    {renderMonthGrid(getPreviousMonthDate())}
                   </div>
-                ))}
 
-                {/* Empty cells before first day */}
-                {Array.from({ length: startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1 }).map((_, index) => (
-                  <div key={`empty-${index}`} className="aspect-square" />
-                ))}
+                  {/* Current Month */}
+                  <div className="w-full flex-shrink-0 px-1">
+                    {renderMonthGrid(currentDate)}
+                  </div>
 
-                {/* Days */}
-                {Array.from({ length: daysInMonth }).map((_, index) => {
-                  const day = index + 1;
-                  const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                  const dayEvents = getEventsForDate(date);
-                  const isSelected = selectedDate &&
-                    selectedDate.getDate() === day &&
-                    selectedDate.getMonth() === currentDate.getMonth() &&
-                    selectedDate.getFullYear() === currentDate.getFullYear();
-                  const isToday =
-                    new Date().getDate() === day &&
-                    new Date().getMonth() === currentDate.getMonth() &&
-                    new Date().getFullYear() === currentDate.getFullYear();
-
-                  return (
-                    <button
-                      key={day}
-                      onClick={() => handleDateClick(day)}
-                      onDoubleClick={() => handleDateDoubleClick(day)}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm sm:text-base font-medium transition-all relative
-                        ${dayEvents.length > 0 && !isSelected
-                          ? 'bg-slate-800/70 text-white hover:bg-slate-800 border border-slate-700'
-                          : !isSelected
-                          ? 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/50'
-                          : ''
-                        }
-                        ${isToday && !isSelected ? 'ring-2' : ''}
-                      `}
-                      style={isSelected ? { backgroundColor: primaryColor, color: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } : isToday ? { borderColor: primaryColor } : {}}
-                    >
-                      <span>{day}</span>
-                      {dayEvents.length > 0 && (
-                        <div className="flex gap-0.5 mt-1">
-                          {dayEvents.slice(0, 3).map((event, i) => (
-                            <div
-                              key={i}
-                              className="w-1 h-1 rounded-full"
-                              style={{
-                                backgroundColor: isSelected
-                                  ? 'white'
-                                  : event.eventType
-                                  ? event.eventType.color
-                                  : primaryLightColor
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                  {/* Next Month */}
+                  <div className="w-full flex-shrink-0 px-1">
+                    {renderMonthGrid(getNextMonthDate())}
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Week View */}
             {viewMode === 'week' && (
               <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-7 gap-2 min-h-full">
+                <div
+                  className="grid grid-cols-7 gap-2 min-h-full"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  style={{
+                    transform: `translateX(${swipeOffset}px)`,
+                    transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                  }}
+                >
                   {getWeekDays(currentDate).map((day, index) => {
                     const dayEvents = getEventsForDate(day);
                     const isToday =
@@ -472,7 +606,16 @@ export default function EventsPage() {
             {/* Day View */}
             {viewMode === 'day' && (
               <div className="flex-1 overflow-auto custom-scrollbar">
-                <div className="space-y-1 pr-2">
+                <div
+                  className="space-y-1 pr-2"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  style={{
+                    transform: `translateX(${swipeOffset}px)`,
+                    transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                  }}
+                >
                   {getHoursOfDay().map((hour) => {
                     const hourEvents = getEventsForHour(hour, currentDate);
                     const hourLabel = `${hour.toString().padStart(2, '0')}:00`;

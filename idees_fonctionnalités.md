@@ -1,6 +1,6 @@
-1. Sur mobile double clique sur la date du calendrier = permet de créer un nouvel événement
+1. Sur mobile double clique sur la date du calendrier = permet de créer un nouvel événement. FAIT
 
-2. sur mobile pouvoir faire glisser avec le doigt pour faire glissr le calendrier
+2. sur mobile pouvoir faire glisser avec le doigt pour faire glisser le calendrier. FAIT
 
 3. photo de profil
 
