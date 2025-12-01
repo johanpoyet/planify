@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         email: true,
-        image: true,
+        
       },
     })
 
@@ -94,7 +94,6 @@ export async function GET(req: NextRequest) {
                     id: creator.id,
                     name: creator.name,
                     email: creator.email,
-                    image: creator.image,
                   }
                 : null,
             }
@@ -124,7 +123,7 @@ export async function GET(req: NextRequest) {
     const pollCreatorIds = pollsWithoutVote.map((p) => p!.createdById)
     const pollCreators = await prisma.user.findMany({
       where: { id: { in: pollCreatorIds } },
-      select: { id: true, name: true, email: true, image: true },
+      select: { id: true, name: true, email: true },
     })
 
     // Formater les sondages comme des invitations
@@ -148,7 +147,6 @@ export async function GET(req: NextRequest) {
                 id: creator.id,
                 name: creator.name,
                 email: creator.email,
-                image: creator.image,
               }
             : null,
         },

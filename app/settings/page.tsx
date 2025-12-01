@@ -12,7 +12,6 @@ interface UserSettings {
   id: string;
   name: string | null;
   email: string;
-  image: string | null;
   calendarVisibility: boolean;
 }
 

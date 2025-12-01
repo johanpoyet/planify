@@ -17,7 +17,6 @@ model User {
   email              String    @unique
   emailVerified      DateTime?
   password           String?   // Pour l'auth par credentials
-  image              String?
   calendarVisibility Boolean   @default(true) // true = visible aux amis
   themeColor         String    @default("blue") // "blue" | "purple" | "emerald" | "rose" | "pink" | "orange" | "amber"
   themeMode          String    @default("dark") // "dark" | "light"

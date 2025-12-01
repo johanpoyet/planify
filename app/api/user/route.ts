@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         id: true,
         email: true,
         name: true,
-        image: true,
+        
         themeColor: true,
         calendarVisibility: true,
       },
