@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
 import { useFriendRequests } from '@/lib/useFriendRequests'
@@ -11,7 +11,6 @@ import ThemeToggle from './ThemeToggle'
 
 export default function DesktopNav() {
   const pathname = usePathname()
-  const router = useRouter()
   const { data: session } = useSession()
   const { primaryColor, primaryHoverColor, themeMode } = useTheme()
   const { pendingCount } = useFriendRequests()
@@ -232,8 +231,8 @@ export default function DesktopNav() {
               >
                 <button
                   onClick={async () => {
-                    await signOut({ redirect: false })
-                    router.push('/auth/login')
+                    setShowLogoutMenu(false)
+                    await signOut({ callbackUrl: '/auth/login', redirect: true })
                   }}
                   className="w-full px-4 py-3 text-left transition flex items-center gap-2"
                   style={{
