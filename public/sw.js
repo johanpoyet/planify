@@ -1,12 +1,9 @@
 // Service Worker pour Planify
 const CACHE_NAME = `planify-${Date.now()}`; // Version dynamique pour forcer la mise à jour
 const IS_DEVELOPMENT = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('192.168');
-const STATIC_CACHE_URLS = IS_DEVELOPMENT ? [] : [
-  '/',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-];
+
+// DÉSACTIVER LE CACHE POUR TOUS LES ENVIRONNEMENTS (développement ET production)
+const STATIC_CACHE_URLS = [];
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
@@ -52,74 +49,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // En développement, désactiver complètement le cache
-  if (IS_DEVELOPMENT) {
-    event.respondWith(
-      fetch(request, {
-        cache: 'no-store',
-        headers: {
-          ...request.headers,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        }
-      })
-    );
-    return;
-  }
-
-  // Ne jamais mettre en cache les fichiers CSS, JS et autres assets Next.js
-  const noCacheExtensions = ['.css', '.js', '.json'];
-  const shouldNotCache = noCacheExtensions.some(ext => url.pathname.endsWith(ext)) ||
-                         url.pathname.includes('/_next/') ||
-                         url.pathname.includes('/static/');
-
-  // Stratégie: Network First pour les API, Cache First pour les assets
-  if (url.pathname.startsWith('/api/')) {
-    // Pour les API: toujours essayer le réseau en premier
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          return response;
-        })
-        .catch((err) => {
-          console.log('[SW] API non disponible:', url.pathname);
-          return new Response(
-            JSON.stringify({ error: 'Vous êtes hors ligne' }),
-            {
-              status: 503,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-        })
-    );
-  } else if (shouldNotCache) {
-    // Pour CSS, JS et assets Next.js: toujours aller chercher la version réseau
-    event.respondWith(
-      fetch(request).catch(() => {
-        // Si hors ligne, essayer le cache en dernier recours
-        return caches.match(request);
-      })
-    );
-  } else {
-    // Pour les autres assets: Cache First, Network Fallback
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
+  // DÉSACTIVER COMPLÈTEMENT LE CACHE - TOUJOURS ALLER AU RÉSEAU
+  // Cela évite les problèmes de page blanche avec F5 en production
+  event.respondWith(
+    fetch(request, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }
+    }).catch((err) => {
+      // Si hors ligne et que c'est une API, retourner une erreur
+      if (url.pathname.startsWith('/api/')) {
+        console.log('[SW] API non disponible:', url.pathname);
+        return new Response(
+          JSON.stringify({ error: 'Vous êtes hors ligne' }),
+          {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      // Pour les autres requêtes, essayer le cache en dernier recours
+      return caches.match(request).then(cachedResponse => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        return fetch(request).then((response) => {
-          // Cache les nouvelles ressources récupérées (sauf CSS/JS)
-          if (response && response.status === 200 && response.type === 'basic') {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-          }
-          return response;
+        // Si vraiment rien, retourner une page d'erreur
+        return new Response('Vous êtes hors ligne', {
+          status: 503,
+          statusText: 'Service Unavailable',
         });
-      })
-    );
-  }
+      });
+    })
+  );
 });
 
 // Gestion des notifications push

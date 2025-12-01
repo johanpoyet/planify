@@ -8,7 +8,7 @@ export default function CacheBuster() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Vérifier si on doit forcer le rechargement
       const lastClearCache = localStorage.getItem('lastClearCache');
-      const currentVersion = 'v2'; // Incrémenter cette valeur après chaque mise à jour CSS
+      const currentVersion = 'v3'; // Incrémenter cette valeur après chaque mise à jour CSS
       
       if (lastClearCache !== currentVersion) {
         console.log('[Cache] Nettoyage du cache pour la version:', currentVersion);
