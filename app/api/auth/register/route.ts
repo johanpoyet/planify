@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, name, image } = body;
+    const { email, password, name } = body;
 
     // Validation
     if (!email || !password) {
@@ -43,7 +43,6 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         name: name || null,
-        image: image || null,
       },
     });
 
