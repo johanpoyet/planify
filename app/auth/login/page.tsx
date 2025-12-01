@@ -27,13 +27,21 @@ export default function LoginPage() {
         redirect: false,
       });
 
+      console.log('SignIn result:', result);
+
       if (result?.error) {
+        console.error('SignIn error:', result.error);
         setError('Email ou mot de passe incorrect');
-      } else {
+      } else if (result?.ok) {
+        console.log('SignIn successful, redirecting...');
         router.push('/');
         router.refresh();
+      } else {
+        console.error('SignIn unexpected result:', result);
+        setError('Une erreur est survenue');
       }
     } catch (err) {
+      console.error('SignIn catch error:', err);
       setError('Une erreur est survenue');
     } finally {
       setLoading(false);
