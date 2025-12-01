@@ -1,89 +1,34 @@
-// Service Worker pour Planify
-const CACHE_NAME = `planify-${Date.now()}`; // Version dynamique pour forcer la mise à jour
-const IS_DEVELOPMENT = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('192.168');
+// Service Worker minimaliste pour Planify
+// Ce SW gère UNIQUEMENT les notifications push - AUCUN cache
 
-// DÉSACTIVER LE CACHE POUR TOUS LES ENVIRONNEMENTS (développement ET production)
-const STATIC_CACHE_URLS = [];
+console.log('[SW] Service Worker Planify chargé');
 
-// Installation du Service Worker
+// Installation : activation immédiate sans cache
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installation du Service Worker');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Mise en cache des assets statiques');
-      return cache.addAll(STATIC_CACHE_URLS).catch((err) => {
-        console.error('[SW] Erreur lors de la mise en cache:', err);
-      });
-    })
-  );
-  // Force le nouveau SW à devenir actif immédiatement
+  console.log('[SW] Installation du Service Worker (sans cache)');
   self.skipWaiting();
 });
 
-// Activation du Service Worker
+// Activation : nettoyage de tous les anciens caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activation du Service Worker');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
+      // Supprimer TOUS les caches existants
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Suppression de l\'ancien cache:', cacheName);
-            return caches.delete(cacheName);
-          }
+          console.log('[SW] Suppression du cache:', cacheName);
+          return caches.delete(cacheName);
         })
       );
-    })
-  );
-  // Prend le contrôle de tous les clients immédiatement
-  return self.clients.claim();
-});
-
-// Stratégie de gestion des requêtes
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Ignore les requêtes non-HTTP (chrome-extension://, etc.)
-  if (!url.protocol.startsWith('http')) {
-    return;
-  }
-
-  // DÉSACTIVER COMPLÈTEMENT LE CACHE - TOUJOURS ALLER AU RÉSEAU
-  // Cela évite les problèmes de page blanche avec F5 en production
-  event.respondWith(
-    fetch(request, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-      }
-    }).catch((err) => {
-      // Si hors ligne et que c'est une API, retourner une erreur
-      if (url.pathname.startsWith('/api/')) {
-        console.log('[SW] API non disponible:', url.pathname);
-        return new Response(
-          JSON.stringify({ error: 'Vous êtes hors ligne' }),
-          {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-      // Pour les autres requêtes, essayer le cache en dernier recours
-      return caches.match(request).then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Si vraiment rien, retourner une page d'erreur
-        return new Response('Vous êtes hors ligne', {
-          status: 503,
-          statusText: 'Service Unavailable',
-        });
-      });
+    }).then(() => {
+      console.log('[SW] Tous les caches ont été supprimés');
+      return self.clients.claim();
     })
   );
 });
+
+// PAS d'interception des requêtes fetch - le navigateur gère tout normalement
 
 // Gestion des notifications push
 self.addEventListener('push', (event) => {
