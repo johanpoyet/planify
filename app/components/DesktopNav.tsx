@@ -181,20 +181,12 @@ export default function DesktopNav() {
               onClick={() => setShowLogoutMenu(!showLogoutMenu)}
               className="flex items-center gap-3 hover:opacity-80 transition"
             >
-              {session.user?.image ? (
-                <img
-                  src={session.user.image}
-                  alt={session.user.name || ''}
-                  className="w-10 h-10 rounded-2xl ring-2 ring-slate-700"
-                />
-              ) : (
-                <div 
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
-                </div>
-              )}
+              <div
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
+                style={{ backgroundColor: primaryColor }}
+              >
+                {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
               <div className="hidden lg:block text-left">
                 <p
                   className="text-sm font-medium transition-colors"

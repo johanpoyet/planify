@@ -23,7 +23,6 @@ interface Invitation {
       id: string
       name: string | null
       email: string
-      image: string | null
     } | null
   } | null
 }
@@ -226,18 +225,10 @@ export default function InvitationsPage() {
                     <div className="p-6">
                       {/* Creator info */}
                       <div className="flex items-start gap-4 mb-4">
-                        {event.creator?.image ? (
-                          <img
-                            src={event.creator.image}
-                            alt={event.creator.name || ''}
-                            className="w-12 h-12 rounded-2xl ring-2 ring-slate-700"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold ring-2 ring-slate-700" style={{ backgroundColor: primaryColor }}>
-                            {event.creator?.name?.[0]?.toUpperCase() ||
-                              event.creator?.email[0].toUpperCase()}
-                          </div>
-                        )}
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold ring-2 ring-slate-700" style={{ backgroundColor: primaryColor }}>
+                          {event.creator?.name?.[0]?.toUpperCase() ||
+                            event.creator?.email[0].toUpperCase()}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-slate-300 text-sm">
                             <span className="font-semibold text-white">

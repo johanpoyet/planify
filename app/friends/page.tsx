@@ -10,7 +10,6 @@ interface Friend {
   id: string;
   name: string | null;
   email: string;
-  image: string | null;
 }
 
 interface Friendship {
