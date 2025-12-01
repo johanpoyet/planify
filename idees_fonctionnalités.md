@@ -4,7 +4,7 @@
 
 3. photo de profil
 
-4. liste d'événements à venir
+4. liste d'événements à venir. FAIT
 
 5. jours fériés, date importantes nationales ajoutées de base au calendrier
 
