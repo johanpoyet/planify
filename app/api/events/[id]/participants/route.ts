@@ -139,14 +139,14 @@ export async function POST(
     );
 
     // Envoyer les notifications push aux participants invités
-    const creatorName = user.name || user.email;
+    const creatorName = (user.name || user.email).toUpperCase();
     const eventTitle = event.title;
-    
+
     await Promise.allSettled(
       userIds.map(async (userId) => {
         try {
           const result = await sendPushNotification(userId, {
-            title: '📅 Nouvelle invitation',
+            title: '❓ Nouvelle invitation',
             body: `${creatorName} vous a invité à "${eventTitle}"`,
             url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/events/invitations`,
             tag: `event-invitation-${eventId}`,

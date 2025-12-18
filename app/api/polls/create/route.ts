@@ -61,12 +61,13 @@ export async function POST(req: NextRequest) {
     );
 
     // Envoyer notification push aux destinataires
+    const senderNameUppercase = senderName.toUpperCase();
     await Promise.allSettled(
       recipientIds.map(async (rid: string) => {
         try {
           await sendPushNotification(rid, {
             title: `Nouvelle proposition : ${question}`,
-            body: `${senderName} vous a envoyé un sondage`,
+            body: `${senderNameUppercase} vous a envoyé un sondage`,
             url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/polls/${poll.id}`,
             tag: `poll-${poll.id}`,
           });

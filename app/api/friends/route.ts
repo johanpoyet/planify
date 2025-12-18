@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Envoyer une notification push à l'ami
-    const senderName = user.name || user.email;
+    const senderName = (user.name || user.email).toUpperCase();
     await sendPushNotification(friend.id, {
       title: '👋 Nouvelle demande d\'ami',
       body: `${senderName} vous a envoyé une demande d'ami`,
