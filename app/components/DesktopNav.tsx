@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
 import { useFriendRequests } from '@/lib/useFriendRequests'
 import { useEventInvitations } from '@/lib/useEventInvitations'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ThemeToggle from './ThemeToggle'
 
 export default function DesktopNav() {
@@ -16,6 +16,21 @@ export default function DesktopNav() {
   const { pendingCount } = useFriendRequests()
   const { invitationsCount } = useEventInvitations()
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+
+  // Récupérer l'URL de la photo de profil
+  useEffect(() => {
+    if (session) {
+      fetch('/api/user/settings')
+        .then(res => res.json())
+        .then(data => {
+          if (data.profileImageUrl) {
+            setProfileImageUrl(data.profileImageUrl)
+          }
+        })
+        .catch(err => console.error('Erreur lors de la récupération de la photo de profil:', err))
+    }
+  }, [session])
 
   // Ne pas afficher la nav sur les pages d'authentification
   if (!session || pathname?.startsWith('/auth')) {
@@ -181,12 +196,20 @@ export default function DesktopNav() {
               onClick={() => setShowLogoutMenu(!showLogoutMenu)}
               className="flex items-center gap-3 hover:opacity-80 transition"
             >
-              <div
-                className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
-                style={{ backgroundColor: primaryColor }}
-              >
-                {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
-              </div>
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt="Profil"
+                  className="w-10 h-10 rounded-2xl object-cover ring-2 ring-slate-700"
+                />
+              ) : (
+                <div
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+              )}
               <div className="hidden lg:block text-left">
                 <p
                   className="text-sm font-medium transition-colors"

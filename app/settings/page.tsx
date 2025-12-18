@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PushNotificationSettings from "@/components/PushNotificationSettings";
 import ThemeSelector from "@/components/ThemeSelector";
+import ProfileImageUpload from "@/components/ProfileImageUpload";
 import { useTheme } from "@/lib/themeContext";
 
 interface UserSettings {
@@ -13,6 +14,7 @@ interface UserSettings {
   name: string | null;
   email: string;
   calendarVisibility: boolean;
+  profileImageUrl?: string | null;
 }
 
 export default function SettingsPage() {
@@ -139,6 +141,24 @@ export default function SettingsPage() {
               <p className="text-lg text-white font-medium">{settings.email}</p>
             </div>
           </div>
+        </div>
+
+        {/* Photo de profil */}
+        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-6 h-6" style={{ color: primaryLightColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-white">
+              Photo de profil
+            </h2>
+          </div>
+          <ProfileImageUpload
+            currentImageUrl={settings.profileImageUrl}
+            onImageUpdate={(imageUrl) => {
+              setSettings(prev => prev ? { ...prev, profileImageUrl: imageUrl } : null);
+            }}
+          />
         </div>
 
         {/* Visibilité du calendrier */}

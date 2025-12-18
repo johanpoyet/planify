@@ -39,6 +39,7 @@ export async function PUT(req: NextRequest) {
         name: true,
         email: true,
         calendarVisibility: true,
+        profileImageUrl: true,
       },
     });
 
@@ -71,6 +72,7 @@ export async function GET() {
         name: true,
         email: true,
         calendarVisibility: true,
+        profileImageUrl: true,
       },
     });
 
