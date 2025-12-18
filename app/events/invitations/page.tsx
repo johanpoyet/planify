@@ -237,14 +237,29 @@ export default function InvitationsPage() {
                             {isPoll ? 'vous a envoyé un sondage' : 'vous invite à un événement'}
                           </p>
                           <p className="text-slate-500 text-xs mt-1">
-                            Il y a {(() => {
-                              const diffMs = Date.now() - new Date(invitation.createdAt || invitation.id).getTime()
+                            {(() => {
+                              // Essayer d'utiliser createdAt, sinon l'ID de l'invitation, sinon la date de l'événement
+                              const dateToUse = invitation.createdAt || event.date
+                              if (!dateToUse) return ''
+
+                              const createdDate = new Date(dateToUse)
+                              if (isNaN(createdDate.getTime())) return ''
+
+                              const diffMs = Date.now() - createdDate.getTime()
+
+                              // Si la différence est négative (date future), ne rien afficher
+                              if (diffMs < 0) return ''
+
                               const hours = Math.floor(diffMs / (1000 * 60 * 60))
                               if (hours < 1) {
                                 const minutes = Math.floor(diffMs / (1000 * 60))
-                                return `${minutes} min`
+                                return `Il y a ${minutes} min`
                               }
-                              return `${hours}h`
+                              if (hours < 24) {
+                                return `Il y a ${hours}h`
+                              }
+                              const days = Math.floor(hours / 24)
+                              return `Il y a ${days} jour${days > 1 ? 's' : ''}`
                             })()}
                           </p>
                         </div>

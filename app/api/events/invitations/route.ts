@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
         eventId: invitation.eventId,
         status: invitation.status,
         type: 'event',
+        createdAt: invitation.createdAt, // Ajouter la date de création de l'invitation
         event: event
           ? {
               id: event.id,

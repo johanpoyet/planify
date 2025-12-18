@@ -212,29 +212,34 @@ export default function NewEventPage() {
 
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-6 mb-6 animate-fade-in">
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-xl"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-4 sm:p-6 mb-6 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Titre et icône */}
+            <div className="flex items-center gap-3 flex-1">
+              <div
+                className="w-12 h-12 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-xl flex-shrink-0"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                  Créer un événement
+                </h1>
+                <p className="text-slate-400 text-xs sm:text-sm">
+                  Planifiez un nouveau moment avec vos amis
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">
-                Créer un événement
-              </h1>
-              <p className="text-slate-400 text-sm">
-                Planifiez un nouveau moment avec vos amis
-              </p>
-            </div>
-            <div className="ml-auto">
+
+            {/* Bouton créer un sondage */}
+            <div className="flex justify-end sm:ml-auto">
               <button
                 type="button"
                 onClick={() => router.push('/polls/new')}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-slate-700 text-sm text-white hover:bg-slate-800"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-slate-700 text-xs sm:text-sm text-white hover:bg-slate-800 transition-colors whitespace-nowrap"
               >
                 🗳️ Créer un sondage
               </button>
@@ -243,7 +248,7 @@ export default function NewEventPage() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-8 animate-slide-up">
+        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-4 sm:p-8 animate-slide-up">
           {error && (
             <div 
               className="mb-6 border rounded-2xl p-4 flex items-center gap-3 animate-shake"
@@ -285,9 +290,9 @@ export default function NewEventPage() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   onFocus={() => setFocusedInput('title')}
                   onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition"
-                  style={{ 
-                    borderColor: focusedInput === 'title' ? primaryLightColor : undefined 
+                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
+                  style={{
+                    borderColor: focusedInput === 'title' ? primaryLightColor : undefined
                   }}
                   placeholder="Ex: Anniversaire de Marie"
                 />
@@ -333,9 +338,9 @@ export default function NewEventPage() {
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   onFocus={() => setFocusedInput('location')}
                   onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition"
-                  style={{ 
-                    borderColor: focusedInput === 'location' ? primaryLightColor : undefined 
+                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
+                  style={{
+                    borderColor: focusedInput === 'location' ? primaryLightColor : undefined
                   }}
                   placeholder="Ex: Restaurant Le Jardin, Paris"
                 />
@@ -366,7 +371,7 @@ export default function NewEventPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   onFocus={() => setFocusedInput('description')}
                   onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition resize-none"
+                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition resize-none text-sm sm:text-base"
                   style={{
                     borderColor: focusedInput === 'description' ? primaryLightColor : undefined
                   }}
@@ -385,13 +390,13 @@ export default function NewEventPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, eventTypeId: "" })}
-                  className={`px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
+                  className={`px-3 sm:px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
                     formData.eventTypeId === ""
                       ? 'border-slate-500 bg-slate-500/20 text-white'
                       : 'border-slate-700 bg-slate-800/40 text-slate-400 hover:border-slate-600'
                   }`}
                 >
-                  <span className="text-sm font-medium">Aucun</span>
+                  <span className="text-xs sm:text-sm font-medium">Aucun</span>
                 </button>
 
                 {/* Types d'événements disponibles */}
@@ -400,7 +405,7 @@ export default function NewEventPage() {
                     key={type.id}
                     type="button"
                     onClick={() => setFormData({ ...formData, eventTypeId: type.id })}
-                    className={`px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
+                    className={`px-3 sm:px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
                       formData.eventTypeId === type.id
                         ? 'border-2 scale-105'
                         : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
@@ -411,11 +416,11 @@ export default function NewEventPage() {
                     } : {}}
                   >
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: type.color }}
                     ></div>
                     <span
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium whitespace-nowrap"
                       style={formData.eventTypeId === type.id ? { color: type.color } : { color: '#cbd5e1' }}
                     >
                       {type.name}
@@ -430,29 +435,29 @@ export default function NewEventPage() {
               <label htmlFor="visibility" className="block text-sm font-medium text-slate-300 mb-2">
                 Visibilité
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, visibility: 'private' })}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                     formData.visibility === 'private'
                       ? 'border-purple-500 bg-purple-500/20'
                       : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
                   }`}
                 >
-                  <div className="text-2xl mb-2">🔒</div>
-                  <div className={`text-sm font-medium ${
+                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🔒</div>
+                  <div className={`text-xs sm:text-sm font-medium ${
                     formData.visibility === 'private' ? 'text-purple-400' : 'text-slate-300'
                   }`}>
                     Privé
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">Seulement moi</div>
+                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Seulement moi</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, visibility: 'friends' })}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                     formData.visibility === 'friends'
                       ? 'border-2 bg-opacity-20'
                       : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
@@ -462,33 +467,33 @@ export default function NewEventPage() {
                     backgroundColor: `${primaryColor}33`
                   } : {}}
                 >
-                  <div className="text-2xl mb-2">👥</div>
-                  <div className={`text-sm font-medium ${
+                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">👥</div>
+                  <div className={`text-xs sm:text-sm font-medium ${
                     formData.visibility === 'friends' ? '' : 'text-slate-300'
                   }`}
                   style={formData.visibility === 'friends' ? { color: primaryLightColor } : {}}
                   >
                     Amis
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">Amis seulement</div>
+                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Amis seulement</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, visibility: 'public' })}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                     formData.visibility === 'public'
                       ? 'border-green-500 bg-green-500/20'
                       : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
                   }`}
                 >
-                  <div className="text-2xl mb-2">🌍</div>
-                  <div className={`text-sm font-medium ${
+                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🌍</div>
+                  <div className={`text-xs sm:text-sm font-medium ${
                     formData.visibility === 'public' ? 'text-green-400' : 'text-slate-300'
                   }`}>
                     Public
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">Tout le monde</div>
+                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Tout le monde</div>
                 </button>
               </div>
             </div>
@@ -665,13 +670,13 @@ export default function NewEventPage() {
             </div>
 
             {/* Boutons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 px-6 py-3 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition font-medium shadow-xl flex items-center justify-center gap-2"
+                className="sm:flex-1 px-6 py-3.5 sm:py-3 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition font-medium shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 Annuler
@@ -679,7 +684,7 @@ export default function NewEventPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 text-white rounded-2xl transition font-medium shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="sm:flex-1 px-6 py-3.5 sm:py-3 text-white rounded-2xl transition font-medium shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 style={{
                   backgroundColor: loading ? '#64748b' : primaryColor
                 }}
@@ -696,7 +701,7 @@ export default function NewEventPage() {
               >
                 {loading ? (
                   <>
-                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -704,7 +709,7 @@ export default function NewEventPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Créer l'événement

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 
 export default function PollCard({ pollId }: { pollId: string }) {
   const { data: session } = useSession();
-  const { primaryLightColor } = useTheme();
+  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
   const [pollData, setPollData] = useState<any>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -156,14 +156,24 @@ export default function PollCard({ pollId }: { pollId: string }) {
         </div>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         {!isEditing && hasVoted ? (
           // Mode lecture : bouton pour passer en mode édition
           <button
             onClick={enableEditing}
             disabled={loading}
-            className="flex-1 px-6 py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: primaryLightColor }}
+            className="flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
+            style={{ backgroundColor: loading ? '#64748b' : primaryColor }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = primaryHoverColor;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = primaryColor;
+              }
+            }}
           >
             Modifier mon vote
           </button>
@@ -173,8 +183,18 @@ export default function PollCard({ pollId }: { pollId: string }) {
             <button
               onClick={vote}
               disabled={loading || !selected}
-              className="flex-1 px-6 py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: primaryLightColor }}
+              className="flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
+              style={{ backgroundColor: (loading || !selected) ? '#64748b' : primaryColor }}
+              onMouseEnter={(e) => {
+                if (!loading && selected) {
+                  e.currentTarget.style.backgroundColor = primaryHoverColor;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading && selected) {
+                  e.currentTarget.style.backgroundColor = primaryColor;
+                }
+              }}
             >
               {loading ? 'Envoi en cours...' : hasVoted ? 'Valider la modification' : 'Voter'}
             </button>
@@ -182,7 +202,7 @@ export default function PollCard({ pollId }: { pollId: string }) {
               <button
                 onClick={cancelEditing}
                 disabled={loading}
-                className="px-6 py-3 rounded-2xl font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="sm:flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
               >
                 Annuler
               </button>

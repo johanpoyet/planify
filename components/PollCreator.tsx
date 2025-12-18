@@ -9,7 +9,7 @@ type OptionItem = { id: string; text: string };
 
 export default function PollCreator() {
   const router = useRouter();
-  const { primaryLightColor } = useTheme();
+  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
 
   const [question, setQuestion] = useState("");
   const [deadline, setDeadline] = useState<string>("");
@@ -86,7 +86,7 @@ export default function PollCreator() {
             onChange={e=>setQuestion(e.target.value)}
             onFocus={() => setFocusedInput('question')}
             onBlur={() => setFocusedInput(null)}
-            className="w-full pl-4 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition"
+            className="w-full px-3 sm:px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
             style={{ borderColor: focusedInput === 'question' ? primaryLightColor : undefined }}
             placeholder="Ex: On se voit quand ?"
           />
@@ -110,7 +110,7 @@ export default function PollCreator() {
                 id={`option-${opt.id}`}
                 value={opt.text}
                 onChange={e=>setOptionAt(opt.id, e.target.value)}
-                className="w-full pl-4 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition"
+                className="w-full px-3 sm:px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
                 placeholder={`Option ${i+1}`}
               />
             </div>
@@ -119,12 +119,12 @@ export default function PollCreator() {
           <button
             type="button"
             onClick={addOption}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all duration-200"
+            className="mt-3 w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all duration-200"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            <span className="text-sm font-medium">Ajouter une option</span>
+            <span className="text-xs sm:text-sm font-medium">Ajouter une option</span>
           </button>
         </fieldset>
       </div>
@@ -145,21 +145,21 @@ export default function PollCreator() {
               <label
                 key={f.friend.id}
                 htmlFor={`friend-${f.friend.id}`}
-                className="flex items-center gap-3 p-3 bg-slate-800/30 hover:bg-slate-800/50 border border-slate-700/50 rounded-2xl cursor-pointer transition-all duration-200 group"
+                className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-800/30 hover:bg-slate-800/50 border border-slate-700/50 rounded-2xl cursor-pointer transition-all duration-200 group"
               >
                 <input
                   id={`friend-${f.friend.id}`}
                   type="checkbox"
                   checked={!!selected[f.friend.id]}
                   onChange={() => toggleFriend(f.friend.id)}
-                  className="w-5 h-5 rounded-lg border-2 border-slate-600 bg-slate-900 checked:bg-current text-current cursor-pointer transition-all"
+                  className="w-5 h-5 rounded-lg border-2 border-slate-600 bg-slate-900 checked:bg-current text-current cursor-pointer transition-all flex-shrink-0"
                   style={{ color: selected[f.friend.id] ? primaryLightColor : undefined }}
                 />
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style={{ backgroundColor: primaryLightColor }}>
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0" style={{ backgroundColor: primaryColor }}>
                     {(f.friend.name || f.friend.email).charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-slate-200 group-hover:text-white transition-colors">{f.friend.name || f.friend.email}</span>
+                  <span className="text-slate-200 group-hover:text-white transition-colors text-sm sm:text-base truncate">{f.friend.name || f.friend.email}</span>
                 </div>
               </label>
             ))}
@@ -167,10 +167,52 @@ export default function PollCreator() {
         </fieldset>
       </div>
 
-      {error && <div className="text-red-400">{error}</div>}
+      {error && <div className="text-red-400 text-sm sm:text-base p-3 bg-red-500/10 rounded-2xl border border-red-500/20">{error}</div>}
 
-      <div>
-        <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl" style={{ backgroundColor: primaryLightColor, color: '#fff' }}>{loading ? 'Création...' : 'Créer sondage'}</button>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="sm:flex-1 px-6 py-3.5 sm:py-3 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition font-medium shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
+        >
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Annuler
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="sm:flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:py-3 rounded-2xl font-medium shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base text-white"
+          style={{ backgroundColor: loading ? '#64748b' : primaryColor }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.currentTarget.style.backgroundColor = primaryHoverColor;
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!loading) {
+              e.currentTarget.style.backgroundColor = primaryColor;
+            }
+          }}
+        >
+          {loading ? (
+            <>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Création...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Créer sondage
+            </>
+          )}
+        </button>
       </div>
     </form>
   );
