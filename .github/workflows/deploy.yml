@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main  # Ou 'master' selon votre branche principale
+      - main
 
 jobs:
   deploy:
@@ -22,10 +22,30 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd ~/apps/planify
-          git pull origin main
-          source ~/.nvm/nvm.sh
+          
+          # Sauvegarder les fichiers de config
+          cp .env .env.backup || true
+          cp .env.local .env.local.backup || true
+          
+          # Forcer la mise à jour depuis GitHub
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Restaurer les fichiers de config
+          cp .env.backup .env || true
+          cp .env.local.backup .env.local || true
+          
+          # Charger NVM
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           nvm use 20
+          
+          # Installer et builder
           npm install
+          rm -rf .next
           npm run build
-          pm2 restart planify
-          pm2 save 
+          
+          # Redémarrer PM2 proprement
+          pm2 delete planify || true
+          pm2 start npm --name "planify" -- start
+          pm2 save
