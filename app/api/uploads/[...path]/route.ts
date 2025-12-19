@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
 
 // GET /api/uploads/profiles/[filename] - Servir les images uploadées
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { path: string[] } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const filePath = path.join(process.cwd(), "public", "uploads", ...params.path);
+    const { path: pathSegments } = await params;
+    const filePath = path.join(process.cwd(), "public", "uploads", ...pathSegments);
 
     // Vérifier que le fichier existe
     if (!existsSync(filePath)) {
