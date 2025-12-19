@@ -143,7 +143,7 @@ export async function DELETE() {
       }
     }
 
-    // Mettre à jour la base de données
+    // Mettre à jour la base de donnéess
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: { profileImageUrl: null },
