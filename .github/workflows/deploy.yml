@@ -14,38 +14,12 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Deploy to VPS
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
+        command_timeout: 30m
         script: |
-          cd ~/apps/planify
-          
-          # Sauvegarder les fichiers de config
-          cp .env .env.backup || true
-          cp .env.local .env.local.backup || true
-          
-          # Forcer la mise à jour depuis GitHub
-          git fetch origin
-          git reset --hard origin/main
-          
-          # Restaurer les fichiers de config
-          cp .env.backup .env || true
-          cp .env.local.backup .env.local || true
-          
-          # Charger NVM
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          nvm use 20
-          
-          # Installer et builder
-          npm install
-          rm -rf .next
-          npm run build
-          
-          # Redémarrer PM2 proprement
-          pm2 delete planify || true
-          pm2 start npm --name "planify" -- start
-          pm2 save
+          bash ~/apps/planify/deploy.sh
