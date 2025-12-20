@@ -138,7 +138,7 @@ export async function POST(
       )
     );
 
-    // Envoyer les notifications push aux participants invités.
+    // Envoyer les notifications push aux participants invités
     const creatorName = (user.name || user.email).toUpperCase();
     const eventTitle = event.title;
 
