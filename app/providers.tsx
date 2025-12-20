@@ -1,59 +1,69 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { registerServiceWorker } from '../lib/pwa';
 import { ThemeProvider, ThemeMode } from '../lib/themeContext';
 import { ToastProvider } from '../lib/toastContext';
 import { ThemeColor } from '../lib/theme';
 
-export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
+function ThemeLoader({ children }: { children: React.ReactNode }) {
+  const { status } = useSession();
   const [themeColor, setThemeColor] = useState<ThemeColor>('blue');
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Enregistrer le Service Worker uniquement en production (évite les caches SW en dev)
+    // Enregistrer le Service Worker uniquement en production
     if (process.env.NODE_ENV === 'production') {
-      // registerServiceWorker peut échouer dans certains environnements,
-      // on l'entoure d'un try/catch pour éviter de casser l'app en dev
       registerServiceWorker().catch((err) => {
-        // eslint-disable-next-line no-console
         console.warn('Service Worker registration failed:', err);
       });
     }
 
-    // Charger la couleur de thème et le mode de l'utilisateur
-    Promise.all([
-      fetch('/api/user/theme').then((res) => res.json()),
-      fetch('/api/user/theme-mode').then((res) => res.json()),
-    ])
-      .then(([themeData, modeData]) => {
-        if (themeData.themeColor) {
-          setThemeColor(themeData.themeColor);
-        }
-        if (modeData.themeMode) {
-          setThemeMode(modeData.themeMode);
-        }
-      })
-      .catch(() => {
-        // En cas d'erreur, utiliser le thème par défaut
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+    // CORRECTIF: Ne charger le thème que si l'utilisateur est authentifié
+    if (status === 'authenticated') {
+      Promise.all([
+        fetch('/api/user/theme').then((res) => res.json()),
+        fetch('/api/user/theme-mode').then((res) => res.json()),
+      ])
+        .then(([themeData, modeData]) => {
+          if (themeData.themeColor) {
+            setThemeColor(themeData.themeColor);
+          }
+          if (modeData.themeMode) {
+            setThemeMode(modeData.themeMode);
+          }
+        })
+        .catch((err) => {
+          console.warn('Failed to load theme preferences:', err);
+          // En cas d'erreur, utiliser le thème par défaut
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else if (status === 'unauthenticated') {
+      // Si non authentifié, utiliser les valeurs par défaut
+      setIsLoading(false);
+    }
+    // Si status === 'loading', on attend
+  }, [status]);
 
-  if (isLoading) {
-    // Afficher un écran de chargement minimal pendant la récupération du thème
+  if (isLoading || status === 'loading') {
     return null;
   }
 
   return (
+    <ThemeProvider initialColor={themeColor} initialMode={themeMode}>
+      <ToastProvider>{children}</ToastProvider>
+    </ThemeProvider>
+  );
+}
+
+export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
     <SessionProvider>
-      <ThemeProvider initialColor={themeColor} initialMode={themeMode}>
-        <ToastProvider>{children}</ToastProvider>
-      </ThemeProvider>
+      <ThemeLoader>{children}</ThemeLoader>
     </SessionProvider>
   );
 }

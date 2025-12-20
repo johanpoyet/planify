@@ -53,11 +53,20 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
   const handleDateSelect = (day: number) => {
     const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     setSelectedDate(newDate);
-    
+
     // Combiner la date et l'heure
     const [hours, minutes] = time.split(':');
-    newDate.setHours(parseInt(hours), parseInt(minutes));
-    
+    const hoursNum = parseInt(hours, 10);
+    const minutesNum = parseInt(minutes, 10);
+
+    // CORRECTIF: Validation des valeurs pour éviter NaN
+    if (!isNaN(hoursNum) && !isNaN(minutesNum)) {
+      newDate.setHours(hoursNum, minutesNum);
+    } else {
+      // Utiliser 12:00 par défaut si les valeurs sont invalides
+      newDate.setHours(12, 0);
+    }
+
     // Format ISO pour l'input datetime-local
     const isoString = newDate.toISOString().slice(0, 16);
     onChange(isoString);
@@ -65,14 +74,20 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
 
   const handleTimeChange = (newTime: string) => {
     setTime(newTime);
-    
+
     if (selectedDate) {
       const [hours, minutes] = newTime.split(':');
-      const newDate = new Date(selectedDate);
-      newDate.setHours(parseInt(hours), parseInt(minutes));
-      
-      const isoString = newDate.toISOString().slice(0, 16);
-      onChange(isoString);
+      const hoursNum = parseInt(hours, 10);
+      const minutesNum = parseInt(minutes, 10);
+
+      // CORRECTIF: Validation des valeurs pour éviter NaN
+      if (!isNaN(hoursNum) && !isNaN(minutesNum)) {
+        const newDate = new Date(selectedDate);
+        newDate.setHours(hoursNum, minutesNum);
+
+        const isoString = newDate.toISOString().slice(0, 16);
+        onChange(isoString);
+      }
     }
   };
 
