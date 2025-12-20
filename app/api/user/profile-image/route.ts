@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, unlink } from "fs/promises";
+import { writeFile, unlink, chmod } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
@@ -78,6 +78,9 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
+
+    // Définir les permissions pour que Nginx puisse lire le fichier (644 = rw-r--r--)
+    await chmod(filePath, 0o644);
 
     // Mettre à jour l'URL dans la base de données
     // Option 1 (recommandé) : Utiliser Nginx pour servir directement
