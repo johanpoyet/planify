@@ -750,12 +750,28 @@ export default function EventsPage() {
                   </div>
                 ) : getUpcomingEvents().length > 0 ? (
                   <div className="animate-fade-in flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
-                    <h3 className="text-lg font-bold text-white mb-1 sticky top-0 bg-slate-900/90 backdrop-blur-xl pb-2 z-10 flex items-center gap-2">
-                      <svg className="w-5 h-5" style={{ color: primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Prochains événements
-                    </h3>
+                    <div className="sticky top-0 bg-slate-900/90 backdrop-blur-xl pb-2 z-10">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                          <svg className="w-5 h-5" style={{ color: primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Prochains événements
+                        </h3>
+                        <button
+                          onClick={() => router.push('/events/new')}
+                          className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-md hover:shadow-lg"
+                          style={{ backgroundColor: primaryColor }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = primaryHoverColor}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = primaryColor}
+                        >
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span className="text-white text-sm font-semibold">Nouveau</span>
+                        </button>
+                      </div>
+                    </div>
 
                     {getUpcomingEvents().map((event) => {
                       const eventDate = new Date(event.date);

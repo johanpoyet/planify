@@ -310,6 +310,7 @@ export default function NewEventPage() {
                 onFocus={() => setFocusedInput('date')}
                 onBlur={() => setFocusedInput(null)}
                 required
+                minDate={new Date()}
               />
             </div>
 
@@ -435,7 +436,7 @@ export default function NewEventPage() {
               <label htmlFor="visibility" className="block text-sm font-medium text-slate-300 mb-2">
                 Visibilité
               </label>
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, visibility: 'private' })}
@@ -476,24 +477,6 @@ export default function NewEventPage() {
                     Amis
                   </div>
                   <div className="text-xs text-slate-500 mt-1 hidden sm:block">Amis seulement</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'public' })}
-                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                    formData.visibility === 'public'
-                      ? 'border-green-500 bg-green-500/20'
-                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🌍</div>
-                  <div className={`text-xs sm:text-sm font-medium ${
-                    formData.visibility === 'public' ? 'text-green-400' : 'text-slate-300'
-                  }`}>
-                    Public
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Tout le monde</div>
                 </button>
               </div>
             </div>

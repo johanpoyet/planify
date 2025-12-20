@@ -391,7 +391,7 @@ export default function EditEventPage({ params }: PageProps) {
               <label htmlFor="visibility" className="block text-sm font-medium text-slate-300 mb-2">
                 Visibilité
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, visibility: 'private' })}
@@ -432,24 +432,6 @@ export default function EditEventPage({ params }: PageProps) {
                     Amis
                   </div>
                   <div className="text-xs text-slate-500 mt-1">Amis seulement</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'public' })}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    formData.visibility === 'public'
-                      ? 'border-green-500 bg-green-500/20'
-                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                  }`}
-                >
-                  <div className="text-2xl mb-2">🌍</div>
-                  <div className={`text-sm font-medium ${
-                    formData.visibility === 'public' ? 'text-green-400' : 'text-slate-300'
-                  }`}>
-                    Public
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">Tout le monde</div>
                 </button>
               </div>
             </div>

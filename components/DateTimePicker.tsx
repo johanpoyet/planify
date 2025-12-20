@@ -9,9 +9,10 @@ interface DateTimePickerProps {
   onFocus?: () => void;
   onBlur?: () => void;
   required?: boolean;
+  minDate?: Date;
 }
 
-export default function DateTimePicker({ value, onChange, onFocus, onBlur, required }: DateTimePickerProps) {
+export default function DateTimePicker({ value, onChange, onFocus, onBlur, required, minDate }: DateTimePickerProps) {
   const { primaryColor, primaryLightColor } = useTheme();
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -159,6 +160,12 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
 
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1;
+              const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              dayDate.setHours(0, 0, 0, 0);
+              
+              const isPast = minDate ? dayDate < minDate : dayDate < today;
               const isSelected = selectedDate &&
                 selectedDate.getDate() === day &&
                 selectedDate.getMonth() === currentMonth.getMonth() &&
@@ -173,14 +180,17 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
                   key={day}
                   type="button"
                   onClick={() => handleDateSelect(day)}
+                  disabled={isPast}
                   className={`aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
-                    isSelected
+                    isPast
+                      ? 'bg-slate-900/50 text-slate-600 cursor-not-allowed'
+                      : isSelected
                       ? 'text-white shadow-lg'
                       : isToday
                       ? 'bg-slate-800/50 text-white'
                       : 'bg-slate-800/30 text-slate-300 hover:bg-slate-800/50'
                   }`}
-                  style={isSelected ? { backgroundColor: primaryColor } : {}}
+                  style={isSelected && !isPast ? { backgroundColor: primaryColor } : {}}
                 >
                   {day}
                 </button>
