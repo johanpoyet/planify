@@ -83,10 +83,8 @@ export async function POST(req: NextRequest) {
     await chmod(filePath, 0o644);
 
     // Mettre à jour l'URL dans la base de données
-    // Option 1 (recommandé) : Utiliser Nginx pour servir directement
-    const imageUrl = `/uploads/profiles/${fileName}`;
-    // Option 2 : Utiliser une API route Next.js
-    // const imageUrl = `/api/uploads/profiles/${fileName}`;
+    // Utiliser l'API route Next.js pour servir les images
+    const imageUrl = `/api/uploads/profiles/${fileName}`;
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: { profileImageUrl: imageUrl },
