@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Configuration Turbopack pour Next.js 16
-  turbopack: {},
   // CORRECTIF: Retirer 'output: standalone' car incompatible avec 'next start'
   // Pour utiliser standalone, vous devez démarrer avec: node .next/standalone/server.js
   // Pour utiliser 'next start', ne pas définir output ou utiliser output: 'export' pour static
