@@ -26,11 +26,15 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Récupérer les invitations en attente
+    // Récupérer les invitations en attente (limité à 50)
     const invitations = await prisma.eventParticipant.findMany({
       where: {
         userId: user.id,
         status: 'pending',
+      },
+      take: 50,
+      orderBy: {
+        createdAt: 'desc',
       },
     })
 
@@ -108,17 +112,21 @@ export async function GET(req: NextRequest) {
         recipientIds: { has: user.id },
         status: 'open',
       },
+      take: 20, // Limiter à 20 sondages maximum
     })
 
-    // Vérifier quels sondages l'utilisateur n'a pas encore voté
-    const pollsWithoutVote = await Promise.all(
-      polls.map(async (poll) => {
-        const hasVoted = await prisma.pollVote.findFirst({
-          where: { pollId: poll.id, userId: user.id },
-        })
-        return hasVoted ? null : poll
-      })
-    ).then(results => results.filter(p => p !== null))
+    // Récupérer tous les votes de l'utilisateur d'un coup (au lieu de N requêtes)
+    const pollIds = polls.map(p => p.id)
+    const userVotes = await prisma.pollVote.findMany({
+      where: {
+        pollId: { in: pollIds },
+        userId: user.id,
+      },
+      select: { pollId: true },
+    })
+
+    const votedPollIds = new Set(userVotes.map(v => v.pollId))
+    const pollsWithoutVote = polls.filter(poll => !votedPollIds.has(poll.id))
 
     // Récupérer les créateurs des sondages
     const pollCreatorIds = pollsWithoutVote.map((p) => p!.createdById)

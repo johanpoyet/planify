@@ -45,10 +45,7 @@ export default function InvitationsPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchInvitations()
-
-      // Polling réduit à 30 secondes pour réduire la charge serveur
-      const interval = setInterval(fetchInvitations, 30000)
-      return () => clearInterval(interval)
+      // Polling supprimé - l'utilisateur peut rafraîchir manuellement si nécessaire
     }
   }, [status])
 

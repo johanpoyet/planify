@@ -26,10 +26,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Limiter aux événements futurs ou dans les 30 derniers jours
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
     // Récupérer les événements créés par l'utilisateur
     const createdEvents = await prisma.event.findMany({
       where: {
         createdById: user.id,
+        date: {
+          gte: thirtyDaysAgo,
+        },
       },
       orderBy: {
         date: "asc",
@@ -37,6 +44,7 @@ export async function GET(req: NextRequest) {
       include: {
         eventType: true,
       },
+      take: 100,
     });
 
     // Récupérer les événements où l'utilisateur est participant (status = accepted uniquement)
@@ -45,6 +53,7 @@ export async function GET(req: NextRequest) {
         userId: user.id,
         status: 'accepted', // Ne récupérer que les invitations acceptées
       },
+      take: 100,
     });
 
     const participantEventIds = participantRecords.map(p => p.eventId);
@@ -52,6 +61,9 @@ export async function GET(req: NextRequest) {
       ? await prisma.event.findMany({
           where: {
             id: { in: participantEventIds },
+            date: {
+              gte: thirtyDaysAgo,
+            },
           },
           orderBy: {
             date: "asc",
@@ -59,6 +71,7 @@ export async function GET(req: NextRequest) {
           include: {
             eventType: true,
           },
+          take: 100,
         })
       : [];
 

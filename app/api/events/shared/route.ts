@@ -40,7 +40,8 @@ export async function GET(req: NextRequest) {
       f.userId === user.id ? f.friendId : f.userId
     );
 
-    // Récupérer les événements publics et des amis
+    // Récupérer les événements publics et des amis (limité à 100 événements futurs)
+    const now = new Date()
     const events = await prisma.event.findMany({
       where: {
         OR: [
@@ -54,10 +55,15 @@ export async function GET(req: NextRequest) {
         ],
         // Ne pas inclure mes propres événements
         createdById: { not: user.id },
+        // Uniquement les événements futurs ou dans les 7 derniers jours
+        date: {
+          gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+        },
       },
       orderBy: {
         date: "asc",
       },
+      take: 100,
     });
 
     // Récupérer les infos des créateurs
