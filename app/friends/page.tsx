@@ -10,6 +10,7 @@ interface Friend {
   id: string;
   name: string | null;
   email: string;
+  profileImageUrl: string | null;
 }
 
 interface Friendship {
@@ -330,8 +331,16 @@ export default function FriendsPage() {
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-950/50 border border-blue-500/20 rounded-2xl hover:border-blue-500/40 transition"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xl shadow-lg">
-                      👤
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xl shadow-lg overflow-hidden">
+                      {friendship.friend.profileImageUrl ? (
+                        <img
+                          src={friendship.friend.profileImageUrl}
+                          alt={friendship.friend.name || "Photo de profil"}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>👤</span>
+                      )}
                     </div>
                     <div>
                       <p className="font-semibold text-white">
@@ -383,8 +392,16 @@ export default function FriendsPage() {
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-950/50 border border-slate-700 rounded-2xl"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl">
-                      👤
+                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl overflow-hidden">
+                      {friendship.friend.profileImageUrl ? (
+                        <img
+                          src={friendship.friend.profileImageUrl}
+                          alt={friendship.friend.name || "Photo de profil"}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>👤</span>
+                      )}
                     </div>
                     <div>
                       <p className="font-semibold text-white">
@@ -429,8 +446,16 @@ export default function FriendsPage() {
                   className="p-4 bg-slate-950/50 border border-slate-700 rounded-2xl hover:border-slate-600 transition group"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl shadow-lg" style={{ backgroundColor: primaryColor }}>
-                      👤
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl shadow-lg overflow-hidden" style={{ backgroundColor: primaryColor }}>
+                      {friendship.friend.profileImageUrl ? (
+                        <img
+                          src={friendship.friend.profileImageUrl}
+                          alt={friendship.friend.name || "Photo de profil"}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>👤</span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-white truncate">
