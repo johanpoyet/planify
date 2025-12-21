@@ -26,7 +26,7 @@ export async function GET(
     const userIds = participants.map(p => p.userId);
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, profileImageUrl: true },
     });
 
     // Récupérer l'événement pour identifier le créateur
@@ -50,7 +50,7 @@ export async function GET(
       if (!alreadyParticipant) {
         const creator = await prisma.user.findUnique({
           where: { id: event.createdById },
-          select: { id: true, name: true, email: true },
+          select: { id: true, name: true, email: true, profileImageUrl: true },
         });
         if (creator) {
           participantsWithInfo.unshift({

@@ -32,6 +32,7 @@ interface Participant {
     id: string;
     name: string | null;
     email: string;
+    profileImageUrl: string | null;
   };
 }
 
@@ -307,11 +308,19 @@ export default function EventDetailPage({ params }: PageProps) {
                       key={participant.id}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors bg-slate-800/40 border-slate-700/30 hover:border-slate-600/50 ${participant.status === "creator" ? "ring-2 ring-yellow-400 bg-yellow-900/30 border-yellow-400/40" : ""}`}
                     >
-                      <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden"
                         style={{ backgroundColor: participant.status === "creator" ? "#facc15" : primaryColor }}
                       >
-                        {participant.user.name?.[0] || participant.user.email[0].toUpperCase()}
+                        {participant.user.profileImageUrl ? (
+                          <img
+                            src={participant.user.profileImageUrl}
+                            alt={participant.user.name || "Photo de profil"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{participant.user.name?.[0] || participant.user.email[0].toUpperCase()}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-medium text-sm truncate flex items-center gap-2">

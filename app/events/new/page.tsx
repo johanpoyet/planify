@@ -11,6 +11,7 @@ interface Friend {
   id: string;
   name: string | null;
   email: string;
+  profileImageUrl: string | null;
 }
 
 interface Friendship {
@@ -564,10 +565,18 @@ export default function NewEventPage() {
 
                         <div className="flex items-center gap-3 flex-1">
                           <div
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold ring-2 ring-slate-700 group-hover:ring-slate-600 transition"
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold ring-2 ring-slate-700 group-hover:ring-slate-600 transition overflow-hidden"
                             style={{ backgroundColor: primaryColor }}
                           >
-                            {friendship.friend.name?.[0]?.toUpperCase() || friendship.friend.email[0].toUpperCase()}
+                            {friendship.friend.profileImageUrl ? (
+                              <img
+                                src={friendship.friend.profileImageUrl}
+                                alt={friendship.friend.name || "Photo de profil"}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span>{friendship.friend.name?.[0]?.toUpperCase() || friendship.friend.email[0].toUpperCase()}</span>
+                            )}
                           </div>
                           <div>
                             <p className="font-medium text-white">
