@@ -5,6 +5,20 @@ const nextConfig = {
   // Pour utiliser standalone, vous devez démarrer avec: node .next/standalone/server.js
   // Pour utiliser 'next start', ne pas définir output ou utiliser output: 'export' pour static
   // output: 'standalone',
+
+  // Optimisations mémoire
+  experimental: {
+    // Désactiver le préchargement des pages pour économiser la mémoire
+    optimizePackageImports: ['@/components', '@/lib'],
+  },
+
+  // Réduire la taille du bundle
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
   // Headers pour le Service Worker uniquement
   async headers() {
     return [

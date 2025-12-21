@@ -46,8 +46,8 @@ export default function InvitationsPage() {
     if (status === 'authenticated') {
       fetchInvitations()
 
-      // Polling toutes les 5 secondes pour détecter les nouveaux sondages/invitations
-      const interval = setInterval(fetchInvitations, 5000)
+      // Polling réduit à 30 secondes pour réduire la charge serveur
+      const interval = setInterval(fetchInvitations, 30000)
       return () => clearInterval(interval)
     }
   }, [status])
