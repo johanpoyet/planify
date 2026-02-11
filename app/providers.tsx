@@ -62,7 +62,7 @@ function ThemeLoader({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
       <ThemeLoader>{children}</ThemeLoader>
     </SessionProvider>
   );
