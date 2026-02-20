@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../../tests/mocks/prisma';
 import { getServerSessionMock, mockSession } from '../../../../../tests/mocks/next-auth';
@@ -14,6 +16,7 @@ const mockUser = { id: 'user-id-123', email: 'test@example.com', name: 'Test Use
 
 beforeEach(() => {
   vi.clearAllMocks();
+    setupDefaultMocks();
   getServerSessionMock.mockResolvedValue(mockSession);
   prismaMock.user.findUnique.mockResolvedValue(mockUser);
 });
@@ -122,7 +125,7 @@ describe('POST /api/polls/create', () => {
     expect(json.options[1].text).toBe('Sushi');
 
     // Verifie la creation du poll
-    expect(prismaMock.poll.create.toHaveBeenCalledWith({
+    expect(prismaMock.poll.create).toHaveBeenCalledWith({
       data: {
         question: 'Ou manger ?',
         createdById: 'user-id-123',
@@ -132,17 +135,17 @@ describe('POST /api/polls/create', () => {
     });
 
     // Verifie la creation des options
-    expect(prismaMock.pollOption.create.toHaveBeenCalledTimes(2);
-    expect(prismaMock.pollOption.create.toHaveBeenCalledWith({
+    expect(prismaMock.pollOption.create)).toHaveBeenCalledTimes(2);
+    expect(prismaMock.pollOption.create)).toHaveBeenCalledWith({
       data: { pollId: 'poll-1', text: 'Pizza' },
     });
-    expect(prismaMock.pollOption.create.toHaveBeenCalledWith({
+    expect(prismaMock.pollOption.create).toHaveBeenCalledWith({
       data: { pollId: 'poll-1', text: 'Sushi' },
     });
 
     // Verifie la creation des notifications
-    expect(prismaMock.notification.create.toHaveBeenCalledTimes(2);
-    expect(prismaMock.notification.create.toHaveBeenCalledWith({
+    expect(prismaMock.notification.create).toHaveBeenCalledTimes(2);
+    expect(prismaMock.notification.create).toHaveBeenCalledWith({
       data: {
         userId: 'user-2',
         type: 'poll',

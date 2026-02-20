@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../../tests/mocks/prisma';
 import { getServerSessionMock, mockSession } from '../../../../../tests/mocks/next-auth';
@@ -17,6 +19,7 @@ const mockPoll = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+    setupDefaultMocks();
   getServerSessionMock.mockResolvedValue(mockSession);
   prismaMock.user.findUnique.mockResolvedValue(mockUser);
 });
@@ -115,10 +118,10 @@ describe('POST /api/polls/vote', () => {
     expect(json.createdEvent).toBeUndefined();
 
     // Verifie la creation du vote
-    expect(prismaMock.pollVote.create.toHaveBeenCalledWith({
+    expect(prismaMock.pollVote.create)).toHaveBeenCalledWith({
       data: { pollId: 'poll-1', optionId: 'option-1', userId: 'user-id-123' },
     });
-    expect(prismaMock.pollVote.update.not.toHaveBeenCalled();
+    expect(prismaMock.pollVote.update.not).toHaveBeenCalled();
   });
 
   it('met a jour un vote existant', async () => {
@@ -149,7 +152,7 @@ describe('POST /api/polls/vote', () => {
     expect(json.ok).toBe(true);
 
     // Verifie la mise a jour du vote
-    expect(prismaMock.pollVote.update.toHaveBeenCalledWith({
+    expect(prismaMock.pollVote.update).toHaveBeenCalledWith({
       where: { id: 'existing-vote' },
       data: { optionId: 'option-2' },
     });
@@ -208,7 +211,7 @@ describe('POST /api/polls/vote', () => {
     expect(json.createdEvent.title).toBe('Pizza');
 
     // Verifie la creation de l'evenement avec le deadline du poll comme date
-    expect(prismaMock.event.create.toHaveBeenCalledWith({
+    expect(prismaMock.event.create).toHaveBeenCalledWith({
       data: {
         title: 'Pizza',
         description: null,
@@ -221,19 +224,19 @@ describe('POST /api/polls/vote', () => {
 
     // Verifie la creation des participants pour tous les membres uniques
     // recipientIds: ['user-id-123', 'user-id-456'] + createdById: 'creator-id' = 3 participants
-    expect(prismaMock.eventParticipant.create.toHaveBeenCalledTimes(3);
-    expect(prismaMock.eventParticipant.create.toHaveBeenCalledWith({
+    expect(prismaMock.eventParticipant.create).toHaveBeenCalledTimes(3);
+    expect(prismaMock.eventParticipant.create).toHaveBeenCalledWith({
       data: { eventId: 'event-created', userId: 'user-id-123', status: 'pending' },
     });
-    expect(prismaMock.eventParticipant.create.toHaveBeenCalledWith({
+    expect(prismaMock.eventParticipant.create).toHaveBeenCalledWith({
       data: { eventId: 'event-created', userId: 'user-id-456', status: 'pending' },
     });
-    expect(prismaMock.eventParticipant.create.toHaveBeenCalledWith({
+    expect(prismaMock.eventParticipant.create).toHaveBeenCalledWith({
       data: { eventId: 'event-created', userId: 'creator-id', status: 'pending' },
     });
 
     // Verifie que le poll est marque comme resolu
-    expect(prismaMock.poll.update.toHaveBeenCalledWith({
+    expect(prismaMock.poll.update).toHaveBeenCalledWith({
       where: { id: 'poll-1' },
       data: { status: 'resolved' },
     });

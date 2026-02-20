@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../tests/mocks/prisma';
 import { getServerSessionMock, mockSession } from '../../../../tests/mocks/next-auth';
@@ -42,6 +44,7 @@ function makeFriendship(overrides: Record<string, any> = {}) {
 describe('GET /api/friends', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('returns 401 if not authenticated', async () => {
@@ -113,7 +116,7 @@ describe('GET /api/friends', () => {
     expect(json[0].status).toBe('pending');
 
     // Verify findMany was called with a status filter
-    expect(prismaMock.friend.findMany.toHaveBeenCalledWith(
+    expect(prismaMock.friend.findMany)).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           status: 'pending',
@@ -150,6 +153,7 @@ describe('GET /api/friends', () => {
 describe('POST /api/friends', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('returns 401 if not authenticated', async () => {
@@ -250,7 +254,7 @@ describe('POST /api/friends', () => {
       friendId: mockFriendUser.id,
       status: 'pending',
     });
-    expect(prismaMock.friend.create.toHaveBeenCalledWith({
+    expect(prismaMock.friend.create)).toHaveBeenCalledWith({
       data: {
         userId: mockUser.id,
         friendId: mockFriendUser.id,

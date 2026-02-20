@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../../tests/mocks/prisma';
 import { getServerSessionMock, mockSession } from '../../../../../tests/mocks/next-auth';
@@ -20,6 +22,7 @@ const mockEvent = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+    setupDefaultMocks();
   getServerSessionMock.mockResolvedValue(mockSession);
   prismaMock.user.findUnique.mockResolvedValue(mockUser);
 });
@@ -61,7 +64,7 @@ describe('GET /api/events/[id]', () => {
     expect(json.id).toBe('event-id-1');
     expect(json.title).toBe('Test Event');
     expect(json).toHaveProperty('eventType');
-    expect(prismaMock.event.findUnique.toHaveBeenCalledWith({
+    expect(prismaMock.event.findUnique)).toHaveBeenCalledWith({
       where: { id: 'event-id-1' },
       include: { eventType: true },
     });
@@ -127,7 +130,7 @@ describe('DELETE /api/events/[id]', () => {
 
     expect(res.status).toBe(200);
     expect(json).toEqual({ success: true });
-    expect(prismaMock.event.delete.toHaveBeenCalledWith({
+    expect(prismaMock.event.delete).toHaveBeenCalledWith({
       where: { id: 'event-id-1' },
     });
   });
@@ -193,7 +196,7 @@ describe('PUT /api/events/[id]', () => {
 
     expect(res.status).toBe(200);
     expect(json.title).toBe('New Title');
-    expect(prismaMock.event.update.toHaveBeenCalledWith({
+    expect(prismaMock.event.update).toHaveBeenCalledWith({
       where: { id: 'event-id-1' },
       data: { title: 'New Title' },
     });
@@ -210,7 +213,7 @@ describe('PUT /api/events/[id]', () => {
 
     expect(res.status).toBe(200);
     expect(json.description).toBeNull();
-    expect(prismaMock.event.update.toHaveBeenCalledWith({
+    expect(prismaMock.event.update).toHaveBeenCalledWith({
       where: { id: 'event-id-1' },
       data: { description: null },
     });

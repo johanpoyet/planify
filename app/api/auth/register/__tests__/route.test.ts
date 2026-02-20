@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../../tests/mocks/prisma';
 import { createMockRequest, getResponseJson } from '../../../../../tests/helpers/api-helpers';
@@ -12,6 +14,7 @@ import { POST } from '../route';
 describe('POST /api/auth/register', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('returns 400 when email is missing', async () => {
@@ -65,7 +68,7 @@ describe('POST /api/auth/register', () => {
 
     expect(response.status).toBe(400);
     expect(json.error).toBe('Un compte avec cet email existe déjà');
-    expect(prismaMock.user.findUnique.toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique)).toHaveBeenCalledWith({
       where: { email: 'test@example.com' },
     });
   });
@@ -97,10 +100,10 @@ describe('POST /api/auth/register', () => {
     });
     // Password must NOT be in the response
     expect(json.user.password).toBeUndefined();
-    expect(prismaMock.user.findUnique.toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { email: 'test@example.com' },
     });
-    expect(prismaMock.user.create.toHaveBeenCalledWith({
+    expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         email: 'test@example.com',
         password: 'hashed-password',

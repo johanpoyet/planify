@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
@@ -10,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('API /api/user/theme-mode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('GET', () => {
@@ -93,7 +96,7 @@ describe('API /api/user/theme-mode', () => {
       } as any);
 
       prismaMock.user.update.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         themeMode: 'dark',
       } as any);
 
@@ -115,7 +118,7 @@ describe('API /api/user/theme-mode', () => {
       } as any);
 
       prismaMock.user.update.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         themeMode: 'light',
       } as any);
 

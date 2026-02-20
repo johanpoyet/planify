@@ -134,3 +134,4 @@ vi.mock('@/lib/prisma', () => ({
   default: prismaMock,
   prismaMock, // Export prismaMock for direct access in tests
 }));
+

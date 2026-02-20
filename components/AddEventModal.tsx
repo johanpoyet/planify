@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 
 // Modal pour ajouter un événement
 interface AddEventModalProps {

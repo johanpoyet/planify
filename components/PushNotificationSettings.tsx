@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 
 import { usePushNotifications } from '@/lib/usePushNotifications';
 import { useTheme } from '@/lib/themeContext';

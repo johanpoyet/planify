@@ -1,3 +1,4 @@
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePushNotifications } from '../usePushNotifications';
@@ -5,9 +6,33 @@ import { usePushNotifications } from '../usePushNotifications';
 // Mock fetch
 global.fetch = vi.fn();
 
+// Mock navigator.serviceWorker
+Object.defineProperty(navigator, 'serviceWorker', {
+  writable: true,
+  configurable: true,
+  value: {
+    ready: Promise.resolve({}),
+  },
+});
+
+// Mock window.PushManager
+Object.defineProperty(window, 'PushManager', {
+  writable: true,
+  configurable: true,
+  value: class PushManager {},
+});
+
 describe('usePushNotifications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset navigator.serviceWorker mock
+    Object.defineProperty(navigator, 'serviceWorker', {
+      writable: true,
+      configurable: true,
+      value: {
+        ready: Promise.resolve({}),
+      },
+    });
   });
 
   it('should detect when push notifications are not supported', async () => {

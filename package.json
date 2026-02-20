@@ -12,9 +12,10 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "test": "vitest run",
+    "test": "node scripts/run-tests.js",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:verbose": "vitest run --reporter=verbose"
   },
   "keywords": [
     "next.js",

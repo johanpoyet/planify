@@ -1,4 +1,7 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 import { PUT, DELETE } from '../route';
 import { getServerSession } from 'next-auth';
 import { prismaMock } from '@/tests/mocks/prisma';
@@ -9,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('API /api/event-types/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('PUT', () => {
@@ -49,7 +53,7 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue(null);
@@ -73,12 +77,12 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue({
         id: 'type1',
-        userId: 'user2', // Autre utilisateur
+        userId: TEST_IDS.user2, // Autre utilisateur
       } as any);
 
       const params = Promise.resolve({ id: 'type1' });
@@ -100,19 +104,19 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue({
         id: 'type1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         name: 'Old Name',
         color: '#FF0000',
       } as any);
 
       prismaMock.eventType.update.mockResolvedValue({
         id: 'type1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         name: 'New Name',
         color: '#00FF00',
       } as any);
@@ -165,7 +169,7 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue(null);
@@ -184,12 +188,12 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue({
         id: 'type1',
-        userId: 'user2',
+        userId: TEST_IDS.user2,
       } as any);
 
       const params = Promise.resolve({ id: 'type1' });
@@ -206,12 +210,12 @@ describe('API /api/event-types/[id]', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.eventType.findUnique.mockResolvedValue({
         id: 'type1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
       } as any);
 
       prismaMock.event.updateMany.mockResolvedValue({ count: 3 } as any);
@@ -223,11 +227,11 @@ describe('API /api/event-types/[id]', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(prisma.event.updateMany).toHaveBeenCalledWith({
+      expect(prismaMock.event.updateMany).toHaveBeenCalledWith({
         where: { eventTypeId: 'type1' },
         data: { eventTypeId: null },
       });
-      expect(prisma.eventType.delete).toHaveBeenCalledWith({
+      expect(prismaMock.eventType.delete).toHaveBeenCalledWith({
         where: { id: 'type1' },
       });
     });

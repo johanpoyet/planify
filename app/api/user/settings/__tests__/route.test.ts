@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PUT } from '../route';
@@ -10,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('API /api/user/settings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('GET', () => {
@@ -39,7 +42,7 @@ describe('API /api/user/settings', () => {
 
     it('devrait retourner les paramètres de l\'utilisateur', async () => {
       const mockUser = {
-        id: 'user1',
+        id: TEST_IDS.user1,
         email: 'test@example.com',
         name: 'Test User',
         calendarVisibility: 'friends',
@@ -97,7 +100,7 @@ describe('API /api/user/settings', () => {
 
     it('devrait mettre à jour la visibilité du calendrier', async () => {
       const mockUser = {
-        id: 'user1',
+        id: TEST_IDS.user1,
         email: 'test@example.com',
         name: 'Test User',
         calendarVisibility: 'friends',
@@ -126,8 +129,8 @@ describe('API /api/user/settings', () => {
 
       expect(response.status).toBe(200);
       expect(data.calendarVisibility).toBe('public');
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: 'user1' },
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: TEST_IDS.user1 },
         data: { calendarVisibility: 'public' },
         select: expect.any(Object),
       });

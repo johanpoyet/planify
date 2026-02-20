@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
 import { getServerSession } from 'next-auth';
@@ -9,6 +11,7 @@ vi.mock('@/lib/prisma');
 describe('GET /api/user', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
@@ -37,7 +40,7 @@ describe('GET /api/user', () => {
 
   it('devrait retourner les informations de l\'utilisateur', async () => {
     const mockUser = {
-      id: 'user1',
+      id: TEST_IDS.user1,
       email: 'test@example.com',
       name: 'Test User',
       themeColor: 'blue',

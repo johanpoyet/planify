@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { themeColors, ThemeColor, defaultThemeColor } from './theme';
 
 export type ThemeMode = 'dark' | 'light';

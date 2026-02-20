@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
 import { getServerSession } from 'next-auth';
@@ -9,6 +11,7 @@ vi.mock('@/lib/prisma');
 describe('GET /api/events/invitations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
@@ -36,15 +39,15 @@ describe('GET /api/events/invitations', () => {
   });
 
   it('devrait retourner les invitations en attente', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockInvitations = [
-      { id: 'inv1', eventId: 'event1', userId: 'user1', status: 'pending', createdAt: new Date() },
+      { id: 'inv1', eventId: TEST_IDS.event1, userId: TEST_IDS.user1, status: 'pending', createdAt: new Date() },
     ];
     const mockEvents = [
-      { id: 'event1', title: 'Event 1', createdById: 'user2', date: new Date() },
+      { id: TEST_IDS.event1, title: 'Event 1', createdById: TEST_IDS.user2, date: new Date() },
     ];
     const mockCreators = [
-      { id: 'user2', name: 'Creator', email: 'creator@example.com' },
+      { id: TEST_IDS.user2, name: 'Creator', email: 'creator@example.com' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -68,13 +71,13 @@ describe('GET /api/events/invitations', () => {
   });
 
   it('devrait supprimer les invitations orphelines', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockInvitations = [
-      { id: 'inv1', eventId: 'event1', userId: 'user1', status: 'pending', createdAt: new Date() },
-      { id: 'inv2', eventId: 'event2', userId: 'user1', status: 'pending', createdAt: new Date() },
+      { id: 'inv1', eventId: TEST_IDS.event1, userId: TEST_IDS.user1, status: 'pending', createdAt: new Date() },
+      { id: 'inv2', eventId: TEST_IDS.event2, userId: TEST_IDS.user1, status: 'pending', createdAt: new Date() },
     ];
     const mockEvents = [
-      { id: 'event1', title: 'Event 1', createdById: 'user2', date: new Date() },
+      { id: TEST_IDS.event1, title: 'Event 1', createdById: TEST_IDS.user2, date: new Date() },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -92,25 +95,25 @@ describe('GET /api/events/invitations', () => {
     const response = await GET({} as any);
     const data = await response.json();
 
-    expect(prisma.eventParticipant.deleteMany).toHaveBeenCalledWith({
+    expect(prismaMock.eventParticipant.deleteMany).toHaveBeenCalledWith({
       where: { id: { in: ['inv2'] } },
     });
   });
 
   it('devrait retourner les sondages en attente', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockPolls = [
       {
-        id: 'poll1',
+        id: TEST_IDS.poll1,
         question: 'Poll Question?',
-        createdById: 'user2',
-        recipientIds: ['user1'],
+        createdById: TEST_IDS.user2,
+        recipientIds: [TEST_IDS.user1],
         status: 'open',
         createdAt: new Date(),
       },
     ];
     const mockCreators = [
-      { id: 'user2', name: 'Creator', email: 'creator@example.com' },
+      { id: TEST_IDS.user2, name: 'Creator', email: 'creator@example.com' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -134,18 +137,18 @@ describe('GET /api/events/invitations', () => {
   });
 
   it('ne devrait pas retourner les sondages où l\'utilisateur a déjà voté', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockPolls = [
       {
-        id: 'poll1',
+        id: TEST_IDS.poll1,
         question: 'Poll Question?',
-        createdById: 'user2',
-        recipientIds: ['user1'],
+        createdById: TEST_IDS.user2,
+        recipientIds: [TEST_IDS.user1],
         status: 'open',
         createdAt: new Date(),
       },
     ];
-    const mockVotes = [{ pollId: 'poll1' }];
+    const mockVotes = [{ pollId: TEST_IDS.poll1 }];
 
     vi.mocked(getServerSession).mockResolvedValue({
       user: { email: 'test@example.com' },
@@ -165,22 +168,22 @@ describe('GET /api/events/invitations', () => {
   });
 
   it('devrait combiner événements et sondages triés par date', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const oldDate = new Date('2020-01-01');
     const recentDate = new Date('2025-01-01');
 
     const mockInvitations = [
-      { id: 'inv1', eventId: 'event1', userId: 'user1', status: 'pending', createdAt: new Date() },
+      { id: 'inv1', eventId: TEST_IDS.event1, userId: TEST_IDS.user1, status: 'pending', createdAt: new Date() },
     ];
     const mockEvents = [
-      { id: 'event1', title: 'Event 1', createdById: 'user2', date: oldDate },
+      { id: TEST_IDS.event1, title: 'Event 1', createdById: TEST_IDS.user2, date: oldDate },
     ];
     const mockPolls = [
       {
-        id: 'poll1',
+        id: TEST_IDS.poll1,
         question: 'Poll?',
-        createdById: 'user2',
-        recipientIds: ['user1'],
+        createdById: TEST_IDS.user2,
+        recipientIds: [TEST_IDS.user1],
         status: 'open',
         createdAt: new Date(),
         deadline: recentDate,

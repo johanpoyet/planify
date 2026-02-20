@@ -9,6 +9,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['**/__tests__/**/*.test.{ts,tsx}'],
     exclude: ['node_modules', '.next'],
+    reporters: ['verbose'],
     coverage: {
       provider: 'v8',
       include: ['lib/**', 'app/api/**', 'components/**', 'app/components/**'],

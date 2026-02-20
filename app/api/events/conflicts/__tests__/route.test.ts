@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
@@ -10,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('POST /api/events/conflicts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
@@ -17,7 +20,7 @@ describe('POST /api/events/conflicts', () => {
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',
-      body: JSON.stringify({ userIds: ['user1'], date: '2025-01-01' }),
+      body: JSON.stringify({ userIds: [TEST_IDS.user1], date: '2025-01-01' }),
     });
 
     const response = await POST(request);
@@ -50,7 +53,7 @@ describe('POST /api/events/conflicts', () => {
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',
-      body: JSON.stringify({ userIds: ['user1'], date: '' }),
+      body: JSON.stringify({ userIds: [TEST_IDS.user1], date: '' }),
     });
 
     const response = await POST(request);
@@ -65,8 +68,8 @@ describe('POST /api/events/conflicts', () => {
     } as any);
 
     const mockEvents = [
-      { id: 'event1', title: 'Event 1', date: new Date('2025-01-01T10:00:00') },
-      { id: 'event2', title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
+      { id: TEST_IDS.event1, title: 'Event 1', date: new Date('2025-01-01T10:00:00') },
+      { id: TEST_IDS.event2, title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
     ];
 
     prismaMock.eventParticipant.findMany.mockResolvedValue([]);
@@ -76,14 +79,14 @@ describe('POST /api/events/conflicts', () => {
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',
-      body: JSON.stringify({ userIds: ['user1'], date: '2025-01-01' }),
+      body: JSON.stringify({ userIds: [TEST_IDS.user1], date: '2025-01-01' }),
     });
 
     const response = await POST(request);
     const data = await response.json();
 
-    expect(data.conflicts.user1).toHaveLength(2);
-    expect(data.conflicts.user1[0].title).toBe('Event 1');
+    expect(data.conflicts[TEST_IDS.user1]).toHaveLength(2);
+    expect(data.conflicts[TEST_IDS.user1][0].title).toBe('Event 1');
   });
 
   it('devrait détecter les conflits pour plusieurs utilisateurs', async () => {
@@ -92,10 +95,10 @@ describe('POST /api/events/conflicts', () => {
     } as any);
 
     const mockEventsUser1 = [
-      { id: 'event1', title: 'Event 1', date: new Date('2025-01-01T10:00:00') },
+      { id: TEST_IDS.event1, title: 'Event 1', date: new Date('2025-01-01T10:00:00') },
     ];
     const mockEventsUser2 = [
-      { id: 'event2', title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
+      { id: TEST_IDS.event2, title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
     ];
 
     prismaMock.eventParticipant.findMany.mockResolvedValue([]);
@@ -107,13 +110,13 @@ describe('POST /api/events/conflicts', () => {
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',
-      body: JSON.stringify({ userIds: ['user1', 'user2'], date: '2025-01-01' }),
+      body: JSON.stringify({ userIds: [TEST_IDS.user1, TEST_IDS.user2], date: '2025-01-01' }),
     });
 
     const response = await POST(request);
     const data = await response.json();
 
-    expect(data.conflicts.user1).toHaveLength(1);
-    expect(data.conflicts.user2).toHaveLength(1);
+    expect(data.conflicts[TEST_IDS.user1]).toHaveLength(1);
+    expect(data.conflicts[TEST_IDS.user2]).toHaveLength(1);
   });
 });

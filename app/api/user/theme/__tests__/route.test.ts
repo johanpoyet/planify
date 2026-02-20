@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
@@ -11,6 +13,7 @@ vi.mock('@/lib/prisma');
 describe('API /api/user/theme', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('GET', () => {
@@ -94,23 +97,23 @@ describe('API /api/user/theme', () => {
       } as any);
 
       prismaMock.user.update.mockResolvedValue({
-        id: 'user1',
-        themeColor: 'green',
+        id: TEST_IDS.user1,
+        themeColor: 'emerald',
       } as any);
 
       const request = new NextRequest('http://localhost:3000/api/user/theme', {
         method: 'POST',
-        body: JSON.stringify({ themeColor: 'green' }),
+        body: JSON.stringify({ themeColor: 'emerald' }),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.themeColor).toBe('green');
-      expect(prisma.user.update).toHaveBeenCalledWith({
+      expect(data.themeColor).toBe('emerald');
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
-        data: { themeColor: 'green' },
+        data: { themeColor: 'emerald' },
       });
     });
   });

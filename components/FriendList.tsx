@@ -1,3 +1,4 @@
+import React from 'react';
 // Composant pour afficher la liste des amis
 interface Friend {
   id: string;

@@ -1,3 +1,4 @@
+import React from 'react';
 // Composant Header / Navigation
 export default function Header() {
   return (

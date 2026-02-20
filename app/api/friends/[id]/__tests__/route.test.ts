@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prismaMock } from '../../../../../tests/mocks/prisma';
 import { getServerSessionMock, mockSession } from '../../../../../tests/mocks/next-auth';
@@ -40,6 +42,7 @@ function makeRouteContext(id: string) {
 describe('PUT /api/friends/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('returns 401 if not authenticated', async () => {
@@ -135,7 +138,7 @@ describe('PUT /api/friends/[id]', () => {
 
     expect(response.status).toBe(200);
     expect(json.status).toBe('accepted');
-    expect(prismaMock.friend.update.toHaveBeenCalledWith({
+    expect(prismaMock.friend.update)).toHaveBeenCalledWith({
       where: { id: 'friendship-1' },
       data: { status: 'accepted' },
     });
@@ -155,7 +158,7 @@ describe('PUT /api/friends/[id]', () => {
 
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
-    expect(prismaMock.friend.delete.toHaveBeenCalledWith({
+    expect(prismaMock.friend.delete).toHaveBeenCalledWith({
       where: { id: 'friendship-1' },
     });
   });
@@ -181,6 +184,7 @@ describe('PUT /api/friends/[id]', () => {
 describe('DELETE /api/friends/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('returns 401 if not authenticated', async () => {
@@ -252,7 +256,7 @@ describe('DELETE /api/friends/[id]', () => {
 
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
-    expect(prismaMock.friend.delete.toHaveBeenCalledWith({
+    expect(prismaMock.friend.delete).toHaveBeenCalledWith({
       where: { id: 'friendship-1' },
     });
   });

@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST, DELETE } from '../route';
@@ -15,6 +17,7 @@ vi.mock('fs', () => ({
 describe('API /api/user/profile-image', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('POST', () => {
@@ -58,7 +61,7 @@ describe('API /api/user/profile-image', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       const formData = new FormData();
@@ -80,7 +83,7 @@ describe('API /api/user/profile-image', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       const formData = new FormData();
@@ -105,7 +108,7 @@ describe('API /api/user/profile-image', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       const formData = new FormData();
@@ -131,12 +134,12 @@ describe('API /api/user/profile-image', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         profileImageUrl: null,
       } as any);
 
       prismaMock.user.update.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         name: 'Test',
         email: 'test@example.com',
         profileImageUrl: '/api/uploads/profiles/user1-123456789.jpg',
@@ -195,12 +198,12 @@ describe('API /api/user/profile-image', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         profileImageUrl: '/uploads/profiles/user1.jpg',
       } as any);
 
       prismaMock.user.update.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
         name: 'Test',
         email: 'test@example.com',
         profileImageUrl: null,

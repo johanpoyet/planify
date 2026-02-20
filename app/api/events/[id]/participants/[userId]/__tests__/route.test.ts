@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { PUT } from '../route';
@@ -10,12 +12,13 @@ vi.mock('@/lib/prisma');
 describe('PUT /api/events/[id]/participants/[userId]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
     vi.mocked(getServerSession).mockResolvedValue(null);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user1' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user1 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user1', {
       method: 'PUT',
       body: JSON.stringify({ action: 'accept' }),
@@ -35,7 +38,7 @@ describe('PUT /api/events/[id]/participants/[userId]', () => {
 
     prismaMock.user.findUnique.mockResolvedValue(null);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user1' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user1 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user1', {
       method: 'PUT',
       body: JSON.stringify({ action: 'accept' }),
@@ -54,10 +57,10 @@ describe('PUT /api/events/[id]/participants/[userId]', () => {
     } as any);
 
     prismaMock.user.findUnique.mockResolvedValue({
-      id: 'user1',
+      id: TEST_IDS.user1,
     } as any);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user2' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user2 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user2', {
       method: 'PUT',
       body: JSON.stringify({ action: 'accept' }),
@@ -76,12 +79,12 @@ describe('PUT /api/events/[id]/participants/[userId]', () => {
     } as any);
 
     prismaMock.user.findUnique.mockResolvedValue({
-      id: 'user1',
+      id: TEST_IDS.user1,
     } as any);
 
     prismaMock.eventParticipant.findUnique.mockResolvedValue(null);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user1' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user1 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user1', {
       method: 'PUT',
       body: JSON.stringify({ action: 'accept' }),
@@ -100,24 +103,24 @@ describe('PUT /api/events/[id]/participants/[userId]', () => {
     } as any);
 
     prismaMock.user.findUnique.mockResolvedValue({
-      id: 'user1',
+      id: TEST_IDS.user1,
     } as any);
 
     prismaMock.eventParticipant.findUnique.mockResolvedValue({
       id: 'part1',
-      eventId: 'event1',
-      userId: 'user1',
+      eventId: TEST_IDS.event1,
+      userId: TEST_IDS.user1,
       status: 'pending',
     } as any);
 
     prismaMock.eventParticipant.update.mockResolvedValue({
       id: 'part1',
-      eventId: 'event1',
-      userId: 'user1',
+      eventId: TEST_IDS.event1,
+      userId: TEST_IDS.user1,
       status: 'accepted',
     } as any);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user1' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user1 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user1', {
       method: 'PUT',
       body: JSON.stringify({ action: 'accept' }),
@@ -136,19 +139,19 @@ describe('PUT /api/events/[id]/participants/[userId]', () => {
     } as any);
 
     prismaMock.user.findUnique.mockResolvedValue({
-      id: 'user1',
+      id: TEST_IDS.user1,
     } as any);
 
     prismaMock.eventParticipant.findUnique.mockResolvedValue({
       id: 'part1',
-      eventId: 'event1',
-      userId: 'user1',
+      eventId: TEST_IDS.event1,
+      userId: TEST_IDS.user1,
       status: 'pending',
     } as any);
 
     prismaMock.eventParticipant.delete.mockResolvedValue({} as any);
 
-    const params = Promise.resolve({ id: 'event1', userId: 'user1' });
+    const params = Promise.resolve({ id: TEST_IDS.event1, userId: TEST_IDS.user1 });
     const request = new NextRequest('http://localhost:3000/api/events/event1/participants/user1', {
       method: 'PUT',
       body: JSON.stringify({ action: 'decline' }),

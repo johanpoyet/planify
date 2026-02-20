@@ -1,3 +1,4 @@
+import React from 'react';
 // Composant pour afficher une carte d'événement
 interface EventCardProps {
   title: string;

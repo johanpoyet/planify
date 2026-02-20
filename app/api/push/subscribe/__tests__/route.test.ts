@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST, DELETE } from '../route';
@@ -10,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('API /api/push/subscribe', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   describe('POST', () => {
@@ -53,7 +56,7 @@ describe('API /api/push/subscribe', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       const request = new NextRequest('http://localhost:3000/api/push/subscribe', {
@@ -79,13 +82,13 @@ describe('API /api/push/subscribe', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.pushSubscription.findUnique.mockResolvedValue(null);
       prismaMock.pushSubscription.create.mockResolvedValue({
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: mockSubscription.endpoint,
         p256dh: mockSubscription.keys.p256dh,
         auth: mockSubscription.keys.auth,
@@ -114,7 +117,7 @@ describe('API /api/push/subscribe', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.pushSubscription.findUnique.mockResolvedValue({
@@ -124,7 +127,7 @@ describe('API /api/push/subscribe', () => {
 
       prismaMock.pushSubscription.update.mockResolvedValue({
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: mockSubscription.endpoint,
         p256dh: mockSubscription.keys.p256dh,
         auth: mockSubscription.keys.auth,
@@ -184,7 +187,7 @@ describe('API /api/push/subscribe', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       const request = new NextRequest('http://localhost:3000/api/push/subscribe', {
@@ -205,7 +208,7 @@ describe('API /api/push/subscribe', () => {
       } as any);
 
       prismaMock.user.findUnique.mockResolvedValue({
-        id: 'user1',
+        id: TEST_IDS.user1,
       } as any);
 
       prismaMock.pushSubscription.deleteMany.mockResolvedValue({ count: 1 } as any);
@@ -220,9 +223,9 @@ describe('API /api/push/subscribe', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(prisma.pushSubscription.deleteMany).toHaveBeenCalledWith({
+      expect(prismaMock.pushSubscription.deleteMany).toHaveBeenCalledWith({
         where: {
-          userId: 'user1',
+          userId: TEST_IDS.user1,
           endpoint: 'https://push.example.com/endpoint',
         },
       });

@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
 import { getServerSession } from 'next-auth';
@@ -9,6 +11,7 @@ vi.mock('@/lib/prisma');
 describe('GET /api/events/shared', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
@@ -36,18 +39,18 @@ describe('GET /api/events/shared', () => {
   });
 
   it('devrait retourner les événements publics', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockEvents = [
       {
-        id: 'event1',
+        id: TEST_IDS.event1,
         title: 'Event Public',
         visibility: 'public',
-        createdById: 'user2',
+        createdById: TEST_IDS.user2,
         date: new Date(),
       },
     ];
     const mockCreators = [
-      { id: 'user2', name: 'Creator', email: 'creator@example.com' },
+      { id: TEST_IDS.user2, name: 'Creator', email: 'creator@example.com' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -68,21 +71,21 @@ describe('GET /api/events/shared', () => {
   });
 
   it('devrait retourner les événements "friends" des amis', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockFriendships = [
-      { id: 'f1', userId: 'user1', friendId: 'user2', status: 'accepted' },
+      { id: 'f1', userId: TEST_IDS.user1, friendId: TEST_IDS.user2, status: 'accepted' },
     ];
     const mockEvents = [
       {
-        id: 'event1',
+        id: TEST_IDS.event1,
         title: 'Event Friends',
         visibility: 'friends',
-        createdById: 'user2',
+        createdById: TEST_IDS.user2,
         date: new Date(),
       },
     ];
     const mockCreators = [
-      { id: 'user2', name: 'Friend', email: 'friend@example.com' },
+      { id: TEST_IDS.user2, name: 'Friend', email: 'friend@example.com' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -103,9 +106,9 @@ describe('GET /api/events/shared', () => {
   });
 
   it('ne devrait pas retourner les événements privés', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
     const mockFriendships = [
-      { id: 'f1', userId: 'user1', friendId: 'user2', status: 'accepted' },
+      { id: 'f1', userId: TEST_IDS.user1, friendId: TEST_IDS.user2, status: 'accepted' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -125,7 +128,7 @@ describe('GET /api/events/shared', () => {
   });
 
   it('ne devrait pas retourner les propres événements de l\'utilisateur', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
 
     vi.mocked(getServerSession).mockResolvedValue({
       user: { email: 'test@example.com' },
@@ -139,17 +142,17 @@ describe('GET /api/events/shared', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(prisma.event.findMany).toHaveBeenCalledWith(
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          createdById: { not: 'user1' },
+          createdById: { not: TEST_IDS.user1 },
         }),
       })
     );
   });
 
   it('devrait limiter les résultats à 100 événements', async () => {
-    const mockUser = { id: 'user1', email: 'test@example.com' };
+    const mockUser = { id: TEST_IDS.user1, email: 'test@example.com' };
 
     vi.mocked(getServerSession).mockResolvedValue({
       user: { email: 'test@example.com' },
@@ -161,7 +164,7 @@ describe('GET /api/events/shared', () => {
 
     const response = await GET({} as any);
 
-    expect(prisma.event.findMany).toHaveBeenCalledWith(
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         take: 100,
       })

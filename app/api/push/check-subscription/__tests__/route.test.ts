@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
@@ -10,6 +12,7 @@ vi.mock('@/lib/prisma');
 describe('POST /api/push/check-subscription', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
@@ -52,12 +55,12 @@ describe('POST /api/push/check-subscription', () => {
     } as any);
 
     prismaMock.user.findUnique.mockResolvedValue({
-      id: 'user1',
+      id: TEST_IDS.user1,
     } as any);
 
     prismaMock.pushSubscription.findFirst.mockResolvedValue({
       id: 'sub1',
-      userId: 'user1',
+      userId: TEST_IDS.user1,
       endpoint: 'https://push.example.com/endpoint',
     } as any);
 

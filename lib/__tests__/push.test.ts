@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { sendPushNotification } from '../push';
-import { prisma } from '../prisma';
+import { prismaMock } from '@/tests/mocks/prisma';
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
 import * as webpush from 'web-push';
 
-vi.mock('../prisma');
 vi.mock('web-push');
 
 describe('push.ts - sendPushNotification', () => {
@@ -17,7 +17,7 @@ describe('push.ts - sendPushNotification', () => {
     delete process.env.VAPID_PUBLIC_KEY;
     delete process.env.VAPID_PRIVATE_KEY;
 
-    const result = await sendPushNotification('user1', {
+    const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
       body: 'Test body',
     });
@@ -27,9 +27,9 @@ describe('push.ts - sendPushNotification', () => {
   });
 
   it('devrait retourner no_subscriptions si aucune subscription', async () => {
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue([]);
+    prismaMock.pushSubscription.findMany.mockResolvedValue([]);
 
-    const result = await sendPushNotification('user1', {
+    const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
       body: 'Test body',
     });
@@ -42,24 +42,24 @@ describe('push.ts - sendPushNotification', () => {
     const mockSubscriptions = [
       {
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push1.example.com',
         p256dh: 'key1',
         auth: 'auth1',
       },
       {
         id: 'sub2',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push2.example.com',
         p256dh: 'key2',
         auth: 'auth2',
       },
     ];
 
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
+    vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
     vi.mocked(webpush.sendNotification).mockResolvedValue({} as any);
 
-    const result = await sendPushNotification('user1', {
+    const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
       body: 'Test body',
       url: '/test',
@@ -76,25 +76,25 @@ describe('push.ts - sendPushNotification', () => {
     const mockSubscriptions = [
       {
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push1.example.com',
         p256dh: 'key1',
         auth: 'auth1',
       },
     ];
 
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
+    prismaMock.pushSubscription.findMany.mockResolvedValue(mockSubscriptions as any);
     vi.mocked(webpush.sendNotification).mockRejectedValue({ statusCode: 410 });
-    vi.mocked(prisma.pushSubscription.delete).mockResolvedValue({} as any);
+    prismaMock.pushSubscription.delete.mockResolvedValue({} as any);
 
-    const result = await sendPushNotification('user1', {
+    const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
       body: 'Test body',
     });
 
     expect(result.ok).toBe(false);
     expect(result.failureCount).toBe(1);
-    expect(prisma.pushSubscription.delete).toHaveBeenCalledWith({
+    expect(prismaMock.pushSubscription.delete).toHaveBeenCalledWith({
       where: { id: 'sub1' },
     });
   });
@@ -103,26 +103,26 @@ describe('push.ts - sendPushNotification', () => {
     const mockSubscriptions = [
       {
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push1.example.com',
         p256dh: 'key1',
         auth: 'auth1',
       },
       {
         id: 'sub2',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push2.example.com',
         p256dh: 'key2',
         auth: 'auth2',
       },
     ];
 
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
+    vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
     vi.mocked(webpush.sendNotification)
       .mockResolvedValueOnce({} as any)
       .mockRejectedValueOnce(new Error('Network error'));
 
-    const result = await sendPushNotification('user1', {
+    const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
       body: 'Test body',
     });
@@ -133,7 +133,7 @@ describe('push.ts - sendPushNotification', () => {
   });
 
   it('devrait appeler setVapidDetails avec les bonnes valeurs', async () => {
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue([]);
+    prismaMock.pushSubscription.findMany.mockResolvedValue([]);
 
     await sendPushNotification('user1', {
       title: 'Test',
@@ -150,14 +150,14 @@ describe('push.ts - sendPushNotification', () => {
     const mockSubscriptions = [
       {
         id: 'sub1',
-        userId: 'user1',
+        userId: TEST_IDS.user1,
         endpoint: 'https://push1.example.com',
         p256dh: 'key1',
         auth: 'auth1',
       },
     ];
 
-    vi.mocked(prisma.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
+    vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
     vi.mocked(webpush.sendNotification).mockResolvedValue({} as any);
 
     await sendPushNotification('user1', {

@@ -1,3 +1,5 @@
+import { TEST_IDS } from '@/tests/helpers/objectid-helper';
+import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
 import { getServerSession } from 'next-auth';
@@ -9,12 +11,13 @@ vi.mock('@/lib/prisma');
 describe('GET /api/polls/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupDefaultMocks();
   });
 
   it('devrait retourner 401 si non authentifié', async () => {
     vi.mocked(getServerSession).mockResolvedValue(null);
 
-    const params = Promise.resolve({ id: 'poll1' });
+    const params = Promise.resolve({ id: TEST_IDS.poll1 });
     const response = await GET({} as any, { params });
     const data = await response.json();
 
@@ -29,7 +32,7 @@ describe('GET /api/polls/[id]', () => {
 
     prismaMock.poll.findUnique.mockResolvedValue(null);
 
-    const params = Promise.resolve({ id: 'poll1' });
+    const params = Promise.resolve({ id: TEST_IDS.poll1 });
     const response = await GET({} as any, { params });
     const data = await response.json();
 
@@ -38,13 +41,13 @@ describe('GET /api/polls/[id]', () => {
   });
 
   it('devrait retourner le sondage avec ses options et votes', async () => {
-    const mockPoll = { id: 'poll1', question: 'Question?', status: 'open' };
+    const mockPoll = { id: TEST_IDS.poll1, question: 'Question?', status: 'open' };
     const mockOptions = [
-      { id: 'opt1', pollId: 'poll1', date: new Date(), location: 'Location 1' },
-      { id: 'opt2', pollId: 'poll1', date: new Date(), location: 'Location 2' },
+      { id: 'opt1', pollId: TEST_IDS.poll1, date: new Date(), location: 'Location 1' },
+      { id: 'opt2', pollId: TEST_IDS.poll1, date: new Date(), location: 'Location 2' },
     ];
     const mockVotes = [
-      { id: 'vote1', pollId: 'poll1', userId: 'user1', pollOptionId: 'opt1' },
+      { id: 'vote1', pollId: TEST_IDS.poll1, userId: TEST_IDS.user1, pollOptionId: 'opt1' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -55,7 +58,7 @@ describe('GET /api/polls/[id]', () => {
     prismaMock.pollOption.findMany.mockResolvedValue(mockOptions as any);
     prismaMock.pollVote.findMany.mockResolvedValue(mockVotes as any);
 
-    const params = Promise.resolve({ id: 'poll1' });
+    const params = Promise.resolve({ id: TEST_IDS.poll1 });
     const response = await GET({} as any, { params });
     const data = await response.json();
 

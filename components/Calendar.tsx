@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 
 // Composant Calendrier - À implémenter avec une bibliothèque de calendrier
 export default function Calendar() {
