@@ -952,12 +952,13 @@ test: {
  <tr><td class="id">V-05</td><td>État du processus applicatif.</td><td><code>pm2 jlist</code>&nbsp;: statut <i>online</i>.</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">V-06</td><td>Consommation mémoire sous le plafond configuré.</td><td>69 Mo relevés pour un plafond de 400 Mo.</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">V-07</td><td>Absence d’erreur applicative dans les journaux.</td><td><code>pm2 logs --err</code>&nbsp;: aucune erreur bloquante après correction de BUG-20.</td><td class="ok-txt">Conforme</td></tr>
- <tr><td class="id">V-08</td><td>Parcours fonctionnel de bout en bout&nbsp;: authentification, création d’un événement, invitation, réponse, sondage.</td><td>Scénarios RF-02 à RF-07 du cahier de recettes, à rejouer sur l’environnement de production.</td><td class="warn-txt">À dérouler</td></tr>
+ <tr><td class="id">V-08</td><td>Parcours fonctionnel de bout en bout&nbsp;: authentification, création d’un événement, invitation, réponse, sondage.</td><td>Scénarios RF-02 à RF-07 du cahier de recettes, rejoués manuellement sur l’environnement de production avec les deux comptes de démonstration.</td><td class="ok-txt">Conforme</td></tr>
  </tbody>
  </table>
- <p class="small">Le contrôle V-01 a été renforcé à la suite de l’anomalie BUG-20&nbsp;: une page répondant en
- HTTP 200 ne garantit pas que l’application soit utilisable, ses actifs statiques pouvant être refusés
- séparément. La vérification porte désormais sur le chargement effectif de ces actifs.</p>
+ <p class="small">Les huit contrôles sont conformes. Le contrôle V-01 a été renforcé à la suite de l’anomalie
+ BUG-20&nbsp;: une page répondant en HTTP 200 ne garantit pas que l’application soit utilisable, ses actifs
+ statiques pouvant être refusés séparément. La vérification porte désormais sur le chargement effectif de
+ ces actifs, et non sur le seul code de réponse.</p>
 </section>
 
 <!-- ============================ 9. CAHIER DE RECETTES ============================ -->
