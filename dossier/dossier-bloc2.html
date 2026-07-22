@@ -113,7 +113,7 @@
  <div>Établissement&nbsp;: Ynov Lyon Campus</div>
  <div>Promotion&nbsp;: 2025-2026</div>
  <div>Date de soutenance&nbsp;: 23/07/2026</div>
- <div>Domaine prévu&nbsp;: planify.johanpoyet.fr</div>
+ <div>Application&nbsp;: https://planify.johanpoyet.fr/</div>
  <div>Dépôt&nbsp;: Git / GitHub, pipeline CI/CD</div>
  </div>
  </div>
@@ -133,8 +133,8 @@
  <div class="toc-line"><span>7. Accessibilité numérique <span class="tag">C2.2.3</span></span><span class="n">16</span></div>
  <div class="toc-line"><span>8. Gestion de versions et déploiement progressif <span class="tag">C2.2.4</span></span><span class="n">18</span></div>
  <div class="toc-line"><span>9. Cahier de recettes <span class="tag">C2.3.1</span></span><span class="n">20</span></div>
- <div class="toc-line"><span>10. Plan de correction des bogues <span class="tag">C2.3.2</span></span><span class="n">21</span></div>
- <div class="toc-line"><span>11. Documentation technique d’exploitation <span class="tag">C2.4.1</span></span><span class="n">25</span></div>
+ <div class="toc-line"><span>10. Plan de correction des bogues <span class="tag">C2.3.2</span></span><span class="n">22</span></div>
+ <div class="toc-line"><span>11. Documentation technique d’exploitation <span class="tag">C2.4.1</span></span><span class="n">26</span></div>
  <div class="toc-line"><span class="sub">11.1 Manuel de déploiement · 11.2 Manuel d’utilisation · 11.3 Manuel de mise à jour</span><span class="n"></span></div>
  <div class="toc-line"><span>Conclusion</span><span class="n">29</span></div>
  <div class="toc-line"><span>Annexe A — Captures d’écran du prototype</span><span class="n">30</span></div>
@@ -443,8 +443,7 @@
   body: <span class="s">`${creatorName} vous a invité à "${eventTitle}"`</span> });</pre>
 
  <p>Les captures d’écran du prototype en fonctionnement figurent en annexe A. L’application est également
- exécutable en environnement de développement pour une démonstration en direct&nbsp;; le domaine
- <code>planify.johanpoyet.fr</code> est réservé pour la mise en production, décrite au chapitre 11.1.</p>
+ accessible sur <code>https://planify.johanpoyet.fr/</code> pour une démonstration en direct.</p>
 </section>
 
 <!-- ============================ 3. ENVIRONNEMENT / CD ============================ -->
@@ -467,15 +466,16 @@
  <tr><td>Gestionnaire de processus</td><td>PM2</td><td>Maintient le service actif, redémarrage automatique, plafond mémoire configuré à 400 Mo.</td></tr>
  <tr><td>Proxy inverse</td><td>Nginx</td><td>Terminaison TLS, service des fichiers statiques, relais vers Next.js.</td></tr>
  <tr><td>Base de données</td><td>MongoDB</td><td>Stockage des données applicatives.</td></tr>
- <tr><td>Production (cible)</td><td>VPS Ubuntu</td><td>Cible d’hébergement sur <code>planify.johanpoyet.fr</code>&nbsp;; procédure décrite au chapitre 11.1, mise en service non encore réalisée.</td></tr>
+ <tr><td>Production</td><td>VPS Ubuntu 24.04 (4 vCPU, 8 Go)</td><td>Hébergement de l’application sur <code>https://planify.johanpoyet.fr</code>, derrière Nginx et TLS Let’s Encrypt.</td></tr>
  </tbody>
  </table>
 
  <h3>3.2 Critères de qualité et de performance</h3>
  <p>Les critères ci-dessous sont ceux que le projet sait mesurer aujourd’hui. Chaque ligne indique la
- commande utilisée et la valeur relevée le 22/07/2026, en environnement de développement
- (Windows 11, Node.js 22.20.0). Les mesures qui n’ont pas pu être réalisées sont écartées de ce tableau et
- listées en annexe C plutôt que remplacées par une estimation.</p>
+ commande utilisée et la valeur relevée le 22/07/2026. Les six premières portent sur la chaîne de
+ développement (Windows 11, Node.js 22.20.0)&nbsp;; les deux dernières ont été relevées sur l’environnement
+ de production, l’application étant en service. Les mesures qui n’ont pas pu être réalisées sont écartées de
+ ce tableau et listées en annexe C plutôt que remplacées par une estimation.</p>
  <table>
  <thead><tr><th style="width:22%">Critère</th><th style="width:26%">Commande</th><th style="width:18%">Objectif</th><th style="width:17%">Valeur relevée</th><th>État</th></tr></thead>
  <tbody>
@@ -485,11 +485,13 @@
  <tr><td>Couverture de tests</td><td><code>npx vitest run --coverage</code></td><td>&gt; 70 % des lignes</td><td>76,6 % des lignes</td><td class="ok-txt">Atteint</td></tr>
  <tr><td>Tests au vert</td><td><code>npx vitest run</code></td><td>Suite complète</td><td>316 / 316</td><td class="ok-txt">Atteint</td></tr>
  <tr><td>Dépendances sans vulnérabilité critique</td><td><code>npm audit --omit=dev</code></td><td>0 critique</td><td>0 critique, 4 au total</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Temps de réponse en production</td><td><code>curl -w %{time_total}</code> sur la page de connexion (5 relevés)</td><td>&lt; 1 s</td><td>0,081 s à 0,106 s</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Empreinte mémoire en production</td><td><code>pm2 jlist</code></td><td>&lt; 400 Mo</td><td>69 Mo</td><td class="ok-txt">Atteint</td></tr>
  </tbody>
  </table>
- <p class="small">Les six critères sont atteints. Le plafond mémoire PM2 de 400 Mo est une limite de
- configuration, et non une mesure de la consommation réelle&nbsp;: cette dernière n’a pas été relevée
- (annexe C).</p>
+ <p class="small">Les huit critères sont atteints. Les deux dernières lignes ont été relevées sur
+ l’environnement de production le 22/07/2026, l’application étant en service&nbsp;: la consommation
+ constatée (69 Mo) reste très en deçà du plafond de 400 Mo configuré dans PM2.</p>
 
  <h3>3.3 Protocole de déploiement continu</h3>
  <p>Le déploiement est déclenché automatiquement lorsqu’une modification est intégrée sur la branche
@@ -613,11 +615,13 @@ jobs:
  pousser à nouveau — ce qui relance le pipeline. Le rapport de couverture est archivé comme artefact à
  chaque exécution, y compris en cas d’échec, ce qui permet de comparer deux exécutions.</p>
  <div class="box ok">
- <b>État actuel du pipeline.</b> Les cinq étapes de contrôle passent&nbsp;: analyse statique (0 erreur),
- vérification des types (0 erreur), suite de tests (316 / 316), publication du rapport de couverture et
- build de production. La barrière de qualité a joué son rôle pendant la préparation de ce dossier&nbsp;:
- elle a mis en évidence 27 tests en échec issus de la refonte d’interface, tous corrigés depuis
- (chapitre 10).
+ <b>Exécution de référence.</b> Le pipeline a été exécuté sur la fusion de la refonte dans
+ <code>main</code> (commit <code>4103963</code>, 22/07/2026). Les deux tâches ont réussi&nbsp;:
+ <i>Qualité</i> en 48 s (analyse statique 0 erreur, types 0 erreur, 316 tests conformes, rapport de
+ couverture publié comme artefact, build de production) puis <i>Déploiement</i> en 56 s, soit
+ <b>1 min 53 s</b> du commit à la mise en ligne. La barrière de qualité a par ailleurs joué son rôle
+ pendant la préparation de ce dossier&nbsp;: elle a mis en évidence 27 tests en échec issus de la refonte
+ d’interface, tous corrigés depuis (chapitre 10).
  </div>
  <p class="small">La protection de la branche <code>main</code> par règle de dépôt (blocage de la fusion
  tant que les contrôles échouent) n’est pas activée à ce jour&nbsp;: la subordination du déploiement est
@@ -935,24 +939,25 @@ test: {
  </ul>
 
  <h3>8.4 Vérification après déploiement</h3>
- <p>La liste ci-dessous constitue le contrôle à dérouler après chaque mise en production. Elle est fournie
- comme procédure de référence&nbsp;; la colonne de résultat est renseignée lors de chaque déploiement, par le
- responsable du déploiement (le développeur, en l’occurrence).</p>
+ <p>La liste ci-dessous est déroulée après chaque mise en production. Les résultats indiqués sont ceux du
+ déploiement du 22/07/2026 (commit <code>4103963</code>), réalisé par le pipeline et vérifié par le
+ développeur.</p>
  <table class="avoid-break">
- <thead><tr><th style="width:8%">Réf.</th><th style="width:40%">Contrôle</th><th>Preuve attendue</th></tr></thead>
+ <thead><tr><th style="width:7%">Réf.</th><th style="width:33%">Contrôle</th><th style="width:32%">Preuve</th><th>Résultat</th></tr></thead>
  <tbody>
- <tr><td class="id">V-01</td><td>L’application répond sur l’URL de production.</td><td>Page de connexion affichée.</td></tr>
- <tr><td class="id">V-02</td><td>Authentification avec un compte de démonstration.</td><td>Accès à l’agenda.</td></tr>
- <tr><td class="id">V-03</td><td>Création d’un événement.</td><td>Événement visible dans l’agenda.</td></tr>
- <tr><td class="id">V-04</td><td>Invitation d’un ami puis réponse depuis le second compte.</td><td>Statut mis à jour, événement consolidé.</td></tr>
- <tr><td class="id">V-05</td><td>Création d’un sondage et vote.</td><td>Vote unique enregistré.</td></tr>
- <tr><td class="id">V-06</td><td>État du processus applicatif.</td><td><code>pm2 status</code>&nbsp;: processus <code>online</code>.</td></tr>
- <tr><td class="id">V-07</td><td>Absence d’erreur récente dans les journaux.</td><td><code>pm2 logs planify --lines 100</code>.</td></tr>
- <tr><td class="id">V-08</td><td>Consommation mémoire du processus.</td><td><code>pm2 status</code>&nbsp;: valeur relevée, plafond 400 Mo.</td></tr>
+ <tr><td class="id">V-01</td><td>L’application répond et ses actifs statiques se chargent.</td><td>Page de connexion en HTTP 200&nbsp;; les 11 ressources référencées répondent également en 200.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-02</td><td>Certificat TLS valide et redirection HTTP vers HTTPS.</td><td>Réponse 301 vers HTTPS&nbsp;; certificat valable 89 jours, renouvellement automatique testé.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-03</td><td>En-têtes de sécurité présents sur les réponses.</td><td>Les cinq en-têtes du chapitre 6 relevés depuis l’extérieur.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-04</td><td>Temps de réponse de la page de connexion.</td><td>Cinq relevés entre 0,081 s et 0,106 s.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-05</td><td>État du processus applicatif.</td><td><code>pm2 jlist</code>&nbsp;: statut <i>online</i>.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-06</td><td>Consommation mémoire sous le plafond configuré.</td><td>69 Mo relevés pour un plafond de 400 Mo.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-07</td><td>Absence d’erreur applicative dans les journaux.</td><td><code>pm2 logs --err</code>&nbsp;: aucune erreur bloquante après correction de BUG-20.</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">V-08</td><td>Parcours fonctionnel de bout en bout&nbsp;: authentification, création d’un événement, invitation, réponse, sondage.</td><td>Scénarios RF-02 à RF-07 du cahier de recettes, à rejouer sur l’environnement de production.</td><td class="warn-txt">À dérouler</td></tr>
  </tbody>
  </table>
- <p class="small">Aucun test utilisateur formalisé n’a été conduit à ce jour&nbsp;: le dossier ne présente donc
- pas de retour d’usage. Ce point figure en annexe C.</p>
+ <p class="small">Le contrôle V-01 a été renforcé à la suite de l’anomalie BUG-20&nbsp;: une page répondant en
+ HTTP 200 ne garantit pas que l’application soit utilisable, ses actifs statiques pouvant être refusés
+ séparément. La vérification porte désormais sur le chargement effectif de ces actifs.</p>
 </section>
 
 <!-- ============================ 9. CAHIER DE RECETTES ============================ -->
@@ -1068,6 +1073,7 @@ test: {
  <tr><td class="id">BUG-13</td><td>Vingt-cinq tests de composants en échec après la refonte d’interface.</td><td class="warn-txt">Majeure</td><td>La refonte a modifié libellés et balisage (radios devenues boutons, cases masquées, navigation renommée)&nbsp;; les tests visaient des éléments disparus.</td><td>Sélecteurs et libellés réalignés sur l’interface réelle. Prévention&nbsp;: privilégier des sélecteurs fondés sur le rôle et le nom accessible plutôt que sur la structure du balisage.</td></tr>
  <tr><td class="id">BUG-18</td><td>Un fichier de tests entier n’était jamais exécuté, sans alerte.</td><td class="bad-txt">Critique</td><td>La simulation du module <code>fs</code> n’exposait pas d’export par défaut&nbsp;: le fichier échouait au chargement, et ses neuf tests n’apparaissaient dans aucun décompte.</td><td>Simulations de <code>fs</code> et <code>fs/promises</code> complétées. Prévention&nbsp;: le pipeline échoue désormais si un fichier de tests ne se charge pas.</td></tr>
  <tr><td class="id">BUG-19</td><td>L’heure choisie dans le sélecteur de date était enregistrée avec un décalage.</td><td class="bad-txt">Critique</td><td>La valeur était produite par une conversion en temps universel&nbsp;: une heure saisie à 15&nbsp;h 45 était enregistrée à 13&nbsp;h 45 en heure d’été.</td><td>Construction d’une date locale, conforme au format attendu par le formulaire. Prévention&nbsp;: scénario de recette vérifiant que l’heure enregistrée est bien celle saisie.</td></tr>
+ <tr><td class="id">BUG-20</td><td>En production, la page s’affichait mais l’application n’était pas interactive.</td><td class="bad-txt">Critique</td><td>Nginx s’exécute sous l’identité <code>www-data</code> et servait les actifs statiques depuis le répertoire personnel, dont les droits (<code>drwxr-x---</code>) interdisent la traversée à autrui&nbsp;: les scripts renvoyaient HTTP 403 et l’interface ne s’activait jamais. Le défaut était invisible sur la page d’accueil, qui répondait bien en HTTP 200.</td><td>Droit de traversée seul accordé (<code>chmod o+x</code>), sans autoriser le listage du répertoire. Prévention&nbsp;: le contrôle post-déploiement V-01 vérifie désormais le chargement effectif des actifs, et non le seul code de réponse de la page.</td></tr>
  <tr><td class="id">BUG-10</td><td>Trente-neuf vulnérabilités dans les dépendances de production, dont trois critiques.</td><td class="bad-txt">Critique</td><td>La bibliothèque <code>next-pwa</code> 2.6.3, non maintenue, entraînait des dépendances transitives obsolètes. Elle figurait dans le manifeste alors qu’aucun code ne l’utilisait.</td><td>Suppression de la dépendance inutilisée (655 paquets retirés) puis mise à jour des correctifs dans les bornes déclarées&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Prévention&nbsp;: audit des dépendances à intégrer au pipeline et contrôle des dépendances non utilisées.</td></tr>
  </tbody>
  </table>
@@ -1227,8 +1233,8 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  <p>
  Planify remplit aujourd’hui la promesse qui a motivé le projet&nbsp;: un groupe d’amis peut y créer un
  événement, inviter ses proches, décider ensemble d’une date et retrouver le tout dans un agenda partagé,
- depuis un téléphone comme depuis un ordinateur. L’application est fonctionnelle, installable et
- utilisable en autonomie&nbsp;; sa mise en production sur le VPS reste à réaliser.
+ depuis un téléphone comme depuis un ordinateur. L’application est en ligne sur
+ <b>https://planify.johanpoyet.fr</b>, installable et utilisable en autonomie.
  </p>
  <p>
  Le travail présenté ici dépasse cependant l’écriture des fonctionnalités. Concevoir une architecture en
@@ -1239,22 +1245,20 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  que prévu. Il a mis au jour des défauts sérieux et invisibles à l’usage — huit fichiers de tests
  silencieusement ignorés, une faille permettant de sortir du dossier des fichiers envoyés, une analyse
  statique inopérante depuis une montée de version, un déploiement qui pouvait partir sans qu’aucun test
- n’ait été exécuté. Ces dix-huit anomalies corrigées valent, à mes yeux, autant que les fonctionnalités
+ n’ait été exécuté. Ces dix-neuf anomalies corrigées valent, à mes yeux, autant que les fonctionnalités
  livrées&nbsp;: elles montrent ce qu’un dispositif de vérification apporte par rapport à une simple relecture.
  </p>
  <p>
- Des limites subsistent, et il serait malhonnête de les passer sous silence. L’application n’est pas
- encore déployée sur son serveur&nbsp;: la procédure est écrite et le domaine réservé, mais la mise en
- service reste à faire. Quatre vulnérabilités subsistent par ailleurs dans les dépendances&nbsp;; aucune
- n’est critique, et elles proviennent de l’arbre de Next.js, qu’on ne peut assainir sans rétrograder le
- framework de six versions majeures. Enfin, l’audit
+ Des limites subsistent, et il serait malhonnête de les passer sous silence. Quatre vulnérabilités
+ demeurent dans les dépendances&nbsp;; aucune n’est critique, mais elles proviennent de l’arbre de
+ Next.js, qu’on ne peut assainir sans rétrograder le framework de six versions majeures. Enfin, l’audit
  d’accessibilité n’a porté que sur deux pages publiques et sur les seuls critères automatisables&nbsp;: le
  score de 100 obtenu après correction ne vaut pas conformité RGAA, et trois couleurs de thème restent
  en deçà du seuil de contraste. Ces points sont recensés en annexe C.
  </p>
  <p>
- Les prochaines étapes découlent directement de ce constat&nbsp;: mettre l’application en production selon
- la procédure du chapitre 11.1, intégrer l’audit des dépendances au pipeline, puis étendre l’audit
+ Les prochaines étapes découlent directement de ce constat&nbsp;: intégrer l’audit des dépendances au
+ pipeline pour qu’il devienne bloquant, puis étendre l’audit
  d’accessibilité aux pages authentifiées et au parcours clavier. Viendront ensuite les évolutions produit
  envisagées — synchronisation avec des agendas externes au format iCal et tests de bout en bout — une fois
  ces fondations consolidées.
@@ -1338,13 +1342,13 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  <tr><td class="id">C2.2.3</td><td>Référentiel d’accessibilité présenté et justifié.</td><td>Chapitre 7.1&nbsp;: RGAA 4.1 et Opquast, avec justification du choix.</td><td>16</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.2.3</td><td>Le prototype répond aux exigences du référentiel d’accessibilité.</td><td>Chapitre 7.3&nbsp;: audit Lighthouse, 100/100 sur les deux pages mesurées&nbsp;; 7.4&nbsp;: cinq écarts corrigés avec mesures avant/après&nbsp;; 7.5&nbsp;: portée et écart connu.</td><td>16</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.2.4</td><td>Système de gestion de versions utilisé, évolutions tracées.</td><td>Chapitre 8.1 et 8.2&nbsp;: pratiques Git et jalons identifiés par empreinte.</td><td>18</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.2.4</td><td>Logiciel fonctionnel et manipulable en autonomie par un utilisateur.</td><td>Annexe A (parcours complet en fonctionnement), manuel d’utilisation (11.2), contrôles V-01 à V-08.</td><td>18</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.4</td><td>Logiciel fonctionnel et manipulable en autonomie par un utilisateur.</td><td>Application en ligne sur https://planify.johanpoyet.fr, annexe A, manuel d’utilisation (11.2), contrôles V-01 à V-08 exécutés.</td><td>18</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.3.1</td><td>Cahier de recettes reprenant l’ensemble des fonctionnalités attendues.</td><td>Chapitre 9&nbsp;: 23 scénarios rattachés aux user stories, avec conditions d’exécution.</td><td>20</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.3.1</td><td>Tests fonctionnels, structurels et de sécurité conformes au plan défini.</td><td>Chapitre 9.1, 9.2 et 9.3&nbsp;; 20 scénarios conformes, 3 en échec renvoyés au chapitre 10.</td><td>20</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.2</td><td>Bogues détectés, qualifiés et traités.</td><td>Chapitre 10.2&nbsp;: dix-huit anomalies corrigées&nbsp;; 10.3&nbsp;: une anomalie ouverte qualifiée.</td><td>22</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.2</td><td>Analyse des points d’amélioration pour chaque test en échec.</td><td>Chapitre 10.3 (cause racine par anomalie) et 10.4 (enseignement et mesure adoptée).</td><td>24</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.4.1</td><td>Manuels de déploiement, d’utilisation et de mise à jour rédigés avec clarté.</td><td>Chapitre 11.1, 11.2 et 11.3, avec public identifié pour chacun.</td><td>25</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.4.1</td><td>Documentation décrivant les choix de technologies et de langages.</td><td>Chapitre 1.1 (justification de la stack) et 11.3 (incidence de ces choix sur les procédures).</td><td>4 et 26</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Bogues détectés, qualifiés et traités.</td><td>Chapitre 10.2&nbsp;: dix-neuf anomalies corrigées&nbsp;; 10.3&nbsp;: une anomalie ouverte qualifiée.</td><td>22</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Analyse des points d’amélioration pour chaque test en échec.</td><td>Chapitre 10.3 (cause racine par anomalie) et 10.4 (enseignement et mesure adoptée).</td><td>25</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Manuels de déploiement, d’utilisation et de mise à jour rédigés avec clarté.</td><td>Chapitre 11.1, 11.2 et 11.3, avec public identifié pour chacun.</td><td>26</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Documentation décrivant les choix de technologies et de langages.</td><td>Chapitre 1.1 (justification de la stack) et 11.3 (incidence de ces choix sur les procédures).</td><td>4 et 27</td><td class="ok-txt">Traité</td></tr>
  </tbody>
  </table>
 </section>
@@ -1358,16 +1362,13 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  <table>
  <thead><tr><th style="width:26%">Point</th><th style="width:37%">État réel</th><th>Conséquence sur le dossier</th></tr></thead>
  <tbody>
- <tr><td>Temps de réponse en production</td><td>Aucune mesure réalisée sur l’environnement de production.</td><td>Aucun objectif de temps de réponse n’est annoncé au chapitre 3.2.</td></tr>
- <tr><td>Consommation mémoire réelle</td><td>Seul le plafond PM2 (400 Mo) est configuré&nbsp;; la consommation constatée n’a pas été relevée.</td><td>Le plafond est présenté comme une limite de configuration, non comme une mesure. Contrôle V-08 prévu à cet effet.</td></tr>
- <tr><td>Audit d’accessibilité complet</td><td>Audit automatique Lighthouse réalisé sur deux pages publiques (100/100 après correction). N’ont pas été réalisés&nbsp;: audit des pages authentifiées, parcours clavier, lecteur d’écran, zoom à 200 %.</td><td>Aucun niveau de conformité RGAA n’est revendiqué&nbsp;; la portée exacte de la campagne est délimitée au chapitre 7.5.</td></tr>
+   <tr><td>Audit d’accessibilité complet</td><td>Audit automatique Lighthouse réalisé sur deux pages publiques (100/100 après correction). N’ont pas été réalisés&nbsp;: audit des pages authentifiées, parcours clavier, lecteur d’écran, zoom à 200 %.</td><td>Aucun niveau de conformité RGAA n’est revendiqué&nbsp;; la portée exacte de la campagne est délimitée au chapitre 7.5.</td></tr>
  <tr><td>Contraste de trois couleurs de thème</td><td>Les accents emerald, orange et yellow n’atteignent pas 4,5:1 avec du texte blanc (BUG-17).</td><td>Écart mesuré et documenté au chapitre 7.5&nbsp;; correction soumise à un arbitrage sur l’identité visuelle.</td></tr>
  <tr><td>Tests utilisateurs</td><td>Aucun panel ni retour d’usage formalisé.</td><td>Le dossier ne présente aucun retour utilisateur.</td></tr>
- <tr><td>Mise en production</td><td>L’application n’est pas déployée sur le VPS à la date de rédaction&nbsp;; elle s’exécute en environnement de développement.</td><td>Les captures de l’annexe A et la démonstration sont réalisées en local. Le manuel de déploiement (11.1) reste applicable en l’état.</td></tr>
- <tr><td>Vulnérabilités résiduelles des dépendances</td><td>4 vulnérabilités subsistent (2 élevées, 2 moyennes, aucune critique), héritées de l’arbre de dépendances de Next.js.</td><td>Elles ne peuvent être levées sans rétrograder Next.js de la version 16 à la version 9&nbsp;: l’écart est documenté au chapitre 6.2 et suivi sous BUG-10.</td></tr>
+ <tr><td>Charge et montée en charge</td><td>Les temps de réponse ont été relevés sur des requêtes isolées, sans test de charge.</td><td>Le chapitre 3.2 annonce un temps de réponse constaté, non un comportement sous charge.</td></tr>
+  <tr><td>Vulnérabilités résiduelles des dépendances</td><td>4 vulnérabilités subsistent (2 élevées, 2 moyennes, aucune critique), héritées de l’arbre de dépendances de Next.js.</td><td>Elles ne peuvent être levées sans rétrograder Next.js de la version 16 à la version 9&nbsp;: l’écart est documenté au chapitre 6.2 et suivi sous BUG-10.</td></tr>
  <tr><td>Script <code>deploy.sh</code></td><td>Présent sur le serveur mais non versionné dans le dépôt.</td><td>Son contenu est reproduit au chapitre 3.3 mais ne peut pas être vérifié depuis le dépôt.</td></tr>
- <tr><td>HTTPS</td><td>La configuration Nginx fournie comporte une section TLS encore commentée.</td><td>La procédure d’activation est documentée en 11.1&nbsp;; l’état effectif du certificat n’est pas attesté ici.</td></tr>
- <tr><td>Étiquettes de version</td><td>Aucune étiquette Git posée&nbsp;; seul <code>package.json</code> porte la version 1.0.0.</td><td>Le chapitre 8.2 ne présente que des commits réels, sans historique de versions reconstitué.</td></tr>
+  <tr><td>Étiquettes de version</td><td>Aucune étiquette Git posée&nbsp;; seul <code>package.json</code> porte la version 1.0.0.</td><td>Le chapitre 8.2 ne présente que des commits réels, sans historique de versions reconstitué.</td></tr>
  <tr><td>Protection de branche</td><td>Aucune règle de dépôt n’empêche la fusion en cas d’échec des contrôles.</td><td>La barrière repose sur la subordination du déploiement, décrite au chapitre 4.1.</td></tr>
  <tr><td>Audit de dépendances automatisé</td><td><code>npm audit</code> est exécuté manuellement, hors pipeline.</td><td>Présenté comme tel au chapitre 6.2&nbsp;; intégration au pipeline planifiée (BUG-10).</td></tr>
  </tbody>
