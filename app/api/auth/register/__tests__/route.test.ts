@@ -18,7 +18,7 @@ describe('POST /api/auth/register', () => {
   });
 
   it('returns 400 when email is missing', async () => {
-    const request = createMockRequest('POST', { password: 'validpass123' });
+    const request = createMockRequest('POST', { password: 'ValidPass2026' });
 
     const response = await POST(request);
     const json = await getResponseJson(response);
@@ -37,17 +37,17 @@ describe('POST /api/auth/register', () => {
     expect(json.error).toBe('Email et mot de passe requis');
   });
 
-  it('returns 400 when password is shorter than 6 characters', async () => {
+  it('returns 400 when password does not meet the policy', async () => {
     const request = createMockRequest('POST', {
       email: 'test@example.com',
-      password: '12345',
+      password: 'court1A',
     });
 
     const response = await POST(request);
     const json = await getResponseJson(response);
 
     expect(response.status).toBe(400);
-    expect(json.error).toBe('Le mot de passe doit contenir au moins 6 caractères');
+    expect(json.error).toContain('12 caracteres');
   });
 
   it('returns 400 when email already exists', async () => {
@@ -60,7 +60,7 @@ describe('POST /api/auth/register', () => {
 
     const request = createMockRequest('POST', {
       email: 'test@example.com',
-      password: 'validpass123',
+      password: 'ValidPass2026',
     });
 
     const response = await POST(request);
@@ -84,7 +84,7 @@ describe('POST /api/auth/register', () => {
 
     const request = createMockRequest('POST', {
       email: 'test@example.com',
-      password: 'validpass123',
+      password: 'ValidPass2026',
       name: 'Test User',
     });
 
@@ -117,7 +117,7 @@ describe('POST /api/auth/register', () => {
 
     const request = createMockRequest('POST', {
       email: 'test@example.com',
-      password: 'validpass123',
+      password: 'ValidPass2026',
     });
 
     const response = await POST(request);

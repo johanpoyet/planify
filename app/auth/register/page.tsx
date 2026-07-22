@@ -60,7 +60,7 @@ export default function RegisterPage() {
         <div className="flex items-center gap-2.5 mb-10">
           <div
             className="flex items-center justify-center text-sm font-bold"
-            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: '#fff' }}
+            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: 'var(--pf-on-accent)' }}
           >
             P
           </div>
@@ -132,7 +132,7 @@ export default function RegisterPage() {
             type="submit"
             disabled={loading}
             className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all mt-2 disabled:opacity-50"
-            style={{ background: primaryColor, color: '#fff' }}
+            style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
           >
             {loading ? 'Création…' : 'Continuer →'}
           </button>

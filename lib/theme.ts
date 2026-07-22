@@ -83,3 +83,45 @@ export const themeColors = {
 export type ThemeColor = keyof typeof themeColors;
 
 export const defaultThemeColor: ThemeColor = 'blue';
+
+// ---------------------------------------------------------------------------
+// Contraste : choix de la couleur de texte posee sur la couleur d'accent
+// ---------------------------------------------------------------------------
+
+/** Couleur de texte foncee utilisee sur les accents clairs. */
+export const ON_ACCENT_DARK = '#12121A';
+export const ON_ACCENT_LIGHT = '#FFFFFF';
+
+function channelLuminance(channel: number): number {
+  const c = channel / 255;
+  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+function relativeLuminance(hex: string): number {
+  const h = hex.replace('#', '');
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  return (
+    0.2126 * channelLuminance(r) +
+    0.7152 * channelLuminance(g) +
+    0.0722 * channelLuminance(b)
+  );
+}
+
+/** Rapport de contraste WCAG entre deux couleurs (1 a 21). */
+export function contrastRatio(a: string, b: string): number {
+  const [la, lb] = [relativeLuminance(a), relativeLuminance(b)];
+  const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * Retourne la couleur de texte offrant le meilleur contraste sur la couleur
+ * fournie. Les accents clairs (vert, orange, jaune) recoivent un texte fonce :
+ * le blanc n'y atteindrait pas le seuil AA de 4,5:1 exige pour du texte normal.
+ */
+export function onAccentColor(background: string): string {
+  return contrastRatio(ON_ACCENT_LIGHT, background) >=
+    contrastRatio(ON_ACCENT_DARK, background)
+    ? ON_ACCENT_LIGHT
+    : ON_ACCENT_DARK;
+}

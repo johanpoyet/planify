@@ -258,7 +258,7 @@ export default function FriendsPage() {
                     <button
                       onClick={() => handleAccept(f.id)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
-                      style={{ background: primaryColor, color: '#fff' }}
+                      style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
                     >
                       Accepter
                     </button>
@@ -360,7 +360,7 @@ export default function FriendsPage() {
             <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: primaryColor, color: '#fff' }}
+              style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
             >
               <IcoPlus /> Ajouter un ami
             </button>
@@ -411,7 +411,7 @@ export default function FriendsPage() {
                         <button
                           onClick={() => handleAccept(f.id)}
                           className="flex-1 py-2 rounded-xl text-sm font-semibold"
-                          style={{ background: primaryColor, color: '#fff' }}
+                          style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
                         >
                           Accepter
                         </button>
@@ -509,7 +509,7 @@ export default function FriendsPage() {
                 type="submit"
                 disabled={adding}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold mb-2 disabled:opacity-50"
-                style={{ background: primaryColor, color: '#fff' }}
+                style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
               >
                 {adding ? '…' : 'Envoyer la demande'}
               </button>
@@ -592,7 +592,7 @@ export default function FriendsPage() {
                   type="submit"
                   disabled={adding}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
-                  style={{ background: primaryColor, color: '#fff' }}
+                  style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}
                 >
                   {adding ? '…' : 'Envoyer'}
                 </button>

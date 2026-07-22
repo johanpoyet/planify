@@ -314,7 +314,7 @@ export default function EventsPage() {
             </div>
           </div>
           <button type="button" onClick={() => router.push('/events/new')}
-            style={{width:38, height:38, borderRadius:12, background:primaryColor, border:"none", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", cursor:"pointer", marginTop:4}}>
+            style={{width:38, height:38, borderRadius:12, background:primaryColor, border:"none", display:"flex", alignItems:"center", justifyContent:"center", color: 'var(--pf-on-accent)', cursor:"pointer", marginTop:4}}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
@@ -393,7 +393,7 @@ export default function EventsPage() {
                 {mobileEmptyMsg}
               </p>
               <button type="button" onClick={() => router.push('/events/new')}
-                style={{marginTop:14, padding:"8px 18px", borderRadius:10, background:primaryColor, color:"#fff", fontSize:13, fontWeight:600, border:"none", cursor:"pointer"}}>
+                style={{marginTop:14, padding:"8px 18px", borderRadius:10, background:primaryColor, color: 'var(--pf-on-accent)', fontSize:13, fontWeight:600, border:"none", cursor:"pointer"}}>
                 Créer
               </button>
             </div>
@@ -433,7 +433,7 @@ export default function EventsPage() {
             </div>
           </div>
           <button type="button" onClick={() => router.push('/events/new')}
-            style={{display:"flex", alignItems:"center", gap:6, padding:"7px 14px", borderRadius:10, background:primaryColor, color:"#fff", fontSize:13, fontWeight:600, border:"none", cursor:"pointer"}}>
+            style={{display:"flex", alignItems:"center", gap:6, padding:"7px 14px", borderRadius:10, background:primaryColor, color: 'var(--pf-on-accent)', fontSize:13, fontWeight:600, border:"none", cursor:"pointer"}}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             Nouvel événement
           </button>

@@ -525,7 +525,7 @@ export default function EventDetailPage({ params }: Readonly<PageProps>) {
               <IcoTrash />
             </button>
             <button type="button" onClick={() => { void handleSubmit(); }} disabled={!canSave}
-              style={{ padding: "7px 16px", borderRadius: 10, background: primaryColor, color: "#fff", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer", opacity: canSave ? 1 : 0.4 }}>
+              style={{ padding: "7px 16px", borderRadius: 10, background: primaryColor, color: 'var(--pf-on-accent)', fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer", opacity: canSave ? 1 : 0.4 }}>
               {saving ? "…" : "Enregistrer"}
             </button>
           </div>

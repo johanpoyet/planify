@@ -23,6 +23,9 @@
   /* Contraste porté à 4.65:1 sur --pf-bg (#0B0B0F) pour satisfaire le WCAG AA. */
   --pf-text-muted: #7A7A88;
   --pf-accent: #7454F5;
+  /* Texte pose sur la couleur d'accent. Recalcule par le contexte de theme
+     selon la teinte choisie ; cette valeur couvre le premier rendu. */
+  --pf-on-accent: #FFFFFF;
   --pf-accent-soft: rgba(124, 92, 255, 0.14);
   --pf-accent-strong: #9277FF;
   --pf-success: #4FD18B;

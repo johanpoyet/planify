@@ -36,7 +36,7 @@ function getDayBg(isSel: boolean, isTod: boolean, primaryColor: string): string 
 }
 function getDayColor(isPast: boolean, isSel: boolean, isTod: boolean, primaryColor: string): string {
   if (isPast) return "var(--pf-border-strong)";
-  if (isSel) return "#fff";
+  if (isSel) return "var(--pf-on-accent)";
   if (isTod) return primaryColor;
   return "var(--pf-text)";
 }
@@ -72,7 +72,10 @@ function CalPicker({ value, onChange, minDate }: Readonly<{ value: string; onCha
     const [h,m] = t.split(":").map(s => Number.parseInt(s,10));
     const nd = new Date(d);
     if (!Number.isNaN(h) && !Number.isNaN(m)) nd.setHours(h,m); else nd.setHours(12,0);
-    return nd.toISOString().slice(0,16);
+    // Date locale : toISOString() convertirait en temps universel et decalerait
+    // l'heure choisie par l'utilisateur de son decalage horaire.
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${nd.getFullYear()}-${p(nd.getMonth()+1)}-${p(nd.getDate())}T${p(nd.getHours())}:${p(nd.getMinutes())}`;
   };
   const pick = (day: number) => {
     const d = new Date(month.getFullYear(), month.getMonth(), day);
@@ -354,7 +357,7 @@ export default function NewEventPage() {
         </button>
         <span style={{ fontSize:14, fontWeight:600, color:"var(--pf-text)", letterSpacing:"-0.01em" }}>Nouvel événement</span>
         <button type="button" onClick={() => { void handleSubmit(); }} disabled={loading||!formData.title.trim()}
-          style={{ padding:"7px 16px", borderRadius:10, background: primaryColor, color:"#fff", fontSize:13, fontWeight:600, border:"none", cursor:"pointer", opacity: loading||!formData.title.trim() ? 0.4 : 1 }}>
+          style={{ padding:"7px 16px", borderRadius:10, background: primaryColor, color: 'var(--pf-on-accent)', fontSize:13, fontWeight:600, border:"none", cursor:"pointer", opacity: loading||!formData.title.trim() ? 0.4 : 1 }}>
           {loading ? "…" : "Créer"}
         </button>
       </div>

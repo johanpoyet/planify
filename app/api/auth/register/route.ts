@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
+import { logSecurityEvent, maskEmail, validatePassword } from '../../../../lib/security';
 
 export async function POST(request: Request) {
   try {
@@ -15,11 +16,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Le mot de passe doit contenir au moins 6 caractères' },
-        { status: 400 }
-      );
+    const policy = validatePassword(password);
+    if (!policy.valid) {
+      logSecurityEvent('password_rejected', { email: maskEmail(email) });
+      return NextResponse.json({ error: policy.reason }, { status: 400 });
     }
 
     // Vérifier si l'utilisateur existe déjà
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         name: name || null,
       },
     });
+
+    logSecurityEvent('account_created', { email: maskEmail(email) });
 
     // Retourner l'utilisateur sans le mot de passe
     const { password: _, ...userWithoutPassword } = user;

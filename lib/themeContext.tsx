@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { themeColors, ThemeColor, defaultThemeColor } from './theme';
+import { themeColors, ThemeColor, defaultThemeColor, onAccentColor } from './theme';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -111,6 +111,9 @@ export function ThemeProvider({ children, initialColor, initialMode }: ThemeProv
     root.style.setProperty('--color-primary', colors.primary);
     root.style.setProperty('--color-primary-hover', colors.primaryHover);
     root.style.setProperty('--color-primary-light', colors.primaryLight);
+    // Couleur de texte a poser sur l'accent : blanche ou foncee selon celle qui
+    // atteint le seuil de contraste AA (voir onAccentColor).
+    root.style.setProperty('--pf-on-accent', onAccentColor(colors.primary));
 
     // Ajouter aussi l'attribut data-theme pour le CSS
     root.setAttribute('data-theme', themeColor);

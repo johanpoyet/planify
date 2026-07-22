@@ -311,7 +311,7 @@ export default function PollsPage() {
                 {filter === 'active' ? 'Aucun sondage actif' : 'Aucun sondage terminé'}
               </p>
               {filter === 'active' && (
-                <Link href="/polls/new" className="mt-3 inline-block px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: primaryColor, color: '#fff' }}>
+                <Link href="/polls/new" className="mt-3 inline-block px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}>
                   Créer un sondage
                 </Link>
               )}
@@ -338,7 +338,7 @@ export default function PollsPage() {
               {activePolls.length} actif{activePolls.length === 1 ? '' : 's'}
             </span>
           </div>
-          <Link href="/polls/new" className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: primaryColor, color: '#fff' }}>
+          <Link href="/polls/new" className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: primaryColor, color: 'var(--pf-on-accent)' }}>
             <PlusIcon /> Nouveau sondage
           </Link>
         </div>
@@ -473,7 +473,7 @@ function MobilePollCard({ poll, primaryColor }: Readonly<{ poll: Poll; primaryCo
       ))}
       <Link
         href={`/polls/${poll.id}`}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 10, padding: '10px 0', borderRadius: 12, background: primaryColor, color: '#fff', fontSize: 14, fontWeight: 600 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 10, padding: '10px 0', borderRadius: 12, background: primaryColor, color: 'var(--pf-on-accent)', fontSize: 14, fontWeight: 600 }}
       >
         Voter
       </Link>
