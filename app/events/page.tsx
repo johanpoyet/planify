@@ -37,8 +37,9 @@ function isSameDay(a: Date, b: Date | null) {
   return a.getDate()===b.getDate() && a.getMonth()===b.getMonth() && a.getFullYear()===b.getFullYear();
 }
 function getDayFg(isToday: boolean, isSelected: boolean, primaryColor: string): string {
-  if (isSelected) return "#fff";
-  if (isToday) return primaryColor;
+  if (isSelected) return "var(--pf-on-accent)";
+  // Variante claire : l accent plein ne passe pas le seuil AA en texte sur surface.
+  if (isToday) return "var(--pf-accent-strong)";
   return "var(--pf-text)";
 }
 

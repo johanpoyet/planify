@@ -52,6 +52,9 @@ export default function PushNotificationSettings() {
       <button
         onClick={handleToggle}
         disabled={isLoading}
+        aria-label="Activer les notifications push"
+        role="switch"
+        aria-checked={isSubscribed}
         className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors flex-shrink-0 ${
           isLoading ? "opacity-50 cursor-not-allowed" : ""
         }`}
