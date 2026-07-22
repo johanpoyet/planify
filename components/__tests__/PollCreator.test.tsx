@@ -40,7 +40,7 @@ describe('PollCreator', () => {
 
     expect(screen.getByLabelText('Question')).toBeInTheDocument();
     expect(screen.getByText('Options')).toBeInTheDocument();
-    expect(screen.getByText('Destinataires (amis)')).toBeInTheDocument();
+    expect(screen.getByText('Destinataires')).toBeInTheDocument();
   });
 
   it('should render initial 2 option inputs', async () => {
@@ -115,7 +115,9 @@ describe('PollCreator', () => {
       expect(screen.getByText('Alice')).toBeInTheDocument();
     });
 
-    const checkbox = screen.getByLabelText('Alice') as HTMLInputElement;
+    // La case est masquée (display: none), le <label> servant de contrôle visuel :
+    // il faut donc inclure les éléments cachés pour la récupérer.
+    const checkbox = screen.getByRole('checkbox', { hidden: true }) as HTMLInputElement;
     expect(checkbox.checked).toBe(false);
 
     fireEvent.click(checkbox);
@@ -132,7 +134,7 @@ describe('PollCreator', () => {
 
     renderWithTheme(<PollCreator />);
 
-    const submitButton = screen.getByText('Créer sondage');
+    const submitButton = screen.getByText('Créer le sondage');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -170,7 +172,7 @@ describe('PollCreator', () => {
     fireEvent.click(friendCheckbox);
 
     // Soumettre
-    const submitButton = screen.getByText('Créer sondage');
+    const submitButton = screen.getByText('Créer le sondage');
     fireEvent.click(submitButton);
 
     await waitFor(() => {

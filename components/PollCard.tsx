@@ -1,215 +1,409 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useTheme } from '@/lib/themeContext';
-import { useSession } from 'next-auth/react';
 
-export default function PollCard({ pollId }: { pollId: string }) {
+import React, { useEffect, useState } from "react";
+import { useTheme } from "@/lib/themeContext";
+import { useSession } from "next-auth/react";
+
+// ── Types ─────────────────────────────────────────────────────────────────
+interface PollOptionData { id: string; text: string; }
+interface VoterInfo { id: string; name: string | null; email: string; }
+interface Vote { id: string; optionId: string; userId: string; createdAt: string; user: VoterInfo | null; }
+interface PollInfo { id: string; question: string; deadline: string | null; status: string; }
+interface PollData { poll: PollInfo; options: PollOptionData[]; votes: Vote[]; }
+type Message = { text: string; type: "success" | "error" };
+type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const COLORS = ["#7C5CFF","#FF7A45","#4FD18B","#FF6BD6","#4F8BFF","#FFB454","#5CE0E0","#FF5C5C"];
+
+function getColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + (seed.codePointAt(i) ?? 0)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.length >= 2
+    ? (parts[0][0] + (parts.at(-1) ?? parts[0])[0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+}
+
+function fmtDate(ds: string): string {
+  return new Date(ds).toLocaleDateString("fr-FR", {
+    day: "numeric", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function fmtRelative(ds: string): string {
+  const diff = Date.now() - new Date(ds).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "À l'instant";
+  if (mins < 60) return `Il y a ${mins} min`;
+  const h = Math.floor(mins / 60);
+  if (h < 24) return `Il y a ${h}h`;
+  return `Il y a ${Math.floor(h / 24)}j`;
+}
+
+function voterName(v: VoterInfo | null): string {
+  return v?.name ?? v?.email ?? "Anonyme";
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────
+function MiniAvatar({ name, size }: Readonly<{ name: string; size: number }>) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%", background: getColor(name),
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: Math.round(size * 0.36), fontWeight: 700, color: "#fff", flexShrink: 0,
+      border: "1.5px solid var(--pf-bg)",
+    }}>
+      {getInitials(name)}
+    </div>
+  );
+}
+
+function VoterStack({ voters, max = 5 }: Readonly<{ voters: string[]; max?: number }>) {
+  const shown = voters.slice(0, max);
+  const extra = voters.length - max;
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      {shown.map((name, i) => (
+        <div key={name + i} style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown.length - i }}>
+          <MiniAvatar name={name} size={20} />
+        </div>
+      ))}
+      {extra > 0 && (
+        <div style={{
+          marginLeft: -6, width: 20, height: 20, borderRadius: "50%",
+          background: "var(--pf-surface-2)", border: "1.5px solid var(--pf-bg)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 9, fontWeight: 700, color: "var(--pf-text-muted)",
+        }}>
+          +{extra}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Standalone async functions ────────────────────────────────────────────
+async function loadPollData(
+  pollId: string,
+  userEmail: string | null | undefined,
+  setPollData: SetState<PollData | null>,
+  setHasVoted: SetState<boolean>,
+  setCurrentVote: SetState<string | null>,
+  setSelected: SetState<string | null>,
+  setIsEditing: SetState<boolean>,
+): Promise<void> {
+  const data: PollData = await fetch(`/api/polls/${pollId}`).then(r => r.json());
+  setPollData(data);
+  if (data.votes && userEmail) {
+    const userData: { id: string } = await fetch("/api/user").then(r => r.json());
+    const userVote = data.votes.find(v => v.userId === userData.id);
+    if (userVote) {
+      setHasVoted(true);
+      setCurrentVote(userVote.optionId);
+      setSelected(userVote.optionId);
+      setIsEditing(false);
+    } else {
+      setIsEditing(true);
+    }
+  }
+}
+
+async function submitVote(
+  pollId: string,
+  optionId: string,
+  hadVoted: boolean,
+  setLoading: SetState<boolean>,
+  setMessage: SetState<Message | null>,
+  setHasVoted: SetState<boolean>,
+  setCurrentVote: SetState<string | null>,
+  setIsEditing: SetState<boolean>,
+  setPollData: SetState<PollData | null>,
+): Promise<void> {
+  setLoading(true);
+  setMessage(null);
+  try {
+    const res = await fetch("/api/polls/vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pollId, optionId }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body?.error || "Erreur");
+    setMessage({ text: hadVoted ? "Vote modifié !" : "Vote enregistré !", type: "success" });
+    setHasVoted(true);
+    setCurrentVote(optionId);
+    setIsEditing(false);
+    const refreshed: PollData = await fetch(`/api/polls/${pollId}`).then(r => r.json());
+    setPollData(refreshed);
+  } catch (err: unknown) {
+    setMessage({ text: err instanceof Error ? err.message : "Erreur", type: "error" });
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+export default function PollCard({ pollId }: Readonly<{ pollId: string }>) {
   const { data: session } = useSession();
-  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
-  const [pollData, setPollData] = useState<any>(null);
+  const { primaryColor } = useTheme();
+
+  const [pollData, setPollData] = useState<PollData | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<Message | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [currentVote, setCurrentVote] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setLoadingData(true);
-    fetch(`/api/polls/${pollId}`)
-      .then(r => r.json())
-      .then(data => {
-        setPollData(data);
-        setLoadingData(false);
-
-        // Vérifier si l'utilisateur a déjà voté
-        if (data.votes && session?.user?.email) {
-          fetch('/api/user')
-            .then(r => r.json())
-            .then(userData => {
-              const userVote = data.votes.find((v: any) => v.userId === userData.id);
-              if (userVote) {
-                setHasVoted(true);
-                setCurrentVote(userVote.optionId);
-                setSelected(userVote.optionId);
-                setIsEditing(false); // L'utilisateur a déjà voté, mode lecture
-              } else {
-                setIsEditing(true); // Première visite, mode édition
-              }
-            });
-        }
-      })
-      .catch(() => {
-        setPollData(null);
-        setLoadingData(false);
-      });
+    loadPollData(pollId, session?.user?.email, setPollData, setHasVoted, setCurrentVote, setSelected, setIsEditing)
+      .catch(() => setPollData(null))
+      .finally(() => setLoadingData(false));
   }, [pollId, session]);
 
-  async function vote() {
-    if (!selected) return setMessage({ text: 'Choisissez une option', type: 'error' });
-    setLoading(true);
-    setMessage(null);
-    try {
-      const res = await fetch('/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionId: selected }) });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body?.error || 'Erreur');
+  const handleVote = () => {
+    if (selected === null) { setMessage({ text: "Choisissez une option", type: "error" }); return; }
+    void submitVote(pollId, selected, hasVoted, setLoading, setMessage, setHasVoted, setCurrentVote, setIsEditing, setPollData);
+  };
 
-      setMessage({ text: hasVoted ? 'Vote modifié avec succès !' : 'Vote enregistré avec succès !', type: 'success' });
-      setHasVoted(true);
-      setCurrentVote(selected);
-      setIsEditing(false); // Retour en mode lecture après vote
+  const handleEnableEditing = () => { setIsEditing(true); setMessage(null); };
+  const handleCancelEditing = () => { setSelected(currentVote); setIsEditing(false); setMessage(null); };
 
-      // refresh
-      const refreshed = await fetch(`/api/polls/${pollId}`).then(r=>r.json());
-      setPollData(refreshed);
-    } catch (e: any) {
-      setMessage({ text: e?.message || 'Erreur', type: 'error' });
-    } finally { setLoading(false); }
-  }
-
-  function enableEditing() {
-    setIsEditing(true);
-    setMessage(null);
-  }
-
-  function cancelEditing() {
-    setSelected(currentVote);
-    setIsEditing(false);
-    setMessage(null);
-  }
-
+  /* ── Loading ──────────────────────────────────────────────────────────── */
   if (loadingData) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-700 border-t-transparent" style={{ borderTopColor: primaryLightColor }}></div>
+      <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}>
+        <svg style={{ animation: "spin 1s linear infinite", color: primaryColor }} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M21 12a9 9 0 11-6.219-8.56"/>
+        </svg>
       </div>
     );
   }
 
-  if (!pollData || !pollData.poll) {
+  if (!pollData?.poll) {
     return (
-      <div className="text-center py-12">
-        <div className="text-slate-400">Sondage introuvable</div>
+      <div style={{ textAlign: "center", padding: "64px 0" }}>
+        <p style={{ fontSize: 14, color: "var(--pf-text-dim)" }}>Sondage introuvable</p>
       </div>
     );
   }
+
+  const { poll, options, votes } = pollData;
+  const totalVotes = votes.length;
+  const optionMap = Object.fromEntries(options.map(o => [o.id, o.text]));
+
+  const optionVoteList = (optId: string) => votes.filter(v => v.optionId === optId);
+  const optionVotes = (optId: string) => optionVoteList(optId).length;
+  const pct = (optId: string) => totalVotes > 0 ? Math.round((optionVotes(optId) / totalVotes) * 100) : 0;
+
+  const submitLabel = loading ? "…" : (hasVoted ? "Valider la modification" : "Confirmer mon vote");
+  const isActive = loading || selected === null;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+      {/* ── Meta ────────────────────────────────────────────────────────── */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">{pollData.poll.question}</h3>
-        {pollData.poll.deadline && (
-          <p className="text-sm text-slate-400">
-            Date limite : {new Date(pollData.poll.deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          </p>
-        )}
+        <p style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: primaryColor, marginBottom: 10 }}>
+          Sondage{poll.deadline !== null ? ` · ${fmtDate(poll.deadline)}` : ""}
+        </p>
+        <h2 style={{ fontSize: 24, fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.2, color: "var(--pf-text)" }}>
+          {poll.question}
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--pf-text-muted)", marginTop: 8 }}>
+          {totalVotes} vote{totalVotes === 1 ? "" : "s"} · {poll.status === "resolved" ? "Résolu" : poll.status === "cancelled" ? "Annulé" : "En cours"}
+        </p>
       </div>
 
-      <div className="space-y-3">
-        {pollData.options?.map((opt: any) => (
-          <label
-            key={opt.id}
-            htmlFor={`option-${opt.id}`}
-            className={`flex items-center gap-3 p-4 border rounded-2xl transition-all duration-200 ${
-              isEditing
-                ? 'bg-slate-800/30 hover:bg-slate-800/50 border-slate-700/50 cursor-pointer group'
-                : 'bg-slate-800/20 border-slate-700/30 cursor-not-allowed opacity-75'
-            }`}
-          >
-            <input
-              id={`option-${opt.id}`}
-              type="radio"
-              name="poll-option"
-              value={opt.id}
-              checked={selected === opt.id}
-              onChange={() => isEditing && setSelected(opt.id)}
-              disabled={!isEditing}
-              className="w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-900 checked:bg-current text-current transition-all disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ color: selected === opt.id ? primaryLightColor : undefined, cursor: isEditing ? 'pointer' : 'not-allowed' }}
-            />
-            <span className={`flex-1 transition-colors ${isEditing ? 'text-slate-200 group-hover:text-white' : 'text-slate-400'}`}>
-              {opt.text}
-            </span>
-          </label>
-        ))}
+      <hr style={{ border: "none", borderTop: "1px solid var(--pf-border)", margin: 0 }} />
+
+      {/* ── Options heading ──────────────────────────────────────────────── */}
+      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--pf-text)" }}>
+        {isEditing ? "Choisis ta préférence" : "Résultats"}
+      </p>
+
+      {/* ── Option cards ─────────────────────────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {options.map(opt => {
+          const isSelected = selected === opt.id;
+          const optVotes = optionVoteList(opt.id);
+          const voteCnt = optVotes.length;
+          const pctVal = pct(opt.id);
+          const maxPct = Math.max(...options.map(o => pct(o.id)));
+          const isLeading = pctVal > 0 && pctVal === maxPct;
+          const voterNames = optVotes.map(v => voterName(v.user));
+
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { if (isEditing) setSelected(opt.id); }}
+              style={{
+                display: "block", width: "100%", textAlign: "left",
+                padding: 16, borderRadius: 14,
+                background: isSelected ? "var(--pf-accent-soft)" : "var(--pf-surface)",
+                border: `1px solid ${isSelected ? primaryColor : "var(--pf-border)"}`,
+                cursor: isEditing ? "pointer" : "default",
+                transition: "background 0.15s, border-color 0.15s",
+              }}
+            >
+              {/* Top row: radio + text + pct */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <div style={{
+                  width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+                  border: `1.5px solid ${isSelected ? primaryColor : "var(--pf-border)"}`,
+                  background: isSelected ? primaryColor : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {isSelected && (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                </div>
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "var(--pf-text)" }}>{opt.text}</span>
+                <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 600, flexShrink: 0, color: isSelected ? primaryColor : (isLeading ? "var(--pf-text)" : "var(--pf-text-muted)") }}>
+                  {pctVal}%
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div style={{ height: 5, borderRadius: 3, background: "var(--pf-surface-2)", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%", borderRadius: 3, width: `${pctVal}%`,
+                  background: isSelected ? primaryColor : (isLeading ? "var(--pf-text-dim)" : "var(--pf-border)"),
+                  transition: "width 0.3s ease",
+                }} />
+              </div>
+
+              {/* Voter avatars + count */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+                {voteCnt > 0 ? (
+                  <VoterStack voters={voterNames} />
+                ) : (
+                  <span style={{ fontSize: 11, color: "var(--pf-text-muted)" }}>Aucun vote</span>
+                )}
+                {voteCnt > 0 && (
+                  <span style={{ fontSize: 11, color: "var(--pf-text-muted)" }}>
+                    {voteCnt} vote{voteCnt === 1 ? "" : "s"}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {message && (
-        <div className={`p-4 border rounded-2xl flex items-center gap-3 ${
-          message.type === 'success'
-            ? 'bg-emerald-900/30 border-emerald-700/50'
-            : 'bg-red-900/30 border-red-700/50'
-        }`}>
-          {message.type === 'success' ? (
-            <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      {/* ── Message ──────────────────────────────────────────────────────── */}
+      {message !== null && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "12px 16px", borderRadius: 12, fontSize: 13,
+          background: message.type === "success" ? "rgba(79,209,139,0.08)" : "rgba(239,68,68,0.08)",
+          border: `1px solid ${message.type === "success" ? "rgba(79,209,139,0.25)" : "rgba(239,68,68,0.25)"}`,
+          color: message.type === "success" ? "#4FD18B" : "#ef4444",
+        }}>
+          {message.type === "success" ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           ) : (
-            <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
           )}
-          <p className={`text-sm ${message.type === 'success' ? 'text-emerald-300' : 'text-red-300'}`}>
-            {message.text}
-          </p>
+          {message.text}
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        {!isEditing && hasVoted ? (
-          // Mode lecture : bouton pour passer en mode édition
+      {/* ── Actions ──────────────────────────────────────────────────────── */}
+      {isEditing ? (
+        <div style={{ display: "flex", gap: 12 }}>
           <button
-            onClick={enableEditing}
-            disabled={loading}
-            className="flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
-            style={{ backgroundColor: loading ? '#64748b' : primaryColor }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = primaryHoverColor;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = primaryColor;
-              }
+            type="button"
+            onClick={handleVote}
+            disabled={isActive}
+            style={{
+              flex: 2, padding: "12px 0", borderRadius: 12, fontSize: 14, fontWeight: 600,
+              background: isActive ? "var(--pf-surface-2)" : primaryColor,
+              color: isActive ? "var(--pf-text-muted)" : "#fff",
+              border: "none", cursor: isActive ? "default" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}
           >
-            Modifier mon vote
+            {loading && (
+              <svg style={{ animation: "spin 1s linear infinite" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M21 12a9 9 0 11-6.219-8.56"/>
+              </svg>
+            )}
+            {submitLabel}
           </button>
-        ) : (
-          // Mode édition : boutons pour valider ou annuler
-          <>
+          {hasVoted && (
             <button
-              onClick={vote}
-              disabled={loading || !selected}
-              className="flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
-              style={{ backgroundColor: (loading || !selected) ? '#64748b' : primaryColor }}
-              onMouseEnter={(e) => {
-                if (!loading && selected) {
-                  e.currentTarget.style.backgroundColor = primaryHoverColor;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading && selected) {
-                  e.currentTarget.style.backgroundColor = primaryColor;
-                }
+              type="button"
+              onClick={handleCancelEditing}
+              disabled={loading}
+              style={{
+                flex: 1, padding: "12px 0", borderRadius: 12, fontSize: 14, fontWeight: 500,
+                background: "var(--pf-surface)", border: "1px solid var(--pf-border)",
+                color: "var(--pf-text-dim)", cursor: loading ? "default" : "pointer",
               }}
             >
-              {loading ? 'Envoi en cours...' : hasVoted ? 'Valider la modification' : 'Voter'}
+              Annuler
             </button>
-            {hasVoted && (
-              <button
-                onClick={cancelEditing}
-                disabled={loading}
-                className="sm:flex-1 px-6 py-3.5 sm:py-3 rounded-2xl font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl text-sm sm:text-base"
-              >
-                Annuler
-              </button>
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleEnableEditing}
+          style={{
+            width: "100%", padding: "12px 0", borderRadius: 12, fontSize: 14, fontWeight: 600,
+            background: "var(--pf-surface)", border: `1px solid ${primaryColor}`,
+            color: primaryColor, cursor: "pointer",
+          }}
+        >
+          Modifier mon vote
+        </button>
+      )}
+
+      {/* ── Activité ─────────────────────────────────────────────────────── */}
+      {votes.length > 0 && (
+        <>
+          <hr style={{ border: "none", borderTop: "1px solid var(--pf-border)", margin: 0 }} />
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--pf-text)" }}>Activité</p>
+              <span style={{ fontSize: 11, color: "var(--pf-text-muted)" }}>
+                Dernier vote {fmtRelative(votes[0].createdAt)}
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {votes.map(vote => {
+                const name = voterName(vote.user);
+                const optText = optionMap[vote.optionId] ?? "?";
+                return (
+                  <div key={vote.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: "1px solid var(--pf-border)" }}>
+                    <MiniAvatar name={name} size={28} />
+                    <p style={{ flex: 1, fontSize: 13, color: "var(--pf-text)" }}>
+                      <strong style={{ fontWeight: 600 }}>{name}</strong>
+                      <span style={{ color: "var(--pf-text-dim)" }}> a voté pour </span>
+                      <strong style={{ fontWeight: 600 }}>{optText}</strong>
+                    </p>
+                    <span style={{ fontSize: 11, color: "var(--pf-text-muted)", flexShrink: 0 }}>
+                      {fmtRelative(vote.createdAt)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

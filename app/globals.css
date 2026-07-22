@@ -9,7 +9,27 @@
   --color-primary-light: #60a5fa; /* blue-400 par défaut */
   --background: #0f172a;
   --foreground: #f8fafc;
+
+  /* Planify design tokens */
+  --pf-bg: #0B0B0F;
+  --pf-bg-2: #101015;
+  --pf-surface: #15151B;
+  --pf-surface-2: #1B1B23;
+  --pf-surface-3: #22222C;
+  --pf-border: #25252F;
+  --pf-border-strong: #34343F;
+  --pf-text: #ECECF0;
+  --pf-text-dim: #9A9AA6;
+  /* Contraste porté à 4.65:1 sur --pf-bg (#0B0B0F) pour satisfaire le WCAG AA. */
+  --pf-text-muted: #7A7A88;
+  --pf-accent: #7454F5;
+  --pf-accent-soft: rgba(124, 92, 255, 0.14);
+  --pf-accent-strong: #9277FF;
+  --pf-success: #4FD18B;
+  --pf-warn: #FFB454;
+  --pf-danger: #FF5C5C;
 }
+
 
 /* Animations modernes */
 @keyframes blob {
@@ -191,6 +211,21 @@ body.light-mode {
   --text-primary: #111827;
   --text-secondary: #374151;
   --text-tertiary: #6b7280;
+  /* Planify light tokens */
+  --pf-bg: #F7F7F9;
+  --pf-bg-2: #FFFFFF;
+  --pf-surface: #FFFFFF;
+  --pf-surface-2: #F2F2F6;
+  --pf-surface-3: #E9E9EE;
+  --pf-border: #E4E4EA;
+  --pf-border-strong: #D0D0D7;
+  --pf-text: #0E0E14;
+  --pf-text-dim: #5A5A66;
+  /* Contraste porté à 4.57:1 sur --pf-bg (#F7F7F9) pour satisfaire le WCAG AA. */
+  --pf-text-muted: #70707B;
+  --pf-accent: #6A48FF;
+  --pf-accent-soft: rgba(106, 72, 255, 0.10);
+  --pf-accent-strong: #5A38EE;
 }
 
 body {
@@ -345,6 +380,30 @@ body.light-mode textarea:focus,
 body.light-mode select:focus {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+}
+
+/* Scrollbar globale — suit le design system de l'app */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pf-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pf-surface-3);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pf-text-muted);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pf-surface-3) var(--pf-bg);
 }
 
 /* Custom Scrollbar - Mode sombre */

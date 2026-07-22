@@ -1,32 +1,65 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
-import { useTheme } from '@/lib/themeContext';
-import DateTimePicker from '@/components/DateTimePicker';
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/themeContext";
+import DateTimePicker from "@/components/DateTimePicker";
 
 type Friend = { id: string; friend: { id: string; name?: string; email: string } };
 type OptionItem = { id: string; text: string };
 
+const COLORS = ["#7C5CFF","#FF7A45","#4FD18B","#FF6BD6","#4F8BFF","#FFB454","#5CE0E0","#FF5C5C"];
+
+function getColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + (seed.codePointAt(i) ?? 0)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.length >= 2
+    ? (parts[0][0] + (parts.at(-1) ?? parts[0])[0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+}
+
+function newId(): string {
+  return crypto.randomUUID?.() || String(Date.now() + Math.random());
+}
+
+const LABEL_STYLE: React.CSSProperties = {
+  display: "block", fontSize: 11, fontWeight: 600,
+  textTransform: "uppercase", letterSpacing: "0.07em",
+  color: "var(--pf-text-muted)", marginBottom: 10,
+};
+
+const INPUT_BASE: React.CSSProperties = {
+  width: "100%", padding: "12px 14px", borderRadius: 12,
+  background: "var(--pf-surface)", border: "1px solid var(--pf-border)",
+  color: "var(--pf-text)", fontSize: 14, outline: "none",
+  transition: "border-color 0.15s",
+};
+
 export default function PollCreator() {
   const router = useRouter();
-  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
+  const { primaryColor } = useTheme();
 
   const [question, setQuestion] = useState("");
   const [deadline, setDeadline] = useState<string>("");
   const [options, setOptions] = useState<OptionItem[]>([
-    { id: crypto.randomUUID?.() || String(Date.now()) + '-1', text: '' },
-    { id: crypto.randomUUID?.() || String(Date.now()) + '-2', text: '' },
+    { id: newId(), text: "" },
+    { id: newId(), text: "" },
   ]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/friends?status=accepted')
+    fetch("/api/friends?status=accepted")
       .then(r => r.json())
-      .then(data => setFriends(data || []))
+      .then((data: Friend[]) => setFriends((data || []).filter(f => f.friend != null)))
       .catch(() => setFriends([]));
   }, []);
 
@@ -35,181 +68,252 @@ export default function PollCreator() {
   }
 
   function addOption() {
-    setOptions(prev => [...prev, { id: crypto.randomUUID?.() || String(Date.now()), text: '' }]);
+    setOptions(prev => [...prev, { id: newId(), text: "" }]);
+  }
+
+  function removeOption(id: string) {
+    setOptions(prev => prev.filter(o => o.id !== id));
   }
 
   function toggleFriend(id: string) {
-    setSelected(s => ({ ...s, [id]: !s[id] }));
+    setSelected(s => ({ ...s, [id]: s[id] === true ? false : true }));
+  }
+
+  function focusStyle(id: string): React.CSSProperties {
+    return focusedId === id ? { borderColor: primaryColor } : {};
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const recipientIds = Object.entries(selected).filter(([k,v]) => v).map(([k]) => k);
+    const recipientIds = Object.keys(selected).filter(k => selected[k]);
     const cleanOptions = options.map(o => o.text.trim()).filter(o => o.length > 0);
     if (!question.trim() || cleanOptions.length < 2 || recipientIds.length === 0) {
-      setError('Question, au moins 2 options et au moins un destinataire requis');
+      setError("Question, au moins 2 options et au moins un destinataire requis.");
       return;
     }
-
     setLoading(true);
     try {
-      const res = await fetch('/api/polls/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/polls/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: question.trim(), options: cleanOptions, recipientIds, deadline: deadline || null }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body?.error || 'Erreur');
-      // Redirect to the newly created poll page
-      if (body?.poll?.id) {
-        router.push(`/polls/${body.poll.id}`);
-      }
-      // reset
-      setQuestion(''); setOptions([
-        { id: crypto.randomUUID?.() || String(Date.now()) + '-1', text: '' },
-        { id: crypto.randomUUID?.() || String(Date.now()) + '-2', text: '' },
-      ]); setSelected({});
-    } catch (err: any) {
-      setError(err?.message || 'Erreur');
-    } finally { setLoading(false); }
+      if (!res.ok) throw new Error(body?.error || "Erreur");
+      if (body?.poll?.id) router.push(`/polls/${body.poll.id}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setLoading(false);
+    }
   }
 
+  const selectedCount = Object.values(selected).filter(Boolean).length;
+
   return (
-    <form onSubmit={submit} className="space-y-6">
+    <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+      {/* Question */}
       <div>
-        <label htmlFor="poll-question" className="block text-sm font-medium text-slate-300 mb-2">Question</label>
-        <div className="relative">
-          <input
-            id="poll-question"
-            value={question}
-            onChange={e=>setQuestion(e.target.value)}
-            onFocus={() => setFocusedInput('question')}
-            onBlur={() => setFocusedInput(null)}
-            className="w-full px-3 sm:px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
-            style={{ borderColor: focusedInput === 'question' ? primaryLightColor : undefined }}
-            placeholder="Ex: On se voit quand ?"
-          />
-        </div>
+        <label htmlFor="poll-question" style={LABEL_STYLE}>Question</label>
+        <input
+          id="poll-question"
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          onFocus={() => setFocusedId("question")}
+          onBlur={() => setFocusedId(null)}
+          placeholder="Ex : On se voit quand ?"
+          style={{ ...INPUT_BASE, ...focusStyle("question"), fontSize: 15 }}
+        />
       </div>
 
+      {/* Deadline */}
       <div>
-        <fieldset>
-          <legend className="block text-sm font-medium text-slate-300 mb-2">Date et heure (optionnel)</legend>
-          <DateTimePicker value={deadline} onChange={(v) => setDeadline(v)} onFocus={() => setFocusedInput('deadline')} onBlur={() => setFocusedInput(null)} />
+        <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+          <legend style={LABEL_STYLE}>Date limite (optionnel)</legend>
+          <DateTimePicker
+            value={deadline}
+            onChange={v => setDeadline(v)}
+            onFocus={() => setFocusedId("deadline")}
+            onBlur={() => setFocusedId(null)}
+          />
         </fieldset>
       </div>
 
+      {/* Options */}
       <div>
-        <fieldset className="space-y-2">
-          <legend className="block text-sm font-medium text-slate-300 mb-2">Options</legend>
-          <div className="space-y-2 mt-2">
-          {options.map((opt, i) => (
-            <div key={opt.id} className="relative">
-              <input
-                id={`option-${opt.id}`}
-                value={opt.text}
-                onChange={e=>setOptionAt(opt.id, e.target.value)}
-                className="w-full px-3 sm:px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
-                placeholder={`Option ${i+1}`}
-              />
-            </div>
-          ))}
+        <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+          <legend style={LABEL_STYLE}>Options</legend>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {options.map((opt, i) => (
+              <div key={opt.id} style={{ position: "relative" }}>
+                <input
+                  id={`option-${opt.id}`}
+                  value={opt.text}
+                  onChange={e => setOptionAt(opt.id, e.target.value)}
+                  onFocus={() => setFocusedId(opt.id)}
+                  onBlur={() => setFocusedId(null)}
+                  placeholder={`Option ${i + 1}`}
+                  style={{ ...INPUT_BASE, ...focusStyle(opt.id), paddingRight: options.length > 2 ? 44 : 14 }}
+                />
+                {options.length > 2 && (
+                  <button
+                    type="button"
+                    aria-label="Supprimer l'option"
+                    onClick={() => removeOption(opt.id)}
+                    style={{
+                      position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                      width: 28, height: 28, borderRadius: 8, border: "none",
+                      background: "var(--pf-surface-2)", color: "var(--pf-text-muted)",
+                      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
           <button
             type="button"
             onClick={addOption}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all duration-200"
+            style={{
+              marginTop: 10, width: "100%", padding: "10px 14px",
+              borderRadius: 12, border: "1px dashed var(--pf-border)",
+              background: "transparent", color: "var(--pf-text-muted)",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            }}
           >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-xs sm:text-sm font-medium">Ajouter une option</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Ajouter une option
           </button>
         </fieldset>
       </div>
 
+      {/* Recipients */}
       <div>
-        <fieldset>
-          <legend className="block text-sm font-medium text-slate-300 mb-2">Destinataires (amis)</legend>
-          <div className="mt-3 space-y-2">
-            {friends.length === 0 && (
-              <div className="text-center py-8 text-slate-400">
-                <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Aucun ami trouvé
-              </div>
+        <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <legend style={{ ...LABEL_STYLE, marginBottom: 0 }}>Destinataires</legend>
+            {selectedCount > 0 && (
+              <span style={{ fontSize: 12, fontWeight: 600, color: primaryColor }}>
+                {selectedCount} sélectionné{selectedCount === 1 ? "" : "s"}
+              </span>
             )}
-            {friends.map(f => (
-              <label
-                key={f.friend.id}
-                htmlFor={`friend-${f.friend.id}`}
-                className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-800/30 hover:bg-slate-800/50 border border-slate-700/50 rounded-2xl cursor-pointer transition-all duration-200 group"
-              >
-                <input
-                  id={`friend-${f.friend.id}`}
-                  type="checkbox"
-                  checked={!!selected[f.friend.id]}
-                  onChange={() => toggleFriend(f.friend.id)}
-                  className="w-5 h-5 rounded-lg border-2 border-slate-600 bg-slate-900 checked:bg-current text-current cursor-pointer transition-all flex-shrink-0"
-                  style={{ color: selected[f.friend.id] ? primaryLightColor : undefined }}
-                />
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0" style={{ backgroundColor: primaryColor }}>
-                    {(f.friend.name || f.friend.email).charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-slate-200 group-hover:text-white transition-colors text-sm sm:text-base truncate">{f.friend.name || f.friend.email}</span>
-                </div>
-              </label>
-            ))}
           </div>
+
+          {friends.length === 0 ? (
+            <div style={{ padding: "32px 0", textAlign: "center", color: "var(--pf-text-muted)", fontSize: 13 }}>
+              Aucun ami trouvé
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {friends.map(f => {
+                const name = f.friend.name || f.friend.email;
+                const isSelected = selected[f.friend.id] === true;
+                const color = getColor(name);
+                return (
+                  <label
+                    key={f.friend.id}
+                    htmlFor={`friend-${f.friend.id}`}
+                    aria-label={name}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 12,
+                      padding: "10px 14px", borderRadius: 12, cursor: "pointer",
+                      background: isSelected ? "var(--pf-accent-soft)" : "var(--pf-surface)",
+                      border: `1px solid ${isSelected ? primaryColor : "var(--pf-border)"}`,
+                      transition: "background 0.15s, border-color 0.15s",
+                    }}
+                  >
+                    <input
+                      id={`friend-${f.friend.id}`}
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleFriend(f.friend.id)}
+                      style={{ display: "none" }}
+                    />
+                    {/* Avatar */}
+                    <div style={{
+                      width: 36, height: 36, borderRadius: "50%", background: color,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 13, fontWeight: 700, color: "#fff", flexShrink: 0,
+                    }}>
+                      {getInitials(name)}
+                    </div>
+                    {/* Name */}
+                    <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: "var(--pf-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {name}
+                    </span>
+                    {/* Check */}
+                    <div style={{
+                      width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                      background: isSelected ? primaryColor : "var(--pf-surface-2)",
+                      border: `1.5px solid ${isSelected ? primaryColor : "var(--pf-border)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "background 0.15s, border-color 0.15s",
+                    }}>
+                      {isSelected && (
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </fieldset>
       </div>
 
-      {error && <div className="text-red-400 text-sm sm:text-base p-3 bg-red-500/10 rounded-2xl border border-red-500/20">{error}</div>}
+      {/* Error */}
+      {error !== null && (
+        <div style={{ padding: "12px 14px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 13 }}>
+          {error}
+        </div>
+      )}
 
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 12, paddingTop: 4 }}>
         <button
           type="button"
           onClick={() => router.back()}
-          className="sm:flex-1 px-6 py-3.5 sm:py-3 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition font-medium shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
+          style={{
+            flex: 1, padding: "12px 0", borderRadius: 12, fontSize: 14, fontWeight: 500,
+            background: "var(--pf-surface)", border: "1px solid var(--pf-border)",
+            color: "var(--pf-text-dim)", cursor: "pointer",
+          }}
         >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
           Annuler
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="sm:flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:py-3 rounded-2xl font-medium shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base text-white"
-          style={{ backgroundColor: loading ? '#64748b' : primaryColor }}
-          onMouseEnter={(e) => {
-            if (!loading) {
-              e.currentTarget.style.backgroundColor = primaryHoverColor;
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!loading) {
-              e.currentTarget.style.backgroundColor = primaryColor;
-            }
+          style={{
+            flex: 2, padding: "12px 0", borderRadius: 12, fontSize: 14, fontWeight: 600,
+            background: loading ? "var(--pf-surface-2)" : primaryColor,
+            color: loading ? "var(--pf-text-muted)" : "#fff",
+            border: "none", cursor: loading ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           }}
         >
           {loading ? (
             <>
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg style={{ animation: "spin 1s linear infinite" }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M21 12a9 9 0 11-6.219-8.56"/>
               </svg>
-              Création...
+              Création…
             </>
           ) : (
             <>
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Créer sondage
+              Créer le sondage
             </>
           )}
         </button>

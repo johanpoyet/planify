@@ -83,8 +83,8 @@ describe('GET /api/events', () => {
     expect(json).toHaveLength(2);
     expect(json[0].id).toBe('event-1');
     expect(json[1].id).toBe('event-2');
-    expect(prismaMock.event.findMany)).toHaveBeenCalledTimes(1);
-    expect(prismaMock.eventParticipant.findMany)).toHaveBeenCalledTimes(1);
+    expect(prismaMock.event.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaMock.eventParticipant.findMany).toHaveBeenCalledTimes(1);
   });
 
   it('combine les evenements crees et les participations acceptees', async () => {
@@ -120,8 +120,8 @@ describe('GET /api/events', () => {
     expect(json).toHaveLength(2);
     expect(json[0].id).toBe('event-1');
     expect(json[1].id).toBe('event-2');
-    expect(prismaMock.event.findMany)).toHaveBeenCalledTimes(2);
-    expect(prismaMock.eventParticipant.findMany)).toHaveBeenCalledWith({
+    expect(prismaMock.event.findMany).toHaveBeenCalledTimes(2);
+    expect(prismaMock.eventParticipant.findMany).toHaveBeenCalledWith({
       where: {
         userId: 'user-id-123',
         status: 'accepted',
@@ -253,7 +253,7 @@ describe('POST /api/events', () => {
     expect(json.description).toBe('Desc');
     expect(json.location).toBe('Paris');
     expect(json.visibility).toBe('public');
-    expect(prismaMock.event.create)).toHaveBeenCalledWith({
+    expect(prismaMock.event.create).toHaveBeenCalledWith({
       data: {
         title: 'Test',
         description: 'Desc',
@@ -286,7 +286,7 @@ describe('POST /api/events', () => {
 
     expect(response.status).toBe(201);
     expect(json.visibility).toBe('friends');
-    expect(prismaMock.event.create)).toHaveBeenCalledWith({
+    expect(prismaMock.event.create).toHaveBeenCalledWith({
       data: {
         title: 'Test Default',
         description: null,

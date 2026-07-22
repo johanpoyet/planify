@@ -46,8 +46,18 @@ describe('GET /api/polls/[id]', () => {
       { id: 'opt1', pollId: TEST_IDS.poll1, date: new Date(), location: 'Location 1' },
       { id: 'opt2', pollId: TEST_IDS.poll1, date: new Date(), location: 'Location 2' },
     ];
+    // createdAt est requis : la route sérialise la date de chaque vote.
     const mockVotes = [
-      { id: 'vote1', pollId: TEST_IDS.poll1, userId: TEST_IDS.user1, pollOptionId: 'opt1' },
+      {
+        id: 'vote1',
+        pollId: TEST_IDS.poll1,
+        userId: TEST_IDS.user1,
+        pollOptionId: 'opt1',
+        createdAt: new Date('2026-07-22T10:00:00Z'),
+      },
+    ];
+    const mockVoters = [
+      { id: TEST_IDS.user1, name: 'Test User', email: 'test@example.com' },
     ];
 
     vi.mocked(getServerSession).mockResolvedValue({
@@ -57,6 +67,8 @@ describe('GET /api/polls/[id]', () => {
     prismaMock.poll.findUnique.mockResolvedValue(mockPoll as any);
     prismaMock.pollOption.findMany.mockResolvedValue(mockOptions as any);
     prismaMock.pollVote.findMany.mockResolvedValue(mockVotes as any);
+    // La route résout ensuite l'auteur de chaque vote.
+    prismaMock.user.findMany.mockResolvedValue(mockVoters as any);
 
     const params = Promise.resolve({ id: TEST_IDS.poll1 });
     const response = await GET({} as any, { params });

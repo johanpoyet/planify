@@ -62,16 +62,17 @@ describe('ProfileImageUpload', () => {
   it('should show delete button only when image exists', () => {
     const onImageUpdate = vi.fn();
 
-    const { rerender } = renderWithTheme(
+    // L'aperçu est initialisé au montage à partir de currentImageUrl : on monte
+    // donc deux instances distinctes plutôt que de re-rendre la même.
+    const { unmount } = renderWithTheme(
       <ProfileImageUpload currentImageUrl={null} onImageUpdate={onImageUpdate} />
     );
 
     expect(screen.queryByText('Supprimer')).not.toBeInTheDocument();
+    unmount();
 
-    rerender(
-      <ThemeProvider>
-        <ProfileImageUpload currentImageUrl="/uploads/profiles/test.jpg" onImageUpdate={onImageUpdate} />
-      </ThemeProvider>
+    renderWithTheme(
+      <ProfileImageUpload currentImageUrl="/uploads/profiles/test.jpg" onImageUpdate={onImageUpdate} />
     );
 
     expect(screen.getByText('Supprimer')).toBeInTheDocument();

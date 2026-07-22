@@ -1,277 +1,229 @@
 'use client'
-import React from 'react';
-
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
 import { useFriendRequests } from '@/lib/useFriendRequests'
 import { useEventInvitations } from '@/lib/useEventInvitations'
-import { useState, useEffect } from 'react'
-import ThemeToggle from './ThemeToggle'
 
 export default function DesktopNav() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const { primaryColor, primaryHoverColor, themeMode } = useTheme()
+  const { primaryColor } = useTheme()
   const { pendingCount } = useFriendRequests()
   const { invitationsCount } = useEventInvitations()
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
 
-  // Récupérer l'URL de la photo de profil
-  useEffect(() => {
-    if (session) {
-      fetch('/api/user/settings')
-        .then(res => res.json())
-        .then(data => {
-          if (data.profileImageUrl) {
-            setProfileImageUrl(data.profileImageUrl)
-          }
-        })
-        .catch(err => console.error('Erreur lors de la récupération de la photo de profil:', err))
-    }
-  }, [session])
-
-  // Ne pas afficher la nav sur les pages d'authentification
-  if (!session || pathname?.startsWith('/auth')) {
-    return null
-  }
+  if (!session || pathname?.startsWith('/auth')) return null
 
   const isActive = (path: string) => {
-    if (path === '/events') {
-      return pathname === '/events' || pathname === '/'
-    }
+    if (path === '/events') return pathname === '/events' || pathname === '/'
     return pathname?.startsWith(path)
   }
 
-  const getLinkStyle = (path: string) => {
-    if (isActive(path)) {
-      return { backgroundColor: primaryColor, color: 'white' }
-    }
-    return {
-      color: themeMode === 'dark' ? '#cbd5e1' : '#64748b',
-      backgroundColor: 'transparent',
-    }
+  const mainNav = [
+    {
+      href: '/events',
+      label: 'Agenda',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/events/invitations',
+      label: 'Invitations',
+      badge: invitationsCount,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 13h5l1 3h6l1-3h5"/><path d="M5 13 7 5h10l2 8v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/polls',
+      label: 'Sondages',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12V7l7-4 7 4v5"/><path d="M3 20h18M5 20v-5h14v5"/><path d="m10 10 2 2 4-4"/>
+        </svg>
+      ),
+    },
+  ]
+
+  const socialNav = [
+    {
+      href: '/friends',
+      label: 'Amis',
+      badge: pendingCount,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.4 5 2.6 5 5.5"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/events/shared',
+      label: 'Agenda partagé',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.5 10.5 7-4M8.5 13.5l7 4"/>
+        </svg>
+      ),
+    },
+  ]
+
+  const NavItem = ({ href, label, icon, badge }: { href: string; label: string; icon: React.ReactNode; badge?: number }) => {
+    const active = isActive(href)
+    return (
+      <Link
+        href={href}
+        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+        style={{
+          color: active ? 'var(--pf-text)' : 'var(--pf-text-dim)',
+          background: active ? 'var(--pf-surface-2)' : 'transparent',
+          letterSpacing: '-0.005em',
+        }}
+      >
+        {icon}
+        <span style={{ flex: 1 }}>{label}</span>
+        {badge != null && badge > 0 && (
+          <span
+            className="text-xs px-1.5 py-0.5 rounded-md font-medium"
+            style={{
+              background: active ? 'var(--pf-accent-soft)' : 'var(--pf-surface-3)',
+              color: active ? 'var(--pf-accent)' : 'var(--pf-text-dim)',
+            }}
+          >
+            {badge > 9 ? '9+' : badge}
+          </span>
+        )}
+      </Link>
+    )
   }
 
-  const handleLinkHover = (e: React.MouseEvent<HTMLAnchorElement>, path: string, isEnter: boolean) => {
-    if (!isActive(path)) {
-      if (isEnter) {
-        e.currentTarget.style.backgroundColor = themeMode === 'dark' ? 'rgba(51, 65, 85, 0.5)' : 'rgba(241, 245, 249, 0.8)'
-        e.currentTarget.style.color = themeMode === 'dark' ? 'white' : '#0f172a'
-      } else {
-        e.currentTarget.style.backgroundColor = 'transparent'
-        e.currentTarget.style.color = themeMode === 'dark' ? '#cbd5e1' : '#64748b'
-      }
-    }
-  }
+  const userName = session.user?.name || session.user?.email || 'Utilisateur'
+  const userHandle = session.user?.email?.split('@')[0] || 'user'
+  const initials = userName.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0].toUpperCase()).join('')
 
   return (
     <nav
-      className="hidden md:block fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-colors"
+      className="hidden md:flex fixed top-0 left-0 bottom-0 z-50 flex-col"
       style={{
-        backgroundColor: themeMode === 'dark' ? 'rgba(2, 6, 23, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-        borderColor: themeMode === 'dark' ? 'rgb(30, 41, 59)' : 'rgb(226, 232, 240)',
+        width: 260,
+        background: 'var(--pf-bg)',
+        borderRight: '1px solid var(--pf-border)',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/events" className="flex items-center gap-2 group">
-            <div 
-              className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <span
-              className="text-xl font-bold transition-colors"
-              style={{ color: themeMode === 'dark' ? 'white' : '#0f172a' }}
-            >
-              Planify
-            </span>
-          </Link>
-
-          {/* Navigation Links */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/events"
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition"
-              style={getLinkStyle('/events')}
-              onMouseEnter={(e) => handleLinkHover(e, '/events', true)}
-              onMouseLeave={(e) => handleLinkHover(e, '/events', false)}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>Accueil</span>
-            </Link>
-
-            <Link
-              href="/events/invitations"
-              className="relative flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition"
-              style={getLinkStyle('/events/invitations')}
-              onMouseEnter={(e) => handleLinkHover(e, '/events/invitations', true)}
-              onMouseLeave={(e) => handleLinkHover(e, '/events/invitations', false)}
-            >
-              <div className="relative">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                {invitationsCount > 0 && (
-                  <div 
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse"
-                    style={{ backgroundColor: '#dc2626' }}
-                  >
-                    {invitationsCount > 9 ? '9+' : invitationsCount}
-                  </div>
-                )}
-              </div>
-              <span>Notifications</span>
-            </Link>
-
-            {/* Gros bouton + central comme en mobile */}
-            <Link
-              href="/events/new"
-              className="relative mx-2 group"
-            >
-              <div 
-                className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110"
-                style={{ backgroundColor: primaryColor }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = primaryHoverColor}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = primaryColor}
-              >
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-            </Link>
-
-            <Link
-              href="/friends"
-              className="relative flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition"
-              style={getLinkStyle('/friends')}
-              onMouseEnter={(e) => handleLinkHover(e, '/friends', true)}
-              onMouseLeave={(e) => handleLinkHover(e, '/friends', false)}
-            >
-              <div className="relative">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {pendingCount > 0 && (
-                  <div 
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-pulse"
-                    style={{ backgroundColor: '#dc2626' }}
-                  >
-                    {pendingCount > 9 ? '9+' : pendingCount}
-                  </div>
-                )}
-              </div>
-              <span>Amis</span>
-            </Link>
-
-            <Link
-              href="/settings"
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl font-medium transition"
-              style={getLinkStyle('/settings')}
-              onMouseEnter={(e) => handleLinkHover(e, '/settings', true)}
-              onMouseLeave={(e) => handleLinkHover(e, '/settings', false)}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>Paramètres</span>
-            </Link>
-          </div>
-
-          {/* User profile */}
-          <div className="relative flex items-center gap-3">
-            {/* Theme Toggle Button */}
-            <ThemeToggle />
-
-            <button
-              onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-              className="flex items-center gap-3 hover:opacity-80 transition"
-            >
-              {profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt="Profil"
-                  className="w-10 h-10 rounded-2xl object-cover ring-2 ring-slate-700"
-                />
-              ) : (
-                <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold ring-2 ring-slate-700"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
-                </div>
-              )}
-              <div className="hidden lg:block text-left">
-                <p
-                  className="text-sm font-medium transition-colors"
-                  style={{ color: themeMode === 'dark' ? 'white' : '#0f172a' }}
-                >
-                  {session.user?.name || 'Utilisateur'}
-                </p>
-                <p
-                  className="text-xs transition-colors"
-                  style={{ color: themeMode === 'dark' ? '#94a3b8' : '#64748b' }}
-                >
-                  {session.user?.email}
-                </p>
-              </div>
-              <svg
-                className="w-4 h-4 transition-colors"
-                style={{ color: themeMode === 'dark' ? '#94a3b8' : '#64748b' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {/* Logout dropdown */}
-            {showLogoutMenu && (
-              <div
-                className="absolute top-full right-0 mt-2 w-48 border rounded-2xl shadow-2xl overflow-hidden z-50 transition-colors"
-                style={{
-                  backgroundColor: themeMode === 'dark' ? 'rgb(15, 23, 42)' : 'rgb(255, 255, 255)',
-                  borderColor: themeMode === 'dark' ? 'rgb(51, 65, 85)' : 'rgb(226, 232, 240)',
-                }}
-              >
-                <button
-                  onClick={async () => {
-                    setShowLogoutMenu(false)
-                    await signOut({ callbackUrl: '/auth/login', redirect: true })
-                  }}
-                  className="w-full px-4 py-3 text-left transition flex items-center gap-2"
-                  style={{
-                    color: themeMode === 'dark' ? '#cbd5e1' : '#64748b',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = themeMode === 'dark' ? 'rgb(30, 41, 59)' : 'rgb(241, 245, 249)'
-                    e.currentTarget.style.color = themeMode === 'dark' ? 'white' : '#0f172a'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                    e.currentTarget.style.color = themeMode === 'dark' ? '#cbd5e1' : '#64748b'
-                  }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Déconnexion</span>
-                </button>
-              </div>
-            )}
-          </div>
+      {/* Brand */}
+      <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--pf-border)' }}>
+        <div
+          className="flex items-center justify-center font-bold text-sm"
+          style={{
+            width: 28, height: 28, borderRadius: 8,
+            background: primaryColor,
+            color: '#fff',
+            flexShrink: 0,
+          }}
+        >
+          P
         </div>
+        <span className="font-semibold text-base" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+      </div>
+
+      {/* Main nav */}
+      <div className="flex flex-col gap-0.5 px-3 pt-3">
+        {mainNav.map(item => (
+          <NavItem key={item.href} {...item} />
+        ))}
+        <div
+          className="text-xs font-semibold uppercase px-3 pt-4 pb-2"
+          style={{ color: 'var(--pf-text-muted)', letterSpacing: '0.08em' }}
+        >
+          Social
+        </div>
+        {socialNav.map(item => (
+          <NavItem key={item.href} {...item} />
+        ))}
+      </div>
+
+      <div style={{ flex: 1 }} />
+
+      {/* Settings */}
+      <div className="px-3 pb-2">
+        <NavItem
+          href="/settings"
+          label="Paramètres"
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.13.31.2.65.2 1"/>
+            </svg>
+          }
+        />
+      </div>
+
+      {/* User footer */}
+      <div
+        className="flex items-center gap-2.5 px-4 py-3.5 relative"
+        style={{ borderTop: '1px solid var(--pf-border)' }}
+      >
+        <div
+          className="flex items-center justify-center text-xs font-semibold text-white rounded-full flex-shrink-0"
+          style={{ width: 32, height: 32, background: primaryColor }}
+        >
+          {initials}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--pf-text)', letterSpacing: '-0.005em' }}>
+            {session.user?.name || 'Utilisateur'}
+          </p>
+          <p className="text-xs truncate" style={{ color: 'var(--pf-text-muted)' }}>
+            @{userHandle}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+          className="p-1 rounded-md transition-colors flex-shrink-0"
+          style={{ color: 'var(--pf-text-muted)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+
+        {showLogoutMenu && (
+          <div
+            className="absolute bottom-full left-3 right-3 mb-2 border rounded-xl shadow-2xl overflow-hidden z-50"
+            style={{
+              background: 'var(--pf-surface)',
+              borderColor: 'var(--pf-border)',
+            }}
+          >
+            <button
+              onClick={async () => {
+                setShowLogoutMenu(false)
+                await signOut({ callbackUrl: '/auth/login', redirect: true })
+              }}
+              className="w-full px-4 py-3 text-left flex items-center gap-2 text-sm transition-colors"
+              style={{ color: 'var(--pf-text-dim)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--pf-surface-2)'
+                e.currentTarget.style.color = 'var(--pf-danger)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = 'var(--pf-text-dim)'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              Déconnexion
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   )

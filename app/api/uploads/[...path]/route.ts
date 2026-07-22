@@ -10,7 +10,21 @@ export async function GET(
 ) {
   try {
     const { path: pathSegments } = await params;
-    const filePath = path.join(process.cwd(), "public", "uploads", ...pathSegments);
+
+    // Protection contre la traversée de répertoires (OWASP A01/A05) :
+    // on rejette tout segment suspect, puis on vérifie que le chemin résolu
+    // reste bien confiné dans public/uploads.
+    const uploadsRoot = path.resolve(process.cwd(), "public", "uploads");
+
+    if (pathSegments.some((segment) => segment === ".." || segment.includes("\0"))) {
+      return NextResponse.json({ error: "Chemin invalide" }, { status: 400 });
+    }
+
+    const filePath = path.resolve(uploadsRoot, ...pathSegments);
+
+    if (filePath !== uploadsRoot && !filePath.startsWith(uploadsRoot + path.sep)) {
+      return NextResponse.json({ error: "Chemin invalide" }, { status: 400 });
+    }
 
     // Vérifier que le fichier existe
     if (!existsSync(filePath)) {

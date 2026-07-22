@@ -72,10 +72,10 @@ describe('POST /api/events/conflicts', () => {
       { id: TEST_IDS.event2, title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
     ];
 
+    // Sans participation acceptée, la route ne fait qu'un seul appel à event.findMany :
+    // empiler un second mock le laisserait dans la file pour le test suivant.
     prismaMock.eventParticipant.findMany.mockResolvedValue([]);
-    prismaMock.event.findMany
-      .mockResolvedValueOnce(mockEvents as any) // Événements créés
-      .mockResolvedValueOnce([]); // Événements où il participe
+    prismaMock.event.findMany.mockResolvedValueOnce(mockEvents as any); // Événements créés
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',
@@ -101,12 +101,12 @@ describe('POST /api/events/conflicts', () => {
       { id: TEST_IDS.event2, title: 'Event 2', date: new Date('2025-01-01T14:00:00') },
     ];
 
+    // Aucune participation acceptée : la route n'interroge donc event.findMany
+    // qu'une seule fois par utilisateur (la requête « participations » est court-circuitée).
     prismaMock.eventParticipant.findMany.mockResolvedValue([]);
     prismaMock.event.findMany
       .mockResolvedValueOnce(mockEventsUser1 as any)
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(mockEventsUser2 as any)
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce(mockEventsUser2 as any);
 
     const request = new NextRequest('http://localhost:3000/api/events/conflicts', {
       method: 'POST',

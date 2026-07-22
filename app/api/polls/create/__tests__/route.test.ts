@@ -135,8 +135,8 @@ describe('POST /api/polls/create', () => {
     });
 
     // Verifie la creation des options
-    expect(prismaMock.pollOption.create)).toHaveBeenCalledTimes(2);
-    expect(prismaMock.pollOption.create)).toHaveBeenCalledWith({
+    expect(prismaMock.pollOption.create).toHaveBeenCalledTimes(2);
+    expect(prismaMock.pollOption.create).toHaveBeenCalledWith({
       data: { pollId: 'poll-1', text: 'Pizza' },
     });
     expect(prismaMock.pollOption.create).toHaveBeenCalledWith({

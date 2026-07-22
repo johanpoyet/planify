@@ -3,7 +3,9 @@ module.exports = {
     name: 'planify',
     script: 'npm',
     args: 'start',
-    cwd: '/home/johan/apps/planify',
+    // Repertoire du fichier de configuration : evite un chemin absolu
+    // dependant du nom d'utilisateur du serveur.
+    cwd: __dirname,
     instances: 1,
     exec_mode: 'fork',
     max_memory_restart: '400M', // Redémarre si > 400MB

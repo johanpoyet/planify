@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
 import ConditionalNav from './components/ConditionalNav';
 import BodyWrapper from './components/BodyWrapper';
 import DesktopNav from './components/DesktopNav';
@@ -38,7 +37,6 @@ export default function RootLayout({
             {children}
           </BodyWrapper>
           <ConditionalNav />
-          <PWAInstallPrompt />
         </Providers>
       </body>
     </html>

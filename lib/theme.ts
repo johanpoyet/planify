@@ -3,13 +3,13 @@
 export const themeColors = {
   blue: {
     name: 'Bleu',
-    primary: '#2563eb',    // blue-600
-    primaryHover: '#1d4ed8', // blue-700
-    primaryLight: '#60a5fa', // blue-400
-    ring: 'ring-blue-500/30',
-    gradient: 'from-blue-500 to-blue-600',
-    shadow: 'shadow-blue-500/30',
-    border: 'border-blue-500/30',
+    primary: '#7454F5',
+    primaryHover: '#6A48FF',
+    primaryLight: '#9277FF',
+    ring: 'ring-indigo-500/30',
+    gradient: 'from-indigo-500 to-violet-600',
+    shadow: 'shadow-indigo-500/30',
+    border: 'border-indigo-500/30',
     emoji: '🔵'
   },
   purple: {

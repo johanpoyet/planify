@@ -1,6 +1,4 @@
 'use client';
-import React from 'react';
-
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/lib/themeContext';
 
@@ -13,200 +11,168 @@ interface DateTimePickerProps {
   minDate?: Date;
 }
 
-export default function DateTimePicker({ value, onChange, onFocus, onBlur, required, minDate }: DateTimePickerProps) {
-  const { primaryColor, primaryLightColor } = useTheme();
+const WEEK_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+function getDayBg(isSelected: boolean, isToday: boolean, primaryColor: string): string {
+  if (isSelected) return primaryColor;
+  if (isToday) return 'var(--pf-surface-3)';
+  return 'transparent';
+}
+
+function getDayColor(isPast: boolean, isSelected: boolean, isToday: boolean, primaryColor: string): string {
+  if (isPast) return 'var(--pf-text-muted)';
+  if (isSelected) return '#fff';
+  if (isToday) return primaryColor;
+  return 'var(--pf-text)';
+}
+
+export default function DateTimePicker({ value, onChange, onFocus, onBlur, minDate }: Readonly<DateTimePickerProps>) {
+  const { primaryColor } = useTheme();
   const [showCalendar, setShowCalendar] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(
-    value ? new Date(value) : null
-  );
+  const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? new Date(value) : null);
   const [time, setTime] = useState(value ? new Date(value).toTimeString().slice(0, 5) : '12:00');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setShowCalendar(false);
         onBlur?.();
       }
     };
-
-    if (showCalendar) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (showCalendar) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, [showCalendar, onBlur]);
 
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+  const getDaysInMonth = (d: Date) => {
+    const first = new Date(d.getFullYear(), d.getMonth(), 1);
+    const last = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    return { daysInMonth: last.getDate(), startingDayOfWeek: first.getDay() };
+  };
 
-    return { daysInMonth, startingDayOfWeek };
+  const buildIso = (date: Date, t: string) => {
+    const [h, m] = t.split(':').map(s => Number.parseInt(s, 10));
+    const d = new Date(date);
+    if (!Number.isNaN(h) && !Number.isNaN(m)) d.setHours(h, m);
+    else d.setHours(12, 0);
+    // La valeur produite est une date locale (format « datetime-local »).
+    // toISOString() convertirait en UTC et décalerait l'heure choisie par
+    // l'utilisateur de son décalage horaire.
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+      + `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
   const handleDateSelect = (day: number) => {
     const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     setSelectedDate(newDate);
-
-    // Combiner la date et l'heure
-    const [hours, minutes] = time.split(':');
-    const hoursNum = parseInt(hours, 10);
-    const minutesNum = parseInt(minutes, 10);
-
-    // CORRECTIF: Validation des valeurs pour éviter NaN
-    if (!isNaN(hoursNum) && !isNaN(minutesNum)) {
-      newDate.setHours(hoursNum, minutesNum);
-    } else {
-      // Utiliser 12:00 par défaut si les valeurs sont invalides
-      newDate.setHours(12, 0);
-    }
-
-    // Format ISO pour l'input datetime-local
-    const isoString = newDate.toISOString().slice(0, 16);
-    onChange(isoString);
+    onChange(buildIso(newDate, time));
   };
 
-  const handleTimeChange = (newTime: string) => {
-    setTime(newTime);
-
-    if (selectedDate) {
-      const [hours, minutes] = newTime.split(':');
-      const hoursNum = parseInt(hours, 10);
-      const minutesNum = parseInt(minutes, 10);
-
-      // CORRECTIF: Validation des valeurs pour éviter NaN
-      if (!isNaN(hoursNum) && !isNaN(minutesNum)) {
-        const newDate = new Date(selectedDate);
-        newDate.setHours(hoursNum, minutesNum);
-
-        const isoString = newDate.toISOString().slice(0, 16);
-        onChange(isoString);
-      }
-    }
+  const handleTimeChange = (t: string) => {
+    setTime(t);
+    if (selectedDate) onChange(buildIso(selectedDate, t));
   };
 
-  const previousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-  };
-
-  const formatDisplayDate = () => {
-    if (!value) return 'Sélectionner une date et heure';
-    
-    const date = new Date(value);
+  const formatDisplay = () => {
+    if (!value) return 'Sélectionner une date';
     return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
+      day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    }).format(new Date(value));
   };
 
   const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+  const blanks = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
   const monthName = currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-  const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
   return (
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        onClick={() => {
-          setShowCalendar(!showCalendar);
-          if (!showCalendar) onFocus?.();
+        onClick={() => { setShowCalendar(p => !p); if (!showCalendar) onFocus?.(); }}
+        className="w-full flex items-center gap-3 text-left transition-all outline-none"
+        style={{
+          background: 'var(--pf-surface-2)', border: '1px solid var(--pf-border)',
+          borderRadius: 10, padding: '10px 14px', fontSize: 14,
+          color: value ? 'var(--pf-text)' : 'var(--pf-text-muted)',
         }}
-        className="w-full pl-4 pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-left text-white focus:outline-none focus:border-2 transition flex items-center gap-3"
       >
-        <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--pf-text-muted)', flexShrink: 0 }}>
+          <rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/>
         </svg>
-        <span className={value ? 'text-white' : 'text-slate-500'}>
-          {formatDisplayDate()}
-        </span>
+        <span>{formatDisplay()}</span>
       </button>
 
       {showCalendar && (
-        <div className="absolute z-50 mt-2 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-4 animate-fade-in">
-          {/* Header du calendrier */}
+        <div
+          className="absolute z-50 mt-2"
+          style={{
+            width: 300, background: 'var(--pf-surface)',
+            border: '1px solid var(--pf-border)', borderRadius: 16,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.4)', padding: 16,
+          }}
+        >
+          {/* Month nav */}
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-bold text-white capitalize">{monthName}</h3>
+            <span className="text-sm font-semibold capitalize" style={{ color: 'var(--pf-text)' }}>{monthName}</span>
             <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={previousMonth}
-                className="p-1.5 bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={nextMonth}
-                className="p-1.5 bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              {(['prev', 'next'] as const).map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + (dir === 'prev' ? -1 : 1)))}
+                  className="flex items-center justify-center rounded-lg transition-colors"
+                  style={{ width: 28, height: 28, background: 'var(--pf-surface-2)', color: 'var(--pf-text-dim)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--pf-surface-3)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'var(--pf-surface-2)')}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={dir === 'prev' ? 'm15 5-7 7 7 7' : 'm9 5 7 7-7 7'}/>
+                  </svg>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Grille du calendrier */}
-          <div className="grid grid-cols-7 gap-1 mb-3">
-            {weekDays.map(day => (
-              <div key={day} className="text-center text-xs font-medium text-slate-400 py-1">
-                {day}
-              </div>
+          {/* Grid header */}
+          <div className="grid grid-cols-7 mb-1">
+            {WEEK_DAYS.map(d => (
+              <div key={d} className="text-center py-1" style={{ fontSize: 10, fontWeight: 600, color: 'var(--pf-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d}</div>
             ))}
+          </div>
 
-            {Array.from({ length: startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1 }).map((_, index) => (
-              <div key={`empty-${index}`} />
-            ))}
-
-            {Array.from({ length: daysInMonth }).map((_, index) => {
-              const day = index + 1;
+          {/* Day cells */}
+          <div className="grid grid-cols-7 gap-0.5">
+            {Array.from({ length: blanks }, (_, i) => `blank-${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${i}`).map(key => <div key={key} />)}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
               const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              dayDate.setHours(0, 0, 0, 0);
-              
-              const isPast = minDate ? dayDate < minDate : dayDate < today;
-              const isSelected = selectedDate &&
-                selectedDate.getDate() === day &&
-                selectedDate.getMonth() === currentMonth.getMonth() &&
-                selectedDate.getFullYear() === currentMonth.getFullYear();
-              const isToday =
-                new Date().getDate() === day &&
-                new Date().getMonth() === currentMonth.getMonth() &&
-                new Date().getFullYear() === currentMonth.getFullYear();
+              const today = new Date(); today.setHours(0, 0, 0, 0);
+              const isPast = minDate
+                ? dayDate < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())
+                : dayDate < today;
+              const isSelected = selectedDate?.getDate() === day
+                && selectedDate?.getMonth() === currentMonth.getMonth()
+                && selectedDate?.getFullYear() === currentMonth.getFullYear();
+              const isToday = new Date().getDate() === day
+                && new Date().getMonth() === currentMonth.getMonth()
+                && new Date().getFullYear() === currentMonth.getFullYear();
 
               return (
                 <button
-                  key={day}
+                  key={`day-${day}`}
                   type="button"
-                  onClick={() => handleDateSelect(day)}
+                  onClick={() => !isPast && handleDateSelect(day)}
                   disabled={isPast}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
-                    isPast
-                      ? 'bg-slate-900/50 text-slate-600 cursor-not-allowed'
-                      : isSelected
-                      ? 'text-white shadow-lg'
-                      : isToday
-                      ? 'bg-slate-800/50 text-white'
-                      : 'bg-slate-800/30 text-slate-300 hover:bg-slate-800/50'
-                  }`}
-                  style={isSelected && !isPast ? { backgroundColor: primaryColor } : {}}
+                  className="aspect-square flex items-center justify-center rounded-lg text-sm transition-all disabled:cursor-not-allowed"
+                  style={{
+                    background: getDayBg(!!isSelected, isToday, primaryColor),
+                    color: getDayColor(isPast, !!isSelected, isToday, primaryColor),
+                    opacity: isPast ? 0.35 : 1,
+                    fontWeight: isSelected || isToday ? 600 : 400,
+                  }}
                 >
                   {day}
                 </button>
@@ -214,30 +180,34 @@ export default function DateTimePicker({ value, onChange, onFocus, onBlur, requi
             })}
           </div>
 
-          {/* Sélecteur d'heure */}
-          <div className="border-t border-slate-700 pt-3">
-            <label className="block text-xs font-medium text-slate-300 mb-2">Heure</label>
+          {/* Time */}
+          <div style={{ borderTop: '1px solid var(--pf-border)', marginTop: 12, paddingTop: 12 }}>
+            <label
+              htmlFor="dt-time"
+              style={{ display: 'block', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--pf-text-muted)', marginBottom: 6 }}
+            >
+              Heure
+            </label>
             <input
+              id="dt-time"
               type="time"
               value={time}
-              onChange={(e) => handleTimeChange(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 transition"
-              style={{ 
-                borderColor: primaryLightColor,
-                colorScheme: 'dark'
+              onChange={e => handleTimeChange(e.target.value)}
+              className="w-full outline-none text-sm"
+              style={{
+                background: 'var(--pf-surface-2)', border: `1px solid ${primaryColor}`,
+                borderRadius: 8, padding: '8px 12px',
+                color: 'var(--pf-text)', colorScheme: 'dark',
               }}
             />
           </div>
 
-          {/* Bouton de validation */}
+          {/* Confirm */}
           <button
             type="button"
-            onClick={() => {
-              setShowCalendar(false);
-              onBlur?.();
-            }}
-            className="w-full mt-3 px-4 py-2 text-white text-sm font-semibold rounded-lg transition-all shadow-lg"
-            style={{ backgroundColor: primaryColor }}
+            onClick={() => { setShowCalendar(false); onBlur?.(); }}
+            className="w-full mt-3 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+            style={{ background: primaryColor }}
           >
             Confirmer
           </button>

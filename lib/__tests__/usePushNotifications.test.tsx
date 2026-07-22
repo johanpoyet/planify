@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePushNotifications } from '../usePushNotifications';
 
@@ -38,7 +38,7 @@ describe('usePushNotifications', () => {
   it('should detect when push notifications are not supported', async () => {
     // Supprimer PushManager temporairement
     const originalPushManager = window.PushManager;
-    // @ts-ignore
+    // Suppression volontaire pour simuler un navigateur sans PushManager.
     delete window.PushManager;
 
     const { result } = renderHook(() => usePushNotifications());
@@ -65,7 +65,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     (global.fetch as any).mockResolvedValueOnce({
       json: vi.fn().mockResolvedValue({ exists: true }),
@@ -103,7 +103,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     (global.fetch as any).mockResolvedValueOnce({
       json: vi.fn().mockResolvedValue({ exists: false }),
@@ -132,7 +132,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     // Mock Notification.requestPermission
     global.Notification = {
@@ -154,7 +154,12 @@ describe('usePushNotifications', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    const success = await result.current.subscribe();
+    // subscribe() déclenche des mises à jour d'état : sans act(), result.current
+    // n'est pas rafraîchi au moment des assertions.
+    let success: boolean | undefined;
+    await act(async () => {
+      success = await result.current.subscribe();
+    });
 
     expect(success).toBe(true);
     expect(result.current.isSubscribed).toBe(true);
@@ -178,7 +183,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     global.Notification = {
       requestPermission: vi.fn().mockResolvedValue('denied'),
@@ -208,7 +213,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     (global.fetch as any)
       .mockResolvedValueOnce({
@@ -224,7 +229,11 @@ describe('usePushNotifications', () => {
       expect(result.current.isSubscribed).toBe(true);
     });
 
-    const success = await result.current.unsubscribe();
+    // Comme pour subscribe(), la mise à jour d'état doit être encapsulée dans act().
+    let success: boolean | undefined;
+    await act(async () => {
+      success = await result.current.unsubscribe();
+    });
 
     expect(success).toBe(true);
     expect(result.current.isSubscribed).toBe(false);
@@ -248,7 +257,7 @@ describe('usePushNotifications', () => {
       },
     };
 
-    navigator.serviceWorker.ready = Promise.resolve(mockRegistration as any);
+    (navigator.serviceWorker as any).ready = Promise.resolve(mockRegistration as any);
 
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 

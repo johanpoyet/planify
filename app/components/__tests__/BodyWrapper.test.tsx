@@ -37,7 +37,7 @@ describe('BodyWrapper', () => {
 
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper).not.toHaveClass('pb-20');
-    expect(wrapper).not.toHaveClass('md:pt-16');
+    expect(wrapper).not.toHaveClass('md:ml-[260px]');
   });
 
   it('should render children with padding when authenticated', async () => {
@@ -57,9 +57,11 @@ describe('BodyWrapper', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     const wrapper = container.firstChild as HTMLElement;
+    // Depuis la refonte, la navigation bureau est latérale : le décalage se fait
+    // par une marge à gauche et non plus par un retrait en haut.
     expect(wrapper.className).toContain('pb-20');
     expect(wrapper.className).toContain('md:pb-0');
-    expect(wrapper.className).toContain('md:pt-16');
+    expect(wrapper.className).toContain('md:ml-[260px]');
   });
 
   it('should not add padding on auth pages', async () => {

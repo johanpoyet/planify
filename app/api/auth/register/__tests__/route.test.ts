@@ -68,7 +68,7 @@ describe('POST /api/auth/register', () => {
 
     expect(response.status).toBe(400);
     expect(json.error).toBe('Un compte avec cet email existe déjà');
-    expect(prismaMock.user.findUnique)).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { email: 'test@example.com' },
     });
   });
