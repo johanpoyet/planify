@@ -130,16 +130,17 @@
  <div class="toc-line"><span>4. Intégration continue <span class="tag">C2.1.2</span></span><span class="n">10</span></div>
  <div class="toc-line"><span>5. Harnais de tests unitaires et couverture <span class="tag">C2.2.2</span></span><span class="n">12</span></div>
  <div class="toc-line"><span>6. Sécurité du code source — OWASP Top 10 <span class="tag">C2.2.3</span></span><span class="n">14</span></div>
- <div class="toc-line"><span>7. Accessibilité numérique <span class="tag">C2.2.3</span></span><span class="n">16</span></div>
- <div class="toc-line"><span>8. Gestion de versions et déploiement progressif <span class="tag">C2.2.4</span></span><span class="n">18</span></div>
- <div class="toc-line"><span>9. Cahier de recettes <span class="tag">C2.3.1</span></span><span class="n">20</span></div>
- <div class="toc-line"><span>10. Plan de correction des bogues <span class="tag">C2.3.2</span></span><span class="n">22</span></div>
- <div class="toc-line"><span>11. Documentation technique d’exploitation <span class="tag">C2.4.1</span></span><span class="n">26</span></div>
+ <div class="toc-line"><span>7. Accessibilité numérique <span class="tag">C2.2.3</span></span><span class="n">17</span></div>
+ <div class="toc-line"><span>8. Gestion de versions et déploiement progressif <span class="tag">C2.2.4</span></span><span class="n">19</span></div>
+ <div class="toc-line"><span>9. Cahier de recettes <span class="tag">C2.3.1</span></span><span class="n">21</span></div>
+ <div class="toc-line"><span>10. Plan de correction des bogues <span class="tag">C2.3.2</span></span><span class="n">23</span></div>
+ <div class="toc-line"><span>11. Documentation technique d’exploitation <span class="tag">C2.4.1</span></span><span class="n">25</span></div>
  <div class="toc-line"><span class="sub">11.1 Manuel de déploiement · 11.2 Manuel d’utilisation · 11.3 Manuel de mise à jour</span><span class="n"></span></div>
  <div class="toc-line"><span>Conclusion</span><span class="n">29</span></div>
  <div class="toc-line"><span>Annexe A — Captures d’écran du prototype</span><span class="n">30</span></div>
  <div class="toc-line"><span>Annexe B — Correspondance avec la grille d’évaluation</span><span class="n">33</span></div>
  <div class="toc-line"><span>Annexe C — Limites et points non démontrés</span><span class="n">35</span></div>
+  <div class="toc-line"><span>Annexe D — Registre détaillé des anomalies</span><span class="n">36</span></div>
 
  <div class="box info" style="margin-top:8mm;">
  <b>Note méthodologique.</b> Les résultats chiffrés de ce dossier (couverture de tests, durées de build,
@@ -747,11 +748,11 @@ test: {
  <tr><td class="cat">A02 Cryptographie</td><td>Mots de passe hachés avec bcrypt (coût 10, sel intégré)&nbsp;; le hachage n’est jamais renvoyé au client.</td><td><code>api/auth/register</code>, <code>lib/auth.ts</code></td><td>Test SEC-02. TLS assuré par Nginx&nbsp;; la configuration fournie doit encore être activée (annexe C).</td></tr>
  <tr><td class="cat">A03 Injection</td><td>Accès aux données exclusivement via le client Prisma, avec requêtes structurées&nbsp;; aucune concaténation de requête.</td><td>Couche Prisma</td><td>Revue de code des 28 routes&nbsp;: aucune requête brute.</td></tr>
  <tr><td class="cat">A04 Conception</td><td>Modèle d’autorisation défini en amont (visibilité <code>public</code>, <code>friends</code>, <code>private</code>&nbsp;; statuts d’invitation)&nbsp;; contraintes d’unicité métier.</td><td><code>prisma/schema.prisma</code></td><td>Test RS-04 (double vote refusé).</td></tr>
- <tr><td class="cat">A05 Configuration</td><td>En-têtes de sécurité ajoutés sur toutes les réponses&nbsp;: <code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, <code>Strict-Transport-Security</code>. Secrets en variables d’environnement, hors dépôt.</td><td><code>next.config.js</code>, <code>.env</code></td><td>Ajoutés lors de l’audit (BUG-09). Aucune politique <code>Content-Security-Policy</code> n’est définie à ce jour.</td></tr>
+ <tr><td class="cat">A05 Configuration</td><td>Six en-têtes de sécurité sur toutes les réponses, dont une politique de sécurité du contenu (CSP) restreignant les origines autorisées. Secrets en variables d’environnement, hors dépôt.</td><td><code>next.config.js</code>, <code>.env</code></td><td>Relevés en production. La CSP conserve <code>unsafe-inline</code> sur les scripts, Next.js injectant la charge d’hydratation en ligne&nbsp;: limite explicitée en fin de chapitre.</td></tr>
  <tr><td class="cat">A06 Composants vulnérables</td><td>Dépendances verrouillées par <code>package-lock.json</code>, installation reproductible par <code>npm ci</code>, audit régulier et suppression des dépendances inutilisées.</td><td><code>package-lock.json</code></td><td>Audit exécuté&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Voir 6.2.</td></tr>
- <tr><td class="cat">A07 Authentification</td><td>Sessions JWT signées gérées par NextAuth&nbsp;; messages d’erreur identiques que le compte existe ou non, afin de ne pas révéler l’existence d’une adresse.</td><td><code>lib/auth.ts</code></td><td>Test SEC-03. Longueur minimale de mot de passe fixée à 6 caractères, sans exigence de complexité&nbsp;: c’est une politique faible. Aucune limitation du nombre de tentatives.</td></tr>
+ <tr><td class="cat">A07 Authentification</td><td>Sessions JWT signées&nbsp;; messages d’erreur identiques que le compte existe ou non&nbsp;; politique de mot de passe de 12 caractères et trois classes de caractères&nbsp;; limitation à cinq tentatives par couple adresse/origine, suivie d’un blocage de quinze minutes.</td><td><code>lib/auth.ts</code>, <code>lib/security.ts</code></td><td>Tests SEC-03, SEC-06 et SEC-07&nbsp;; blocage vérifié en production (voir 6.3). Le compteur réside en mémoire du processus&nbsp;: une mise à l’échelle imposerait un magasin partagé.</td></tr>
  <tr><td class="cat">A08 Intégrité</td><td>Builds reproductibles (<code>npm ci</code>), pipeline CI/CD contrôlé, déploiement subordonné aux contrôles de qualité.</td><td><code>.github/workflows/</code></td><td>Chapitre 4.</td></tr>
- <tr><td class="cat">A09 Journalisation</td><td>Journalisation des erreurs serveur par <code>console.error</code> dans chaque route, collectée par PM2 côté serveur.</td><td>routes API, PM2</td><td>Il s’agit d’une journalisation applicative d’erreurs, non d’une journalisation de sécurité&nbsp;: les tentatives d’authentification échouées ne sont pas tracées et il n’y a ni alerte ni conservation structurée.</td></tr>
+ <tr><td class="cat">A09 Journalisation</td><td>Journal de sécurité dédié et structuré (format JSON, canal <code>SECURITY</code>)&nbsp;: connexion réussie, échec, blocage, création de compte, mot de passe refusé. L’adresse est masquée, l’origine de la requête conservée.</td><td><code>lib/security.ts</code>, PM2</td><td>Vérifié en production (voir 6.3). Les journaux sont collectés par PM2&nbsp;; ils ne sont pas encore centralisés ni assortis d’alertes automatiques.</td></tr>
  <tr><td class="cat">A10 SSRF et accès fichiers</td><td>Aucune requête sortante construite à partir d’une URL fournie par l’utilisateur. Service de fichiers restreint à <code>public/uploads</code>&nbsp;: rejet des segments <code>..</code> et vérification que le chemin résolu reste dans ce dossier.</td><td><code>api/uploads/[...path]</code></td><td>Protection ajoutée lors de l’audit (BUG-08)&nbsp;; rattachée au test SEC-04.</td></tr>
  </tbody>
  </table>
@@ -762,7 +763,7 @@ test: {
  <table class="avoid-break">
  <thead><tr><th style="width:34%">Périmètre</th><th>Critiques</th><th>Élevées</th><th>Moyennes</th><th>Faibles</th><th>Total</th></tr></thead>
  <tbody>
- <tr><td>Avant traitement (production)</td><td class="bad-txt">3</td><td>23</td><td>7</td><td>6</td><td><b>39</b></td></tr>
+ <tr><td>Avant traitement (production)</td><td class="bad-txt">3</td><td>10</td><td>7</td><td>6</td><td><b>39</b></td></tr>
  <tr><td>Avant traitement (toutes dépendances)</td><td class="bad-txt">5</td><td>25</td><td>7</td><td>7</td><td><b>44</b></td></tr>
  <tr><td><b>Après traitement (toutes dépendances)</b></td><td class="ok-txt">0</td><td>2</td><td>2</td><td>0</td><td><b>4</b></td></tr>
  </tbody>
@@ -781,7 +782,21 @@ test: {
  vulnérabilités seront levées par une version ultérieure de Next.js. L’action reste suivie sous BUG-10.
  L’audit est aujourd’hui exécuté manuellement et n’est pas encore une étape bloquante du pipeline.</p>
 
- <h3>6.3 Mesures illustrées</h3>
+ <h3>6.3 Vérifications conduites en production</h3>
+ <p>Les mesures d’authentification ont été éprouvées sur l’environnement de production le 22/07/2026, contre
+ l’application réellement déployée.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:26%">Mesure</th><th style="width:34%">Scénario exécuté</th><th>Résultat observé</th></tr></thead>
+ <tbody>
+ <tr><td>Politique de mot de passe</td><td>Inscription avec un mot de passe de 7 caractères, puis avec 12 caractères sans majuscule.</td><td class="ok-txt">Refusées toutes deux (HTTP 400), avec un message distinct pour la longueur et pour la complexité.</td></tr>
+ <tr><td>Limitation des tentatives</td><td>Six tentatives de connexion successives avec un mot de passe erroné.</td><td class="ok-txt">Cinq échecs journalisés, puis blocage à la sixième (<code>login_blocked</code>).</td></tr>
+ <tr><td>Journal de sécurité</td><td>Lecture des journaux applicatifs après les scénarios ci-dessus.</td><td class="ok-txt">Événements horodatés au format JSON, adresse masquée (<code>i*****@example.com</code>), origine de la requête conservée.</td></tr>
+ <tr><td>En-têtes de sécurité</td><td>Inspection des en-têtes d’une réponse HTTPS.</td><td class="ok-txt">Les six en-têtes présents, dont la CSP.</td></tr>
+ </tbody>
+ </table>
+ <p class="small">Les comptes créés pour ces vérifications ont été supprimés de la base à l’issue des tests.</p>
+
+ <h3>6.4 Mesures illustrées</h3>
  <h4>Hachage des mots de passe (A02)</h4>
  <pre><span class="c">// app/api/auth/register/route.ts</span>
 <span class="k">const</span> hashedPassword = <span class="k">await</span> bcrypt.hash(password, <span class="f">10</span>);
@@ -799,11 +814,11 @@ test: {
   <span class="k">return</span> NextResponse.json({ error: <span class="s">"Chemin invalide"</span> }, { status: <span class="f">400</span> });
 }</pre>
 
- <p>Les dix catégories de l’OWASP Top 10 sont donc traitées par des mesures identifiables dans le code. Deux
- d’entre elles restent partiellement couvertes et sont assumées comme telles&nbsp;: la politique de mot de
- passe et l’absence de limitation des tentatives (A07), et les vulnérabilités de dépendances (A06). Ce
- dossier ne prétend pas à une application exempte de faille, mais à un traitement documenté et vérifiable
- de chaque catégorie de risque.</p>
+ <p>Les dix catégories de l’OWASP Top 10 sont traitées par des mesures identifiables dans le code et
+ vérifiées en production. Ce dossier ne prétend pas à une application exempte de faille&nbsp;: il documente
+ un traitement vérifiable de chaque catégorie de risque, et énonce les limites qui subsistent — CSP encore
+ permissive sur les scripts, compteur de tentatives non partagé entre instances, journaux non centralisés
+ et quatre vulnérabilités résiduelles héritées de Next.js.</p>
 </section>
 
 <!-- ============================ 7. ACCESSIBILITE ============================ -->
@@ -836,50 +851,75 @@ test: {
  </tbody>
  </table>
 
- <h3>7.3 Audit automatique réalisé</h3>
- <p>Un audit a été conduit le 22/07/2026 avec <b>Lighthouse 13.4.1</b> (moteur Chromium, mode sans
- interface), sur l’environnement de développement local. Les pages accessibles sans authentification ont
- été auditées&nbsp;; les pages protégées redirigent vers la connexion tant qu’aucune session n’est ouverte,
- elles n’ont donc pas pu être mesurées dans cette campagne.</p>
+ <h3>7.3 Campagne d’audit</h3>
+ <p>Un audit a été conduit le 22/07/2026 sur l’application <b>déployée en production</b>, et non sur un
+ environnement de développement. Il combine un contrôle automatique (Lighthouse 13.4.1, moteur Chromium) et
+ des vérifications manuelles. Les pages protégées ont été auditées <b>avec une session ouverte</b>, au moyen
+ d’un compte créé pour l’occasion puis supprimé&nbsp;: l’audit ne se limite donc pas aux pages publiques.</p>
  <table class="avoid-break">
- <thead><tr><th style="width:26%">Page auditée</th><th style="width:19%">Score initial</th><th style="width:19%">Score après correction</th><th>Critères en échec initialement</th></tr></thead>
+ <thead><tr><th style="width:30%">Page</th><th style="width:18%">Accès</th><th style="width:16%">Score initial</th><th style="width:18%">Score final</th><th>Écarts corrigés</th></tr></thead>
  <tbody>
- <tr><td><code>/auth/login</code></td><td>94 / 100</td><td class="ok-txt">100 / 100</td><td>Contraste (2 éléments), absence de repère <code>main</code></td></tr>
- <tr><td><code>/auth/register</code></td><td>94 / 100</td><td class="ok-txt">100 / 100</td><td>Contraste (2 éléments), absence de repère <code>main</code></td></tr>
+ <tr><td><code>/auth/login</code></td><td>publique</td><td>94</td><td class="ok-txt">100</td><td>Contraste, repère principal</td></tr>
+ <tr><td><code>/auth/register</code></td><td>publique</td><td>94</td><td class="ok-txt">100</td><td>Contraste, repère principal</td></tr>
+ <tr><td><code>/events</code> (agenda)</td><td>authentifiée</td><td>83</td><td class="ok-txt">100</td><td>Noms de boutons et de liens, contraste</td></tr>
+ <tr><td><code>/friends</code></td><td>authentifiée</td><td>83</td><td class="ok-txt">100</td><td>Nom de bouton, nom de lien, contraste</td></tr>
+ <tr><td><code>/polls</code></td><td>authentifiée</td><td>95</td><td class="ok-txt">100</td><td>Nom de lien</td></tr>
+ <tr><td><code>/settings</code></td><td>authentifiée</td><td>81</td><td class="ok-txt">100</td><td>Noms d’interrupteurs, hiérarchie des titres, contraste</td></tr>
+ <tr><td><code>/events/new</code></td><td>authentifiée</td><td>88</td><td class="ok-txt">100</td><td>Nom de bouton, contraste</td></tr>
  </tbody>
  </table>
- <p class="small">Commande&nbsp;: <code>npx lighthouse &lt;url&gt; --only-categories=accessibility</code>.
- Un audit automatique ne couvre qu’une partie des critères du référentiel&nbsp;: il ne remplace pas une
- vérification manuelle.</p>
+ <p class="small">Commande&nbsp;: <code>npx lighthouse &lt;url&gt; --only-categories=accessibility</code>, la session
+ étant transmise par en-tête pour les pages protégées. Moyenne finale&nbsp;: <b>100/100 sur les sept pages</b>.</p>
 
- <h3>7.4 Anomalies détectées et corrigées</h3>
- <p>Les cinq écarts relevés ont été corrigés, puis l’audit a été relancé pour vérifier le résultat.</p>
- <table>
- <thead><tr><th style="width:24%">Écart constaté</th><th style="width:19%">Mesure avant</th><th style="width:19%">Mesure après</th><th>Correction apportée</th></tr></thead>
+ <h3>7.4 Vérifications manuelles</h3>
+ <p>Un audit automatique ne couvre qu’une part des critères. Les contrôles suivants ont donc été menés
+ directement dans le navigateur, sur l’application en production.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:30%">Contrôle</th><th style="width:34%">Méthode</th><th>Résultat</th></tr></thead>
  <tbody>
- <tr><td>Absence de repère principal (<code>landmark-one-main</code>)</td><td>Aucun élément <code>main</code></td><td class="ok-txt">Repère présent</td><td>Le conteneur de <code>BodyWrapper</code> devient un élément <code>main</code>, ce qui dote toutes les pages du repère&nbsp;; le <code>main</code> imbriqué de la page d’accueil a été supprimé.</td></tr>
- <tr><td>Texte secondaire, mode sombre</td><td>3,08:1</td><td class="ok-txt">4,65:1</td><td><code>--pf-text-muted</code> éclairci de <code>#5E5E6B</code> à <code>#7A7A88</code>.</td></tr>
- <tr><td>Texte secondaire, mode clair</td><td>3,03:1</td><td class="ok-txt">4,57:1</td><td><code>--pf-text-muted</code> assombri de <code>#8E8E99</code> à <code>#70707B</code>.</td></tr>
- <tr><td>Bouton de soumission (texte blanc sur accent)</td><td>4,35:1</td><td class="ok-txt">4,85:1</td><td>Couleur d’accent par défaut ajustée de <code>#7C5CFF</code> à <code>#7454F5</code>.</td></tr>
- <tr><td>Lien «&nbsp;Oublié&nbsp;?&nbsp;» (accent utilisé comme texte)</td><td>4,04:1</td><td class="ok-txt">5,90:1</td><td>Emploi de la variante claire <code>--pf-accent-strong</code>&nbsp;: une couleur lisible en fond de bouton ne l’est pas nécessairement en texte.</td></tr>
+ <tr><td>Accès au clavier</td><td>Recensement des éléments interactifs et de leur ordre de tabulation.</td><td class="ok-txt">Tous focalisables, aucun retiré du parcours de tabulation.</td></tr>
+ <tr><td>Nom accessible</td><td>Calcul du nom de chaque élément interactif (contenu, <code>aria-label</code>, libellé associé).</td><td class="ok-txt">Aucun élément sans intitulé.</td></tr>
+ <tr><td>Visibilité du focus</td><td>Inspection du style appliqué à la prise de focus.</td><td class="ok-txt">Contour de 2 px avec décalage, appliqué aux boutons, liens et champs.</td></tr>
+ <tr><td>Zoom à 200 %</td><td>Réduction de la fenêtre à 640 px, équivalente à un zoom de 200 % sur un écran de 1280 px.</td><td class="ok-txt">Aucun défilement horizontal, aucun élément débordant.</td></tr>
+ <tr><td>Structure du document</td><td>Langue déclarée, unicité du titre de niveau 1, présence du repère principal.</td><td class="ok-txt"><code>lang="fr"</code>, un seul <code>h1</code>, repère <code>main</code> présent.</td></tr>
+ <tr><td>Contraste des sept thèmes</td><td>Calcul du rapport de contraste du texte posé sur chaque couleur d’accent.</td><td class="ok-txt">Les sept thèmes atteignent le niveau AA (voir 7.5).</td></tr>
  </tbody>
  </table>
- <p>Le seuil visé est celui du niveau AA pour du texte de taille normale, soit un rapport de contraste
- d’au moins 4,5:1. Ces corrections sont enregistrées sous BUG-16 au chapitre 10.</p>
 
- <h3>7.5 Écart connu et portée de la vérification</h3>
- <p>Le contrôle des sept couleurs d’accent proposées à l’utilisateur montre que trois d’entre elles
- n’atteignent pas le seuil lorsqu’elles portent du texte blanc&nbsp;: emerald (3,77:1), orange (3,56:1) et
- yellow (2,94:1). Corriger ces teintes modifierait sensiblement l’identité visuelle du produit&nbsp;: la
- décision est donc documentée plutôt que tranchée unilatéralement, et suivie sous BUG-17.</p>
+ <h3>7.5 Contraste des thèmes&nbsp;: une correction sans renoncer à l’identité visuelle</h3>
+ <p>Le contrôle des sept couleurs d’accent proposées à l’utilisateur montrait que trois d’entre elles —
+ vert, orange et jaune — n’atteignaient pas le seuil de 4,5:1 lorsqu’elles portaient du texte blanc.
+ Assombrir ces teintes aurait altéré l’identité visuelle du produit. La couleur du texte est donc désormais
+ <b>calculée</b> selon le contraste&nbsp;: les accents sombres conservent un texte blanc, les accents clairs
+ reçoivent un texte foncé. La palette reste inchangée et les sept thèmes satisfont au niveau AA.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:20%">Thème</th><th style="width:22%">Texte blanc</th><th style="width:22%">Texte foncé</th><th>Retenu</th></tr></thead>
+ <tbody>
+ <tr><td>Bleu (défaut)</td><td class="ok-txt">4,85</td><td>3,84</td><td>blanc</td></tr>
+ <tr><td>Violet</td><td class="ok-txt">5,38</td><td>3,46</td><td>blanc</td></tr>
+ <tr><td>Vert</td><td class="bad-txt">3,77</td><td class="ok-txt">4,94</td><td>foncé</td></tr>
+ <tr><td>Rose</td><td class="ok-txt">4,60</td><td>4,05</td><td>blanc</td></tr>
+ <tr><td>Rouge</td><td class="ok-txt">4,83</td><td>3,86</td><td>blanc</td></tr>
+ <tr><td>Orange</td><td class="bad-txt">3,56</td><td class="ok-txt">5,23</td><td>foncé</td></tr>
+ <tr><td>Jaune</td><td class="bad-txt">2,94</td><td class="ok-txt">6,34</td><td>foncé</td></tr>
+ </tbody>
+ </table>
+ <p>Le texte secondaire a par ailleurs été recalibré. Il avait d’abord été ajusté sur le fond de page, où il
+ atteignait 4,65:1&nbsp;; l’audit des pages authentifiées a révélé qu’il retombait à 4,3:1 sur les surfaces
+ plus claires des cartes. Il est désormais calibré sur la surface la plus claire, dans les deux modes
+ d’affichage.</p>
+
+ <h3>7.6 Portée et limites</h3>
  <div class="box warn">
- <p style="margin-top:0"><b>Portée de la campagne.</b> L’audit a porté sur deux pages publiques et sur les
- seuls critères vérifiables automatiquement. N’ont pas été réalisés&nbsp;: l’audit des pages protégées par
- authentification, le parcours complet au clavier, le test avec lecteur d’écran et le contrôle du zoom
- à 200 %.</p>
- <p style="margin-bottom:0">Ce dossier ne revendique donc <b>aucun niveau de conformité RGAA</b>. Les
- scores obtenus attestent d’une conformité aux critères automatisables sur les pages mesurées, ce qui
- constitue une étape de la démarche et non son aboutissement.</p>
+ <p style="margin-top:0">Douze écarts ont été détectés puis corrigés, et les sept pages du parcours principal
+ satisfont aux critères vérifiés. La campagne comporte néanmoins deux limites, énoncées ici plutôt que
+ passées sous silence&nbsp;: aucun test n’a été mené <b>avec un lecteur d’écran</b> réel, et l’audit n’a pas
+ porté sur l’<b>intégralité des 106 critères</b> du RGAA, mais sur ceux vérifiables par outil automatique et
+ par les contrôles manuels décrits en 7.4.</p>
+ <p style="margin-bottom:0">Le dossier ne revendique donc pas une <i>déclaration de conformité</i> RGAA, qui
+ supposerait un audit exhaustif par un tiers. Il établit que les critères vérifiés — repères, noms
+ accessibles, hiérarchie des titres, contrastes, accès au clavier, adaptabilité au zoom — sont satisfaits sur
+ l’ensemble du parcours applicatif, pages authentifiées comprises.</p>
  </div>
 </section>
 
@@ -979,7 +1019,7 @@ test: {
  <table>
  <thead><tr><th style="width:7%">Réf.</th><th style="width:7%">US</th><th style="width:29%">Scénario</th><th style="width:29%">Résultat attendu</th><th style="width:13%">Preuve</th><th>Résultat</th></tr></thead>
  <tbody>
- <tr><td class="id">RF-01</td><td class="id">US-01</td><td>Création d’un compte avec une adresse valide et un mot de passe d’au moins 6 caractères.</td><td>Compte créé (HTTP 201), redirection vers la connexion.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-01</td><td class="id">US-01</td><td>Création d’un compte avec une adresse valide et un mot de passe conforme à la politique (12 caractères, trois classes).</td><td>Compte créé (HTTP 201), redirection vers la connexion.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">RF-02</td><td class="id">US-01</td><td>Connexion avec des identifiants corrects.</td><td>Session ouverte, accès à l’agenda.</td><td>Manuel, fig. A.1</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">RF-03</td><td class="id">US-02</td><td>Création d’un événement avec titre et date.</td><td>Événement créé (HTTP 201) et visible dans l’agenda.</td><td>Automatisé, fig. A.2</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">RF-04</td><td class="id">US-03</td><td>Invitation d’un ami à un événement.</td><td>Participant ajouté au statut <code>pending</code> et notification émise.</td><td>Automatisé, fig. A.2</td><td class="ok-txt">Conforme</td></tr>
@@ -1016,9 +1056,14 @@ test: {
  <tr><td class="id">SEC-03</td><td>Tentative de connexion avec une adresse inexistante.</td><td>Message générique, identique à celui d’un mot de passe erroné.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
  <tr><td class="id">SEC-04</td><td>Requête sur <code>/api/uploads/../../</code> visant un fichier hors du dossier d’envoi.</td><td>HTTP 400, aucun contenu servi.</td><td>Manuel</td><td class="ok-txt">Conforme après BUG-08</td></tr>
  <tr><td class="id">SEC-05</td><td>Inspection des en-têtes HTTP d’une réponse.</td><td>Présence des en-têtes de sécurité configurés.</td><td>Manuel</td><td class="ok-txt">Conforme après BUG-09</td></tr>
+ <tr><td class="id">SEC-06</td><td>Inscription avec un mot de passe de 7 caractères, puis de 12 caractères sans majuscule.</td><td>HTTP 400 dans les deux cas, avec un message distinct.</td><td>Automatisé et manuel</td><td class="ok-txt">Conforme après BUG-23</td></tr>
+ <tr><td class="id">SEC-07</td><td>Six tentatives de connexion successives avec un mot de passe erroné.</td><td>Blocage à partir de la sixième, journalisé.</td><td>Automatisé et manuel</td><td class="ok-txt">Conforme après BUG-23</td></tr>
+ <tr><td class="id">SEC-08</td><td>Lecture du journal après un échec d’authentification.</td><td>Événement horodaté, adresse masquée.</td><td>Manuel</td><td class="ok-txt">Conforme après BUG-24</td></tr>
+ <tr><td class="id">A11Y-01</td><td>Audit d’accessibilité des sept pages du parcours, session ouverte pour les pages protégées.</td><td>Aucun critère automatisable en échec.</td><td>Lighthouse</td><td class="ok-txt">Conforme après BUG-21 et BUG-22</td></tr>
+ <tr><td class="id">A11Y-02</td><td>Parcours au clavier, visibilité du focus et zoom à 200 %.</td><td>Tous les éléments atteignables et nommés&nbsp;; aucun défilement horizontal.</td><td>Manuel</td><td class="ok-txt">Conforme</td></tr>
  </tbody>
  </table>
- <p>Les 23 scénarios du cahier sont conformes. Trois d’entre eux (RS-07, RS-08 et RS-09) ont d’abord échoué&nbsp;:
+ <p>Les 28 scénarios du cahier sont conformes. Trois d’entre eux (RS-07, RS-08 et RS-09) ont d’abord échoué&nbsp;:
  ils ont été enregistrés comme anomalies, corrigés, puis rejoués en contre-recette. Le cahier de recettes et
  le registre des anomalies partagent les mêmes identifiants, ce qui permet de suivre chaque écart de sa
  détection à sa vérification finale.</p>
@@ -1053,41 +1098,37 @@ test: {
  correction s’accompagne, chaque fois que c’est possible, d’une mesure préventive destinée à empêcher la
  réapparition du même type de défaut. La contre-recette rejoue le scénario d’origine.</p>
 
- <h3>10.2 Anomalies corrigées</h3>
- <table>
- <thead><tr><th style="width:8%">Réf.</th><th style="width:23%">Description</th><th style="width:9%">Gravité</th><th style="width:24%">Cause racine</th><th>Correction et prévention</th></tr></thead>
+ <h3>10.2 Anomalies traitées</h3>
+ <p>Vingt-cinq anomalies ont été détectées, qualifiées et corrigées au cours du projet et de l’audit mené
+ pour ce dossier. Le registre détaillé — cause racine, correction et mesure préventive pour chacune —
+ figure en <b>annexe D</b>. La répartition par nature est la suivante&nbsp;:</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:26%">Nature</th><th style="width:10%">Nombre</th><th>Exemples représentatifs</th></tr></thead>
  <tbody>
- <tr><td class="id">BUG-01</td><td>Consommation mémoire excessive sur le VPS.</td><td class="warn-txt">Majeure</td><td>Rafraîchissement périodique (<i>polling</i>) trop fréquent côté client sur la page des événements.</td><td>Suppression du polling puis espacement des intervalles (commits <code>ea014a1</code>, <code>a797b6c</code>). Prévention&nbsp;: plafond mémoire PM2 et contrôle V-08 après déploiement.</td></tr>
- <tr><td class="id">BUG-02</td><td>Échec du build de production.</td><td class="warn-txt">Majeure</td><td>Le client Prisma n’était pas régénéré avant la compilation.</td><td>Ajout de <code>prisma generate</code> au script <code>build</code> (<code>baca205</code>). Prévention&nbsp;: étape dédiée dans le pipeline.</td></tr>
- <tr><td class="id">BUG-03</td><td>Imports non résolus en production.</td><td class="warn-txt">Majeure</td><td>Alias de chemins non résolus par l’outil de build de la plateforme d’hébergement.</td><td>Passage en chemins relatifs sur les modules concernés. Prévention&nbsp;: build exécuté dans le pipeline.</td></tr>
- <tr><td class="id">BUG-04</td><td>Événement affiché en double dans l’agenda.</td><td>Mineure</td><td>Un événement à la fois créé par l’utilisateur et accepté comme invitation figurait dans les deux listes.</td><td>Déduplication par identifiant dans la route. Prévention&nbsp;: test automatisé RS-03.</td></tr>
- <tr><td class="id">BUG-05</td><td>Service Worker non pris en compte en production.</td><td>Mineure</td><td>En-têtes HTTP manquants sur <code>sw.js</code> et <code>manifest.json</code>.</td><td>Ajout des en-têtes dédiés dans <code>next.config.js</code> (<code>9ce1e6b</code>).</td></tr>
- <tr><td class="id">BUG-06</td><td>Huit fichiers de tests non exécutés.</td><td class="bad-txt">Critique</td><td>Seize parenthèses fermantes en trop, du type <code>expect(mock))</code>, rendant les fichiers syntaxiquement invalides. Ces fichiers étaient silencieusement ignorés, d’où un taux de réussite affiché de 66,7 %.</td><td>Correction des seize occurrences. Prévention&nbsp;: ajout de l’étape <code>typecheck</code> au pipeline, qui détecte désormais toute erreur de syntaxe avant la fusion.</td></tr>
- <tr><td class="id">BUG-07</td><td>Deux assertions inopérantes sur les sondages.</td><td class="warn-txt">Majeure</td><td>Négation mal placée&nbsp;: <code>expect(mock.not)</code> au lieu de <code>expect(mock).not</code>, et une parenthèse manquante.</td><td>Réécriture des deux assertions. Prévention&nbsp;: couverte par l’étape <code>typecheck</code>.</td></tr>
- <tr><td class="id">BUG-08</td><td>Absence de protection contre la traversée de répertoires.</td><td class="bad-txt">Critique</td><td>La route de service des fichiers concaténait les segments d’URL sans vérifier que le chemin résolu restait dans <code>public/uploads</code>.</td><td>Rejet des segments <code>..</code> et vérification du chemin résolu. Prévention&nbsp;: scénario SEC-04 ajouté au cahier de recettes.</td></tr>
- <tr><td class="id">BUG-09</td><td>Aucun en-tête de sécurité HTTP.</td><td class="warn-txt">Majeure</td><td>Seuls les en-têtes du Service Worker étaient définis&nbsp;; aucune protection contre le détournement de cadre ou l’interprétation abusive de type.</td><td>Ajout de cinq en-têtes de sécurité sur toutes les réponses. Prévention&nbsp;: scénario SEC-05.</td></tr>
- <tr><td class="id">BUG-14</td><td>Composant d’agenda non marqué comme composant client.</td><td class="warn-txt">Majeure</td><td>La directive <code>"use client"</code> était placée après un import&nbsp;: elle était donc traitée comme une expression sans effet.</td><td>Directive replacée en première ligne. Prévention&nbsp;: détection par l’analyse statique, désormais bloquante dans le pipeline.</td></tr>
- <tr><td class="id">BUG-15</td><td>Analyse statique inopérante.</td><td class="warn-txt">Majeure</td><td>Le script <code>lint</code> appelait <code>next lint</code>, commande retirée de Next.js 16&nbsp;; aucune configuration ESLint n’existait par ailleurs.</td><td>Configuration ESLint 9 au format <i>flat config</i>, ajout du parseur TypeScript et réécriture du script. Prévention&nbsp;: étape bloquante dans le pipeline.</td></tr>
- <tr><td class="id">BUG-16</td><td>Cinq écarts d’accessibilité sur les pages publiques.</td><td class="warn-txt">Majeure</td><td>Absence de repère <code>main</code> dans le gabarit, et quatre couleurs choisies sans contrôle du rapport de contraste (texte secondaire dans les deux modes, fond de bouton, accent employé comme texte).</td><td>Repère <code>main</code> porté par <code>BodyWrapper</code> et quatre couleurs réajustées&nbsp;; score Lighthouse porté de 94 à 100 sur les deux pages. Prévention&nbsp;: contrôle du contraste avant toute introduction d’une couleur, et audit automatique à intégrer au pipeline.</td></tr>
- <tr><td class="id">BUG-11</td><td>La détection des conflits d’agenda ne remontait aucun conflit dès qu’il y avait plusieurs utilisateurs.</td><td class="warn-txt">Majeure</td><td>Le test empilait deux réponses simulées par utilisateur alors que la route n’en consomme qu’une&nbsp;: la réponse excédentaire était consommée par le scénario suivant.</td><td>Simulation alignée sur le nombre réel d’appels. Prévention&nbsp;: ne jamais empiler de réponse simulée non consommée, qui fuit vers le test suivant.</td></tr>
- <tr><td class="id">BUG-12</td><td>La lecture d’un sondage renvoyait une erreur 500 au lieu du sondage.</td><td class="warn-txt">Majeure</td><td>Deux dépendances de la route n’étaient pas simulées&nbsp;: la résolution des auteurs de votes et la date de chaque vote, sérialisée par la route.</td><td>Simulation complétée. Prévention&nbsp;: couverture de la route vérifiée après correction.</td></tr>
- <tr><td class="id">BUG-13</td><td>Vingt-cinq tests de composants en échec après la refonte d’interface.</td><td class="warn-txt">Majeure</td><td>La refonte a modifié libellés et balisage (radios devenues boutons, cases masquées, navigation renommée)&nbsp;; les tests visaient des éléments disparus.</td><td>Sélecteurs et libellés réalignés sur l’interface réelle. Prévention&nbsp;: privilégier des sélecteurs fondés sur le rôle et le nom accessible plutôt que sur la structure du balisage.</td></tr>
- <tr><td class="id">BUG-18</td><td>Un fichier de tests entier n’était jamais exécuté, sans alerte.</td><td class="bad-txt">Critique</td><td>La simulation du module <code>fs</code> n’exposait pas d’export par défaut&nbsp;: le fichier échouait au chargement, et ses neuf tests n’apparaissaient dans aucun décompte.</td><td>Simulations de <code>fs</code> et <code>fs/promises</code> complétées. Prévention&nbsp;: le pipeline échoue désormais si un fichier de tests ne se charge pas.</td></tr>
- <tr><td class="id">BUG-19</td><td>L’heure choisie dans le sélecteur de date était enregistrée avec un décalage.</td><td class="bad-txt">Critique</td><td>La valeur était produite par une conversion en temps universel&nbsp;: une heure saisie à 15&nbsp;h 45 était enregistrée à 13&nbsp;h 45 en heure d’été.</td><td>Construction d’une date locale, conforme au format attendu par le formulaire. Prévention&nbsp;: scénario de recette vérifiant que l’heure enregistrée est bien celle saisie.</td></tr>
- <tr><td class="id">BUG-20</td><td>En production, la page s’affichait mais l’application n’était pas interactive.</td><td class="bad-txt">Critique</td><td>Nginx s’exécute sous l’identité <code>www-data</code> et servait les actifs statiques depuis le répertoire personnel, dont les droits (<code>drwxr-x---</code>) interdisent la traversée à autrui&nbsp;: les scripts renvoyaient HTTP 403 et l’interface ne s’activait jamais. Le défaut était invisible sur la page d’accueil, qui répondait bien en HTTP 200.</td><td>Droit de traversée seul accordé (<code>chmod o+x</code>), sans autoriser le listage du répertoire. Prévention&nbsp;: le contrôle post-déploiement V-01 vérifie désormais le chargement effectif des actifs, et non le seul code de réponse de la page.</td></tr>
- <tr><td class="id">BUG-10</td><td>Trente-neuf vulnérabilités dans les dépendances de production, dont trois critiques.</td><td class="bad-txt">Critique</td><td>La bibliothèque <code>next-pwa</code> 2.6.3, non maintenue, entraînait des dépendances transitives obsolètes. Elle figurait dans le manifeste alors qu’aucun code ne l’utilisait.</td><td>Suppression de la dépendance inutilisée (655 paquets retirés) puis mise à jour des correctifs dans les bornes déclarées&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Prévention&nbsp;: audit des dépendances à intégrer au pipeline et contrôle des dépendances non utilisées.</td></tr>
+ <tr><td>Sécurité</td><td>6</td><td>Traversée de répertoires sur le service de fichiers, absence de limitation des tentatives, politique de mot de passe faible, absence de journal de sécurité et de politique de contenu.</td></tr>
+ <tr><td>Accessibilité</td><td>4</td><td>Éléments interactifs sans nom accessible, contrastes insuffisants, repère principal absent, hiérarchie des titres rompue.</td></tr>
+ <tr><td>Fiabilité des tests</td><td>4</td><td>Dix-huit erreurs de syntaxe rendant huit fichiers inexécutables, un neuvième échouant au chargement sans alerte.</td></tr>
+ <tr><td>Exploitation et déploiement</td><td>6</td><td>Consommation mémoire, échec du build, actifs statiques refusés par le proxy, analyse statique inopérante.</td></tr>
+ <tr><td>Fonctionnel</td><td>5</td><td>Heure décalée par une conversion en temps universel, événement affiché en double, Service Worker non diffusé.</td></tr>
  </tbody>
  </table>
-</section>
+ <div class="box info">
+ Deux anomalies méritent d’être soulignées, car elles étaient <b>invisibles à l’usage</b>&nbsp;: une heure
+ saisie à 15&nbsp;h&nbsp;45 était enregistrée à 13&nbsp;h&nbsp;45 en heure d’été, et la page de connexion
+ répondait correctement en production alors que ses scripts étaient refusés par le proxy, rendant
+ l’application inerte. Aucune n’aurait été détectée par une relecture du code.
+ </div>
 
-<section>
- <h3>10.3 Anomalies ouvertes</h3>
- <p>L’anomalie ci-dessous est détectée, qualifiée et planifiée, mais non corrigée à la date de rédaction&nbsp;:
- son traitement engage un arbitrage sur l’identité visuelle du produit, qui dépasse le périmètre de cet audit.</p>
+ <h3>10.3 Points de vigilance résiduels</h3>
+ <p>Aucune anomalie détectée ne reste ouverte à la date de rédaction. Subsistent en revanche trois limites
+ assumées, qui ne relèvent pas d’un défaut à corriger mais d’un arbitrage ou d’une dépendance externe. Elles
+ sont suivies au même titre que les anomalies.</p>
  <table>
- <thead><tr><th style="width:8%">Réf.</th><th style="width:8%">Recette</th><th style="width:20%">Description</th><th style="width:9%">Gravité</th><th style="width:24%">Cause racine identifiée</th><th>Correction prévue</th></tr></thead>
+ <thead><tr><th style="width:22%">Point</th><th style="width:36%">Nature</th><th>Conduite retenue</th></tr></thead>
  <tbody>
- <tr><td class="id">BUG-17</td><td>—</td><td>Trois couleurs de thème (emerald, orange, yellow) n’atteignent pas le contraste AA avec du texte blanc.</td><td>Mineure</td><td>Teintes choisies pour leur rendu visuel, sans contrôle du rapport de contraste au moment de la conception de la palette.</td><td>Arbitrage à rendre entre identité visuelle et accessibilité&nbsp;: assombrir les trois teintes ou basculer le texte des boutons concernés en couleur sombre.</td></tr>
+ <tr><td>Vulnérabilités résiduelles des dépendances</td><td>Quatre vulnérabilités, aucune critique, héritées de l’arbre de dépendances de Next.js.</td><td>Non corrigeables sans rétrograder le framework de six versions majeures. Suivi de la prochaine version de Next.js&nbsp;; audit à rendre bloquant dans le pipeline.</td></tr>
+ <tr><td>CSP permissive sur les scripts</td><td><code>unsafe-inline</code> reste nécessaire, Next.js injectant la charge d’hydratation en ligne.</td><td>Un nonce imposerait un rendu dynamique de toutes les pages aujourd’hui prérendues. Arbitrage en faveur de la performance, à réexaminer si l’application expose des contenus tiers.</td></tr>
+ <tr><td>Compteur de tentatives en mémoire</td><td>La limitation repose sur la mémoire du processus applicatif.</td><td>Suffisant pour une instance unique, ce qui est la configuration actuelle. Un magasin partagé sera nécessaire en cas de mise à l’échelle horizontale.</td></tr>
  </tbody>
  </table>
 
@@ -1143,7 +1184,7 @@ sudo systemctl reload nginx</pre>
  <table class="avoid-break">
  <thead><tr><th style="width:28%">Action</th><th>Marche à suivre</th></tr></thead>
  <tbody>
- <tr><td>Créer un compte</td><td>Depuis la page d’accueil, choisir « S’inscrire gratuitement », saisir une adresse e-mail et un mot de passe d’au moins 6 caractères.</td></tr>
+ <tr><td>Créer un compte</td><td>Depuis la page d’accueil, choisir « S’inscrire gratuitement », saisir une adresse e-mail et un mot de passe d’au moins 12 caractères comportant une minuscule, une majuscule et un chiffre.</td></tr>
  <tr><td>Se connecter</td><td>Saisir l’adresse e-mail et le mot de passe sur la page de connexion (figure A.1).</td></tr>
  <tr><td>Créer un événement</td><td>Onglet Agenda, bouton « Nouvel événement »&nbsp;: renseigner le titre, la date, l’heure, le lieu et la visibilité, puis valider avec « Créer ».</td></tr>
  <tr><td>Inviter des amis</td><td>Dans le panneau « Inviter » de l’événement, rechercher un ami et activer l’interrupteur correspondant. Les invités reçoivent une notification.</td></tr>
@@ -1246,16 +1287,16 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  que prévu. Il a mis au jour des défauts sérieux et invisibles à l’usage — huit fichiers de tests
  silencieusement ignorés, une faille permettant de sortir du dossier des fichiers envoyés, une analyse
  statique inopérante depuis une montée de version, un déploiement qui pouvait partir sans qu’aucun test
- n’ait été exécuté. Ces dix-neuf anomalies corrigées valent, à mes yeux, autant que les fonctionnalités
+ n’ait été exécuté. Ces vingt-cinq anomalies corrigées valent, à mes yeux, autant que les fonctionnalités
  livrées&nbsp;: elles montrent ce qu’un dispositif de vérification apporte par rapport à une simple relecture.
  </p>
  <p>
  Des limites subsistent, et il serait malhonnête de les passer sous silence. Quatre vulnérabilités
  demeurent dans les dépendances&nbsp;; aucune n’est critique, mais elles proviennent de l’arbre de
  Next.js, qu’on ne peut assainir sans rétrograder le framework de six versions majeures. Enfin, l’audit
- d’accessibilité n’a porté que sur deux pages publiques et sur les seuls critères automatisables&nbsp;: le
- score de 100 obtenu après correction ne vaut pas conformité RGAA, et trois couleurs de thème restent
- en deçà du seuil de contraste. Ces points sont recensés en annexe C.
+ d’accessibilité, bien qu’étendu aux sept pages du parcours et complété de vérifications manuelles, n’a
+ comporté ni test avec lecteur d’écran ni revue des cent six critères du RGAA&nbsp;: le score de 100 obtenu
+ ne vaut donc pas déclaration de conformité. Ces points sont recensés en annexe C.
  </p>
  <p>
  Les prochaines étapes découlent directement de ce constat&nbsp;: intégrer l’audit des dépendances au
@@ -1340,16 +1381,16 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  <tr><td class="id">C2.2.1</td><td>Composants d’interface présents et fonctionnels.</td><td>Chapitre 2.2 et annexe A.</td><td>7</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.2.2</td><td>Jeu de tests unitaires couvrant la majorité du code développé.</td><td>Chapitre 5.2&nbsp;: couverture mesurée (71,4 % des lignes), détail par domaine&nbsp;; 5.3&nbsp;: jeu de tests commenté.</td><td>12</td><td class="ok-txt">Traité</td></tr>
  <tr><td class="id">C2.2.3</td><td>Mesures couvrant les dix failles principales de l’OWASP.</td><td>Chapitre 6.1&nbsp;: tableau des dix catégories avec fichier, vérification et limite&nbsp;; 6.3&nbsp;: extraits de code.</td><td>14</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.2.3</td><td>Référentiel d’accessibilité présenté et justifié.</td><td>Chapitre 7.1&nbsp;: RGAA 4.1 et Opquast, avec justification du choix.</td><td>16</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.2.3</td><td>Le prototype répond aux exigences du référentiel d’accessibilité.</td><td>Chapitre 7.3&nbsp;: audit Lighthouse, 100/100 sur les deux pages mesurées&nbsp;; 7.4&nbsp;: cinq écarts corrigés avec mesures avant/après&nbsp;; 7.5&nbsp;: portée et écart connu.</td><td>16</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.2.4</td><td>Système de gestion de versions utilisé, évolutions tracées.</td><td>Chapitre 8.1 et 8.2&nbsp;: pratiques Git et jalons identifiés par empreinte.</td><td>18</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.2.4</td><td>Logiciel fonctionnel et manipulable en autonomie par un utilisateur.</td><td>Application en ligne sur https://planify.johanpoyet.fr, annexe A, manuel d’utilisation (11.2), contrôles V-01 à V-08 exécutés.</td><td>18</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.1</td><td>Cahier de recettes reprenant l’ensemble des fonctionnalités attendues.</td><td>Chapitre 9&nbsp;: 23 scénarios rattachés aux user stories, avec conditions d’exécution.</td><td>20</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.1</td><td>Tests fonctionnels, structurels et de sécurité conformes au plan défini.</td><td>Chapitre 9.1, 9.2 et 9.3&nbsp;; 20 scénarios conformes, 3 en échec renvoyés au chapitre 10.</td><td>20</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.2</td><td>Bogues détectés, qualifiés et traités.</td><td>Chapitre 10.2&nbsp;: dix-neuf anomalies corrigées&nbsp;; 10.3&nbsp;: une anomalie ouverte qualifiée.</td><td>22</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.3.2</td><td>Analyse des points d’amélioration pour chaque test en échec.</td><td>Chapitre 10.3 (cause racine par anomalie) et 10.4 (enseignement et mesure adoptée).</td><td>25</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.4.1</td><td>Manuels de déploiement, d’utilisation et de mise à jour rédigés avec clarté.</td><td>Chapitre 11.1, 11.2 et 11.3, avec public identifié pour chacun.</td><td>26</td><td class="ok-txt">Traité</td></tr>
- <tr><td class="id">C2.4.1</td><td>Documentation décrivant les choix de technologies et de langages.</td><td>Chapitre 1.1 (justification de la stack) et 11.3 (incidence de ces choix sur les procédures).</td><td>4 et 27</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.3</td><td>Référentiel d’accessibilité présenté et justifié.</td><td>Chapitre 7.1&nbsp;: RGAA 4.1 et Opquast, avec justification du choix.</td><td>17</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.3</td><td>Le prototype répond aux exigences du référentiel d’accessibilité.</td><td>Chapitre 7.3&nbsp;: sept pages auditées, publiques et authentifiées, 100/100 après correction&nbsp;; 7.4&nbsp;: vérifications manuelles (clavier, focus, zoom)&nbsp;; 7.5&nbsp;: sept thèmes au niveau AA&nbsp;; 7.6&nbsp;: portée et limites.</td><td>17</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.4</td><td>Système de gestion de versions utilisé, évolutions tracées.</td><td>Chapitre 8.1 et 8.2&nbsp;: pratiques Git et jalons identifiés par empreinte.</td><td>19</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.4</td><td>Logiciel fonctionnel et manipulable en autonomie par un utilisateur.</td><td>Application en ligne sur https://planify.johanpoyet.fr, annexe A, manuel d’utilisation (11.2), contrôles V-01 à V-08 exécutés.</td><td>19</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.1</td><td>Cahier de recettes reprenant l’ensemble des fonctionnalités attendues.</td><td>Chapitre 9&nbsp;: 28 scénarios rattachés aux user stories, avec conditions d’exécution.</td><td>21</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.1</td><td>Tests fonctionnels, structurels et de sécurité conformes au plan défini.</td><td>Chapitre 9.1 à 9.3&nbsp;; 28 scénarios conformes, dont 3 après correction (chapitre 10).</td><td>21</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Bogues détectés, qualifiés et traités.</td><td>Chapitre 10.2 (synthèse) et annexe D (registre détaillé)&nbsp;: vingt-cinq anomalies corrigées&nbsp;; 10.3&nbsp;: trois points de vigilance.</td><td>23</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Analyse des points d’amélioration pour chaque test en échec.</td><td>Chapitre 10.3 (cause racine par anomalie) et 10.4 (enseignement et mesure adoptée).</td><td>24</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Manuels de déploiement, d’utilisation et de mise à jour rédigés avec clarté.</td><td>Chapitre 11.1, 11.2 et 11.3, avec public identifié pour chacun.</td><td>25</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Documentation décrivant les choix de technologies et de langages.</td><td>Chapitre 1.1 (justification de la stack) et 11.3 (incidence de ces choix sur les procédures).</td><td>4 et 26</td><td class="ok-txt">Traité</td></tr>
  </tbody>
  </table>
 </section>
@@ -1363,9 +1404,8 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  <table>
  <thead><tr><th style="width:26%">Point</th><th style="width:37%">État réel</th><th>Conséquence sur le dossier</th></tr></thead>
  <tbody>
-   <tr><td>Audit d’accessibilité complet</td><td>Audit automatique Lighthouse réalisé sur deux pages publiques (100/100 après correction). N’ont pas été réalisés&nbsp;: audit des pages authentifiées, parcours clavier, lecteur d’écran, zoom à 200 %.</td><td>Aucun niveau de conformité RGAA n’est revendiqué&nbsp;; la portée exacte de la campagne est délimitée au chapitre 7.5.</td></tr>
- <tr><td>Contraste de trois couleurs de thème</td><td>Les accents emerald, orange et yellow n’atteignent pas 4,5:1 avec du texte blanc (BUG-17).</td><td>Écart mesuré et documenté au chapitre 7.5&nbsp;; correction soumise à un arbitrage sur l’identité visuelle.</td></tr>
- <tr><td>Tests utilisateurs</td><td>Aucun panel ni retour d’usage formalisé.</td><td>Le dossier ne présente aucun retour utilisateur.</td></tr>
+   <tr><td>Audit RGAA exhaustif</td><td>Sept pages auditées (dont cinq authentifiées) et vérifications manuelles menées&nbsp;; en revanche, aucun test avec lecteur d’écran réel, et les 106 critères du RGAA n’ont pas tous été passés en revue.</td><td>Le dossier n’établit pas de déclaration de conformité&nbsp;; la portée est délimitée au chapitre 7.6.</td></tr>
+  <tr><td>Tests utilisateurs</td><td>Aucun panel ni retour d’usage formalisé.</td><td>Le dossier ne présente aucun retour utilisateur.</td></tr>
  <tr><td>Charge et montée en charge</td><td>Les temps de réponse ont été relevés sur des requêtes isolées, sans test de charge.</td><td>Le chapitre 3.2 annonce un temps de réponse constaté, non un comportement sous charge.</td></tr>
   <tr><td>Vulnérabilités résiduelles des dépendances</td><td>4 vulnérabilités subsistent (2 élevées, 2 moyennes, aucune critique), héritées de l’arbre de dépendances de Next.js.</td><td>Elles ne peuvent être levées sans rétrograder Next.js de la version 16 à la version 9&nbsp;: l’écart est documenté au chapitre 6.2 et suivi sous BUG-10.</td></tr>
  <tr><td>Script <code>deploy.sh</code></td><td>Présent sur le serveur mais non versionné dans le dépôt.</td><td>Son contenu est reproduit au chapitre 3.3 mais ne peut pas être vérifié depuis le dépôt.</td></tr>
@@ -1375,6 +1415,44 @@ pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérificat
  </tbody>
  </table>
  <p class="center small" style="margin-top:1.6em;">Fin du dossier — Planify — POYET Johan — Ynov Lyon Campus 2025-2026 — 23/07/2026</p>
+</section>
+
+<!-- ============================ ANNEXE D ============================ -->
+<section class="page-break">
+  <h2>Annexe D — Registre détaillé des anomalies</h2>
+  <p>Registre complet des vingt-cinq anomalies traitées, dans l’ordre de leur détection. Le chapitre 10
+  présente le processus de traitement et la synthèse par nature&nbsp;; les identifiants sont partagés avec le
+  cahier de recettes (chapitre 9).</p>
+<table>
+ <thead><tr><th style="width:8%">Réf.</th><th style="width:23%">Description</th><th style="width:9%">Gravité</th><th style="width:24%">Cause racine</th><th>Correction et prévention</th></tr></thead>
+ <tbody>
+ <tr><td class="id">BUG-01</td><td>Consommation mémoire excessive sur le VPS.</td><td class="warn-txt">Majeure</td><td>Rafraîchissement périodique (<i>polling</i>) trop fréquent côté client sur la page des événements.</td><td>Suppression du polling puis espacement des intervalles (commits <code>ea014a1</code>, <code>a797b6c</code>). Prévention&nbsp;: plafond mémoire PM2 et contrôle V-08 après déploiement.</td></tr>
+ <tr><td class="id">BUG-02</td><td>Échec du build de production.</td><td class="warn-txt">Majeure</td><td>Le client Prisma n’était pas régénéré avant la compilation.</td><td>Ajout de <code>prisma generate</code> au script <code>build</code> (<code>baca205</code>). Prévention&nbsp;: étape dédiée dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-03</td><td>Imports non résolus en production.</td><td class="warn-txt">Majeure</td><td>Alias de chemins non résolus par l’outil de build de la plateforme d’hébergement.</td><td>Passage en chemins relatifs sur les modules concernés. Prévention&nbsp;: build exécuté dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-04</td><td>Événement affiché en double dans l’agenda.</td><td>Mineure</td><td>Un événement à la fois créé par l’utilisateur et accepté comme invitation figurait dans les deux listes.</td><td>Déduplication par identifiant dans la route. Prévention&nbsp;: test automatisé RS-03.</td></tr>
+ <tr><td class="id">BUG-05</td><td>Service Worker non pris en compte en production.</td><td>Mineure</td><td>En-têtes HTTP manquants sur <code>sw.js</code> et <code>manifest.json</code>.</td><td>Ajout des en-têtes dédiés dans <code>next.config.js</code> (<code>9ce1e6b</code>).</td></tr>
+ <tr><td class="id">BUG-06</td><td>Huit fichiers de tests non exécutés.</td><td class="bad-txt">Critique</td><td>Seize parenthèses fermantes en trop, du type <code>expect(mock))</code>, rendant les fichiers syntaxiquement invalides. Ces fichiers étaient silencieusement ignorés, d’où un taux de réussite affiché de 66,7 %.</td><td>Correction des seize occurrences. Prévention&nbsp;: ajout de l’étape <code>typecheck</code> au pipeline, qui détecte désormais toute erreur de syntaxe avant la fusion.</td></tr>
+ <tr><td class="id">BUG-07</td><td>Deux assertions inopérantes sur les sondages.</td><td class="warn-txt">Majeure</td><td>Négation mal placée&nbsp;: <code>expect(mock.not)</code> au lieu de <code>expect(mock).not</code>, et une parenthèse manquante.</td><td>Réécriture des deux assertions. Prévention&nbsp;: couverte par l’étape <code>typecheck</code>.</td></tr>
+ <tr><td class="id">BUG-08</td><td>Absence de protection contre la traversée de répertoires.</td><td class="bad-txt">Critique</td><td>La route de service des fichiers concaténait les segments d’URL sans vérifier que le chemin résolu restait dans <code>public/uploads</code>.</td><td>Rejet des segments <code>..</code> et vérification du chemin résolu. Prévention&nbsp;: scénario SEC-04 ajouté au cahier de recettes.</td></tr>
+ <tr><td class="id">BUG-09</td><td>Aucun en-tête de sécurité HTTP.</td><td class="warn-txt">Majeure</td><td>Seuls les en-têtes du Service Worker étaient définis&nbsp;; aucune protection contre le détournement de cadre ou l’interprétation abusive de type.</td><td>Ajout de cinq en-têtes de sécurité sur toutes les réponses. Prévention&nbsp;: scénario SEC-05.</td></tr>
+ <tr><td class="id">BUG-14</td><td>Composant d’agenda non marqué comme composant client.</td><td class="warn-txt">Majeure</td><td>La directive <code>"use client"</code> était placée après un import&nbsp;: elle était donc traitée comme une expression sans effet.</td><td>Directive replacée en première ligne. Prévention&nbsp;: détection par l’analyse statique, désormais bloquante dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-15</td><td>Analyse statique inopérante.</td><td class="warn-txt">Majeure</td><td>Le script <code>lint</code> appelait <code>next lint</code>, commande retirée de Next.js 16&nbsp;; aucune configuration ESLint n’existait par ailleurs.</td><td>Configuration ESLint 9 au format <i>flat config</i>, ajout du parseur TypeScript et réécriture du script. Prévention&nbsp;: étape bloquante dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-16</td><td>Cinq écarts d’accessibilité sur les pages publiques.</td><td class="warn-txt">Majeure</td><td>Absence de repère <code>main</code> dans le gabarit, et quatre couleurs choisies sans contrôle du rapport de contraste (texte secondaire dans les deux modes, fond de bouton, accent employé comme texte).</td><td>Repère <code>main</code> porté par <code>BodyWrapper</code> et quatre couleurs réajustées&nbsp;; score Lighthouse porté de 94 à 100 sur les deux pages. Prévention&nbsp;: contrôle du contraste avant toute introduction d’une couleur, et audit automatique à intégrer au pipeline.</td></tr>
+ <tr><td class="id">BUG-11</td><td>La détection des conflits d’agenda ne remontait aucun conflit dès qu’il y avait plusieurs utilisateurs.</td><td class="warn-txt">Majeure</td><td>Le test empilait deux réponses simulées par utilisateur alors que la route n’en consomme qu’une&nbsp;: la réponse excédentaire était consommée par le scénario suivant.</td><td>Simulation alignée sur le nombre réel d’appels. Prévention&nbsp;: ne jamais empiler de réponse simulée non consommée, qui fuit vers le test suivant.</td></tr>
+ <tr><td class="id">BUG-12</td><td>La lecture d’un sondage renvoyait une erreur 500 au lieu du sondage.</td><td class="warn-txt">Majeure</td><td>Deux dépendances de la route n’étaient pas simulées&nbsp;: la résolution des auteurs de votes et la date de chaque vote, sérialisée par la route.</td><td>Simulation complétée. Prévention&nbsp;: couverture de la route vérifiée après correction.</td></tr>
+ <tr><td class="id">BUG-13</td><td>Vingt-cinq tests de composants en échec après la refonte d’interface.</td><td class="warn-txt">Majeure</td><td>La refonte a modifié libellés et balisage (radios devenues boutons, cases masquées, navigation renommée)&nbsp;; les tests visaient des éléments disparus.</td><td>Sélecteurs et libellés réalignés sur l’interface réelle. Prévention&nbsp;: privilégier des sélecteurs fondés sur le rôle et le nom accessible plutôt que sur la structure du balisage.</td></tr>
+ <tr><td class="id">BUG-18</td><td>Un fichier de tests entier n’était jamais exécuté, sans alerte.</td><td class="bad-txt">Critique</td><td>La simulation du module <code>fs</code> n’exposait pas d’export par défaut&nbsp;: le fichier échouait au chargement, et ses neuf tests n’apparaissaient dans aucun décompte.</td><td>Simulations de <code>fs</code> et <code>fs/promises</code> complétées. Prévention&nbsp;: le pipeline échoue désormais si un fichier de tests ne se charge pas.</td></tr>
+ <tr><td class="id">BUG-19</td><td>L’heure choisie dans le sélecteur de date était enregistrée avec un décalage.</td><td class="bad-txt">Critique</td><td>La valeur était produite par une conversion en temps universel&nbsp;: une heure saisie à 15&nbsp;h 45 était enregistrée à 13&nbsp;h 45 en heure d’été.</td><td>Construction d’une date locale, conforme au format attendu par le formulaire. Prévention&nbsp;: scénario de recette vérifiant que l’heure enregistrée est bien celle saisie.</td></tr>
+ <tr><td class="id">BUG-20</td><td>En production, la page s’affichait mais l’application n’était pas interactive.</td><td class="bad-txt">Critique</td><td>Nginx s’exécute sous l’identité <code>www-data</code> et servait les actifs statiques depuis le répertoire personnel, dont les droits (<code>drwxr-x---</code>) interdisent la traversée à autrui&nbsp;: les scripts renvoyaient HTTP 403 et l’interface ne s’activait jamais. Le défaut était invisible sur la page d’accueil, qui répondait bien en HTTP 200.</td><td>Droit de traversée seul accordé (<code>chmod o+x</code>), sans autoriser le listage du répertoire. Prévention&nbsp;: le contrôle post-déploiement V-01 vérifie désormais le chargement effectif des actifs, et non le seul code de réponse de la page.</td></tr>
+ <tr><td class="id">BUG-17</td><td>Trois couleurs de thème (vert, orange, jaune) n’atteignaient pas le contraste AA avec du texte blanc.</td><td>Mineure</td><td>Teintes choisies pour leur rendu, sans contrôle du rapport de contraste, et couleur de texte figée en blanc quelle que soit la teinte.</td><td>La couleur du texte est calculée selon le contraste&nbsp;: les accents clairs reçoivent un texte foncé. Les sept thèmes atteignent AA sans modification de la palette. Prévention&nbsp;: le calcul est centralisé dans une fonction unique.</td></tr>
+ <tr><td class="id">BUG-21</td><td>Neuf éléments interactifs sans nom accessible sur les pages authentifiées.</td><td class="warn-txt">Majeure</td><td>Boutons et liens ne portant qu’une icône (navigation entre mois, bouton de création, interrupteurs)&nbsp;: aucun intitulé n’était exposé aux technologies d’assistance.</td><td>Ajout d’un <code>aria-label</code> et, pour les interrupteurs, du rôle <code>switch</code> avec son état. Prévention&nbsp;: audit étendu aux pages authentifiées, jusque-là non couvertes.</td></tr>
+ <tr><td class="id">BUG-22</td><td>Texte secondaire sous le seuil de contraste sur les cartes.</td><td class="warn-txt">Majeure</td><td>La couleur avait été calibrée sur le fond de page (4,65:1) alors qu’elle est aussi employée sur des surfaces plus claires, où elle retombait à 4,3:1.</td><td>Calibrage sur la surface la plus claire, dans les deux modes d’affichage. Prévention&nbsp;: le contraste se vérifie sur la surface la moins favorable, non sur le fond de page.</td></tr>
+ <tr><td class="id">BUG-23</td><td>Authentification sans limitation du nombre de tentatives ni politique de mot de passe robuste.</td><td class="bad-txt">Critique</td><td>Un mot de passe de six caractères suffisait, et rien ne freinait les tentatives répétées&nbsp;: une attaque par force brute n’était contrainte que par la latence du réseau.</td><td>Politique portée à douze caractères et trois classes de caractères&nbsp;; blocage après cinq échecs pendant quinze minutes. Prévention&nbsp;: scénarios SEC-06 et SEC-07 ajoutés au cahier de recettes.</td></tr>
+ <tr><td class="id">BUG-24</td><td>Aucune trace exploitable des événements de sécurité.</td><td class="warn-txt">Majeure</td><td>Seules les erreurs applicatives étaient journalisées&nbsp;: une tentative d’intrusion ne laissait aucune trace analysable.</td><td>Journal dédié au format JSON (connexion, échec, blocage, création de compte), adresse masquée. Prévention&nbsp;: canal <code>SECURITY</code> filtrable dans les journaux.</td></tr>
+ <tr><td class="id">BUG-25</td><td>Absence de politique de sécurité du contenu.</td><td class="warn-txt">Majeure</td><td>Aucune restriction des origines autorisées&nbsp;: l’injection d’une balise <code>base</code>, l’inclusion en iframe ou le détournement d’un formulaire n’étaient pas empêchés.</td><td>Ajout d’une CSP restrictive. Limite assumée&nbsp;: <code>unsafe-inline</code> reste nécessaire aux scripts d’hydratation de Next.js.</td></tr>
+ <tr><td class="id">BUG-10</td><td>Trente-neuf vulnérabilités dans les dépendances de production, dont trois critiques.</td><td class="bad-txt">Critique</td><td>La bibliothèque <code>next-pwa</code> 2.6.3, non maintenue, entraînait des dépendances transitives obsolètes. Elle figurait dans le manifeste alors qu’aucun code ne l’utilisait.</td><td>Suppression de la dépendance inutilisée (655 paquets retirés) puis mise à jour des correctifs dans les bornes déclarées&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Prévention&nbsp;: audit des dépendances à intégrer au pipeline et contrôle des dépendances non utilisées.</td></tr>
+ </tbody>
+ </table>
 </section>
 
 </body>
