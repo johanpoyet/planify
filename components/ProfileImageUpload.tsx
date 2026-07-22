@@ -1,5 +1,6 @@
-import React from 'react';
 "use client";
+
+import React from 'react';
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,40 +8,27 @@ import { useTheme } from '@/lib/themeContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
+  const { primaryColor } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      console.log('SignIn result:', result);
-
+      const result = await signIn('credentials', { email, password, redirect: false });
       if (result?.error) {
-        console.error('SignIn error:', result.error);
         setError('Email ou mot de passe incorrect');
       } else if (result?.ok) {
-        console.log('SignIn successful, redirecting...');
         router.push('/');
         router.refresh();
       } else {
-        console.error('SignIn unexpected result:', result);
         setError('Une erreur est survenue');
       }
-    } catch (err) {
-      console.error('SignIn catch error:', err);
+    } catch {
       setError('Une erreur est survenue');
     } finally {
       setLoading(false);
@@ -49,169 +36,171 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950">
-      {/* Subtle background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-slate-900/30 to-transparent"></div>
-      </div>
-
-      {/* Main content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        {/* Logo/Brand */}
-        <div className="mb-8 text-center animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl shadow-2xl mb-4" style={{ backgroundColor: primaryColor }}>
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+    <div className="min-h-screen flex" style={{ background: 'var(--pf-bg)' }}>
+      {/* Left — brand panel (desktop only) */}
+      <div
+        className="hidden lg:flex flex-col justify-between flex-1 p-16"
+        style={{ background: 'var(--pf-bg-2)', borderRight: '1px solid var(--pf-border)' }}
+      >
+        {/* Brand */}
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex items-center justify-center text-sm font-bold"
+            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: '#fff' }}
+          >
+            P
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Planify</h1>
-          <p className="text-slate-400 text-sm">Organisez vos moments ensemble</p>
+          <span className="font-semibold text-base" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
         </div>
 
-        {/* Login card */}
-        <div className="w-full max-w-md animate-slide-up">
-          <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-8 sm:p-10">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Bon retour !
-              </h2>
-              <p className="text-slate-400 text-sm">
-                Connectez-vous pour continuer
-              </p>
+        {/* Tagline */}
+        <div style={{ maxWidth: 480 }}>
+          <h1 className="font-semibold leading-tight mb-5" style={{ fontSize: 52, letterSpacing: '-0.035em', color: 'var(--pf-text)', lineHeight: 1.02 }}>
+            Tous tes plans.<br />
+            <span style={{ color: primaryColor }}>Un seul endroit.</span>
+          </h1>
+          <p style={{ fontSize: 17, color: 'var(--pf-text-dim)', lineHeight: 1.55 }}>
+            Sondage pour décider d'une date, invitations en un tap, calendriers partagés — sans drama de groupe.
+          </p>
+        </div>
+
+        {/* Preview card */}
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: 'var(--pf-surface)', border: '1px solid var(--pf-border)', maxWidth: 380 }}
+        >
+          <div className="mb-4">
+            <div className="text-xs font-mono mb-1" style={{ color: 'var(--pf-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Sam 14 juin · 21:00
+            </div>
+            <div className="font-semibold" style={{ fontSize: 17, color: 'var(--pf-text)', letterSpacing: '-0.015em' }}>
+              Anniversaire Camille
+            </div>
+            <div className="text-sm mt-1" style={{ color: 'var(--pf-text-dim)' }}>Bar Le Calbar · 11e</div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex">
+              {['CA', 'MO', 'LD', 'TM'].map((init, i) => (
+                <div
+                  key={init}
+                  className="flex items-center justify-center text-xs font-semibold text-white rounded-full"
+                  style={{
+                    width: 28, height: 28,
+                    background: ['#7C5CFF', '#FF7A45', '#4FD18B', '#FF6BD6'][i],
+                    marginLeft: i > 0 ? -8 : 0,
+                    border: '2px solid var(--pf-surface)',
+                  }}
+                >
+                  {init}
+                </div>
+              ))}
+            </div>
+            <span
+              className="text-xs font-medium px-2.5 py-1 rounded-full"
+              style={{ background: 'var(--pf-accent-soft)', color: primaryColor }}
+            >
+              6 ok
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right — form */}
+      <div className="flex flex-col justify-center flex-1 px-8 py-12 lg:px-20" style={{ maxWidth: '100%' }}>
+        {/* Mobile brand */}
+        <div className="flex items-center gap-2.5 mb-12 lg:hidden">
+          <div
+            className="flex items-center justify-center text-sm font-bold"
+            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: '#fff' }}
+          >
+            P
+          </div>
+          <span className="font-semibold" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+        </div>
+
+        <div style={{ maxWidth: 380, width: '100%' }}>
+          <h2 className="font-semibold mb-1.5" style={{ fontSize: 32, color: 'var(--pf-text)', letterSpacing: '-0.025em' }}>
+            Re-bonjour.
+          </h2>
+          <p className="mb-9 text-sm" style={{ color: 'var(--pf-text-dim)' }}>Connecte-toi pour continuer.</p>
+
+          {error && (
+            <div
+              className="mb-6 px-4 py-3 rounded-xl text-sm"
+              style={{ background: 'rgba(255,92,92,0.1)', border: '1px solid rgba(255,92,92,0.2)', color: 'var(--pf-danger)' }}
+            >
+              {error}
+            </div>
+          )}
+
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--pf-text-dim)' }}>Email</label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="toi@example.com"
+                className="w-full rounded-xl px-3.5 py-3 text-sm outline-none transition-all"
+                style={{
+                  background: 'var(--pf-surface)',
+                  border: '1px solid var(--pf-border)',
+                  color: 'var(--pf-text)',
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = primaryColor; e.currentTarget.style.boxShadow = `0 0 0 3px var(--pf-accent-soft)`; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--pf-border)'; e.currentTarget.style.boxShadow = 'none'; }}
+              />
             </div>
 
-            {error && (
-              <div className="mb-6 bg-red-500/10 backdrop-blur-sm border border-red-500/20 text-red-400 px-4 py-3 rounded-2xl text-sm flex items-center gap-2 animate-shake">
-                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                {error}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className="text-xs font-medium" style={{ color: 'var(--pf-text-dim)' }}>Mot de passe</label>
+                {/* Variante claire de l'accent : la couleur pleine n'atteint pas
+                    le contraste WCAG AA lorsqu'elle sert de texte sur fond sombre. */}
+                <span className="text-xs font-medium cursor-pointer" style={{ color: 'var(--pf-accent-strong)' }}>Oublié ?</span>
               </div>
-            )}
-
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Email input */}
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-slate-300">
-                  Email
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'email' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={(e) => {
-                      setFocusedInput('email');
-                      e.currentTarget.style.borderColor = primaryColor;
-                    }}
-                    onBlur={(e) => {
-                      setFocusedInput(null);
-                      e.currentTarget.style.borderColor = '#334155';
-                    }}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                    placeholder="votre@email.com"
-                  />
-                </div>
-              </div>
-
-              {/* Password input */}
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 transition-colors" style={{ color: focusedInput === 'password' ? primaryLightColor : '#64748b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={(e) => {
-                      setFocusedInput('password');
-                      e.currentTarget.style.borderColor = primaryColor;
-                    }}
-                    onBlur={(e) => {
-                      setFocusedInput(null);
-                      e.currentTarget.style.borderColor = '#334155';
-                    }}
-                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              {/* Submit button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full text-white px-6 py-4 rounded-2xl font-semibold text-lg shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed mt-8"
-                style={{ backgroundColor: primaryColor }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = primaryHoverColor)}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = primaryColor)}
-              >
-                <div className="flex items-center justify-center">
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span className="text-white font-semibold">Connexion...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-white font-semibold text-lg">Se connecter</span>
-                      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </>
-                  )}
-                </div>
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-slate-900/60 text-slate-400">Nouveau sur Planify ?</span>
-              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full rounded-xl px-3.5 py-3 text-sm outline-none transition-all"
+                style={{
+                  background: 'var(--pf-surface)',
+                  border: '1px solid var(--pf-border)',
+                  color: 'var(--pf-text)',
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = primaryColor; e.currentTarget.style.boxShadow = `0 0 0 3px var(--pf-accent-soft)`; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--pf-border)'; e.currentTarget.style.boxShadow = 'none'; }}
+              />
             </div>
 
-            {/* Register link */}
-            <Link href="/auth/register" className="block">
-              <button
-                type="button"
-                className="w-full px-6 py-3.5 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 text-white font-medium rounded-2xl transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <span>Créer un compte</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </button>
-            </Link>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all mt-2 disabled:opacity-50"
+              style={{ background: primaryColor, color: '#fff' }}
+            >
+              {loading ? 'Connexion…' : 'Se connecter'}
+            </button>
+          </form>
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px" style={{ background: 'var(--pf-border)' }} />
+            <span className="text-xs" style={{ color: 'var(--pf-text-muted)' }}>ou</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--pf-border)' }} />
           </div>
 
-          {/* Footer text */}
-          <p className="mt-6 text-center text-sm text-slate-500">
-            En continuant, vous acceptez nos conditions d'utilisation
-          </p>
+          <div className="text-center text-sm" style={{ color: 'var(--pf-text-dim)' }}>
+            Pas encore de compte ?{' '}
+            <Link href="/auth/register" className="font-medium" style={{ color: 'var(--pf-text)' }}>
+              S'inscrire gratuitement
+            </Link>
+          </div>
         </div>
       </div>
     </div>

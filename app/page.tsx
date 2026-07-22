@@ -22,7 +22,8 @@ export default function HomePage() {
 
   // Afficher un loader pendant la redirection
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-950">
+    // Le repère <main> est porté par BodyWrapper : on évite ici un landmark imbriqué.
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl shadow-2xl mb-4 animate-pulse" style={{ backgroundColor: primaryColor }}>
           <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,6 +32,6 @@ export default function HomePage() {
         </div>
         <p className="mt-4 text-slate-300 text-lg">Chargement...</p>
       </div>
-    </main>
+    </div>
   );
 }

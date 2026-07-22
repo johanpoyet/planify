@@ -1,731 +1,542 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/lib/themeContext";
 import { useToast } from "@/lib/toastContext";
-import DateTimePicker from "@/components/DateTimePicker";
 import ConfirmModal from "@/components/ConfirmModal";
 
-interface Friend {
-  id: string;
-  name: string | null;
-  email: string;
-  profileImageUrl: string | null;
+/* ------------------------------------------------------------------ types */
+interface Friend { id: string; name: string | null; email: string; }
+interface Friendship { id: string; friend: Friend; status: string; }
+
+/* --------------------------------------------------------------- constants */
+const FRIEND_COLORS = ["#7C5CFF","#FF7A45","#4FD18B","#FF6BD6","#4F8BFF","#FFB454"];
+const WEEKDAYS = [
+  { key: "lun", label: "L" }, { key: "mar", label: "M" }, { key: "mer", label: "M" },
+  { key: "jeu", label: "J" }, { key: "ven", label: "V" }, { key: "sam", label: "S" }, { key: "dim", label: "D" },
+];
+
+/* --------------------------------------------------------------- helpers */
+function fcolor(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + (s.codePointAt(i) ?? 0)) >>> 0;
+  return FRIEND_COLORS[h % FRIEND_COLORS.length];
+}
+function fmtDate(s: string) {
+  return new Intl.DateTimeFormat("fr-FR",{ weekday:"long", day:"numeric", month:"long" }).format(new Date(s));
+}
+function fmtTime(s: string) {
+  return new Intl.DateTimeFormat("fr-FR",{ hour:"2-digit", minute:"2-digit" }).format(new Date(s));
+}
+function getDayBg(isSel: boolean, isTod: boolean, primaryColor: string): string {
+  if (isSel) return primaryColor;
+  if (isTod) return "var(--pf-surface-3)";
+  return "transparent";
+}
+function getDayColor(isPast: boolean, isSel: boolean, isTod: boolean, primaryColor: string): string {
+  if (isPast) return "var(--pf-border-strong)";
+  if (isSel) return "#fff";
+  if (isTod) return primaryColor;
+  return "var(--pf-text)";
 }
 
-interface Friendship {
-  id: string;
-  friend: Friend;
-  status: string;
+/* --------------------------------------------------------------- icons */
+function IcoCal() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>;
+}
+function IcoClock() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>;
+}
+function IcoPin() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>;
+}
+function IcoVis() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+}
+function IcoSearch() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
+}
+function IcoPlus() {
+  return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>;
 }
 
-interface EventType {
-  id: string;
-  name: string;
-  color: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
+/* --------------------------------------------------------- CalPicker */
+function CalPicker({ value, onChange, minDate }: Readonly<{ value: string; onChange:(v:string)=>void; minDate?: Date }>) {
+  const { primaryColor } = useTheme();
+  const [month, setMonth] = useState(value ? new Date(value) : new Date());
+  const [selDate, setSelDate] = useState<Date|null>(value ? new Date(value) : null);
+  const [time, setTime] = useState(value ? new Date(value).toTimeString().slice(0,5) : "12:00");
+
+  const toIso = (d: Date, t: string) => {
+    const [h,m] = t.split(":").map(s => Number.parseInt(s,10));
+    const nd = new Date(d);
+    if (!Number.isNaN(h) && !Number.isNaN(m)) nd.setHours(h,m); else nd.setHours(12,0);
+    return nd.toISOString().slice(0,16);
+  };
+  const pick = (day: number) => {
+    const d = new Date(month.getFullYear(), month.getMonth(), day);
+    setSelDate(d); onChange(toIso(d, time));
+  };
+  const changeTime = (t: string) => { setTime(t); if (selDate) onChange(toIso(selDate, t)); };
+
+  const fdow = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+  const blanks = fdow === 0 ? 6 : fdow - 1;
+  const days = new Date(month.getFullYear(), month.getMonth()+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  return (
+    <div style={{ background:"var(--pf-surface-2)", borderRadius:12, padding:12, border:"1px solid var(--pf-border)" }}>
+      <div className="flex items-center justify-between mb-2">
+        <span style={{ fontSize:13, fontWeight:600, textTransform:"capitalize", color:"var(--pf-text)" }}>
+          {month.toLocaleDateString("fr-FR",{ month:"long", year:"numeric" })}
+        </span>
+        <div className="flex gap-1">
+          {(["prev","next"] as const).map(dir => (
+            <button key={dir} type="button"
+              onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth()+(dir==="prev"?-1:1)))}
+              style={{ width:24, height:24, borderRadius:8, background:"var(--pf-surface-3)", border:"none", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--pf-text-dim)", cursor:"pointer" }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={dir==="prev" ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7"}/>
+              </svg>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", marginBottom:4 }}>
+        {WEEKDAYS.map(wd => (
+          <div key={wd.key} style={{ textAlign:"center", fontSize:9, fontWeight:700, color:"var(--pf-text-muted)", padding:"3px 0", textTransform:"uppercase", letterSpacing:"0.05em" }}>{wd.label}</div>
+        ))}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
+        {(["a","b","c","d","e","f"] as const).slice(0, blanks).map(k => <div key={`blank-${k}`}/>)}
+        {Array.from({ length:days }, (_,i) => i+1).map(day => {
+          const dd = new Date(month.getFullYear(), month.getMonth(), day);
+          dd.setHours(0,0,0,0);
+          const isPast = minDate ? dd < new Date(minDate.getFullYear(),minDate.getMonth(),minDate.getDate()) : dd < today;
+          const isSel = selDate?.getDate()===day && selDate?.getMonth()===month.getMonth() && selDate?.getFullYear()===month.getFullYear();
+          const isTod = today.getDate()===day && today.getMonth()===month.getMonth() && today.getFullYear()===month.getFullYear();
+          return (
+            <button key={`d-${day}`} type="button" disabled={isPast} onClick={() => !isPast && pick(day)}
+              style={{
+                aspectRatio:"1", display:"flex", alignItems:"center", justifyContent:"center",
+                borderRadius:8, fontSize:12, fontWeight: isSel||isTod ? 600 : 400, border:"none", cursor: isPast?"not-allowed":"pointer",
+                background: getDayBg(!!isSel, isTod, primaryColor),
+                color: getDayColor(isPast, !!isSel, isTod, primaryColor),
+                opacity: isPast ? 0.35 : 1,
+              }}>{day}</button>
+          );
+        })}
+      </div>
+      <div style={{ borderTop:"1px solid var(--pf-border)", marginTop:10, paddingTop:10 }}>
+        <label htmlFor="evt-time" style={{ display:"block", fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--pf-text-muted)", marginBottom:5 }}>Heure</label>
+        <input id="evt-time" type="time" value={time} onChange={e => changeTime(e.target.value)}
+          style={{ width:"100%", background:"var(--pf-surface)", border:`1px solid ${primaryColor}`, borderRadius:8, padding:"7px 10px", color:"var(--pf-text)", colorScheme:"dark", fontSize:14, outline:"none" }}/>
+      </div>
+    </div>
+  );
 }
 
+/* --------------------------------------------------------- FieldRow (mobile) */
+function MFieldRow({ icon, label, value, placeholder, divider=false, onClick }:
+  Readonly<{ icon:React.ReactNode; label:string; value?:string|null; placeholder?:string; divider?:boolean; onClick?:()=>void }>) {
+  return (
+    <button type="button" onClick={onClick} className="w-full text-left"
+      style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", borderTop: divider ? "1px solid var(--pf-border)" : "none", background:"transparent", border:"none", cursor:"pointer", width:"100%" }}>
+      <span style={{ color:"var(--pf-text-muted)", display:"flex", flexShrink:0 }}>{icon}</span>
+      <span style={{ flex:1, minWidth:0 }}>
+        <span style={{ display:"block", fontSize:10, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--pf-text-muted)" }}>{label}</span>
+        <span style={{ display:"block", fontSize:13, fontWeight:500, marginTop:1, color: value ? "var(--pf-text)" : "var(--pf-text-muted)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+          {value || placeholder}
+        </span>
+      </span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color:"var(--pf-text-muted)", flexShrink:0 }}>
+        <path d="m9 5 7 7-7 7"/>
+      </svg>
+    </button>
+  );
+}
+
+/* --------------------------------------------------------- FormField (desktop) */
+function DFormField({ label, span=1, children }: Readonly<{ label:string; span?:number; children:React.ReactNode }>) {
+  return (
+    <div style={{ gridColumn:`span ${span}` }}>
+      <div style={{ fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--pf-text-muted)", marginBottom:6 }}>{label}</div>
+      <div style={{ background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:10, padding:"12px 14px", fontSize:14, fontWeight:500 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------- VisChip */
+function VisChip({ label, active, onClick }: Readonly<{ label:string; active:boolean; onClick:()=>void }>) {
+  return (
+    <button type="button" onClick={onClick}
+      style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 14px", borderRadius:999, fontSize:13, fontWeight:500, cursor:"pointer",
+        background: active ? "var(--pf-accent-soft)" : "transparent",
+        border: `1px solid ${active ? "transparent" : "var(--pf-border)"}`,
+        color: active ? "var(--pf-accent)" : "var(--pf-text-dim)" }}>
+      {label}
+    </button>
+  );
+}
+
+/* --------------------------------------------------------- FriendRow */
+function FriendRow({ friend, selected, onToggle, primaryColor }: Readonly<{ friend:Friend; selected:boolean; onToggle:()=>void; primaryColor:string }>) {
+  const name = friend.name || friend.email;
+  const color = fcolor(name);
+  return (
+    <button type="button" onClick={onToggle}
+      style={{ display:"flex", alignItems:"center", gap:12, padding:"8px 4px", width:"100%", background:"transparent", border:"none", cursor:"pointer", textAlign:"left" }}>
+      <div style={{ width:32, height:32, borderRadius:"50%", background:color, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:700, color:"#fff", flexShrink:0 }}>
+        {(() => { const p = name.trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase(); })()}
+      </div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:13, fontWeight:500, color:"var(--pf-text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{name}</div>
+        {friend.name && <div style={{ fontSize:11, color:"var(--pf-text-muted)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{friend.email}</div>}
+      </div>
+      <div style={{ width:36, height:22, borderRadius:999, background: selected ? primaryColor : "var(--pf-surface-3)", position:"relative", flexShrink:0, transition:"background .15s" }}>
+        <div style={{ position:"absolute", top:2, left:2, width:18, height:18, borderRadius:"50%", background:"#fff", boxShadow:"0 1px 3px rgba(0,0,0,.2)", transition:"transform .15s", transform: selected ? "translateX(14px)" : "translateX(0)" }}/>
+      </div>
+    </button>
+  );
+}
+
+/* --------------------------------------------------------- MobileFriendSection */
+interface MobileFriendSectionProps {
+  selectedFriends: string[];
+  friends: Friendship[];
+  filteredFriends: Friendship[];
+  friendSearch: string;
+  setFriendSearch: (v: string) => void;
+  showMobileFriends: boolean;
+  setShowMobileFriends: React.Dispatch<React.SetStateAction<boolean>>;
+  toggle: (id: string) => void;
+  primaryColor: string;
+}
+
+function MobileFriendSection({ selectedFriends, friends, filteredFriends, friendSearch, setFriendSearch, showMobileFriends, setShowMobileFriends, toggle, primaryColor }: Readonly<MobileFriendSectionProps>) {
+  return (
+    <div style={{ marginBottom:14 }}>
+      <div style={{ fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--pf-text-muted)", marginBottom:10 }}>
+        {selectedFriends.length > 0 ? `Invités · ${selectedFriends.length}` : "Invités"}
+      </div>
+      <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+        {selectedFriends.map(id => {
+          const f = friends.find(fr => fr.friend.id===id)?.friend;
+          if (!f) return null;
+          const name = f.name || f.email;
+          const col = fcolor(name);
+          return (
+            <button key={id} type="button" onClick={() => toggle(id)}
+              style={{ display:"flex", alignItems:"center", gap:6, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:999, padding:"4px 10px 4px 4px", cursor:"pointer" }}>
+              <div style={{ width:22, height:22, borderRadius:"50%", background:col, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#fff", flexShrink:0 }}>
+                {(() => { const p = name.trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase(); })()}
+              </div>
+              <span style={{ fontSize:13, fontWeight:500, color:"var(--pf-text)" }}>{name.split(" ")[0]}</span>
+              <span style={{ fontSize:11, color:"var(--pf-text-muted)" }}>×</span>
+            </button>
+          );
+        })}
+        {friends.length > 0 && (
+          <button type="button" onClick={() => setShowMobileFriends(p => !p)}
+            style={{ display:"flex", alignItems:"center", gap:6, background:"transparent", border:"1px dashed var(--pf-border-strong)", borderRadius:999, padding:"5px 12px", fontSize:13, color:"var(--pf-text-dim)", cursor:"pointer" }}>
+            <IcoPlus/> Ajouter
+          </button>
+        )}
+      </div>
+      {showMobileFriends && (
+        <div style={{ marginTop:10, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:16, padding:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, background:"var(--pf-surface-2)", border:"1px solid var(--pf-border)", borderRadius:10, padding:"8px 12px", marginBottom:10 }}>
+            <IcoSearch/>
+            <input type="text" value={friendSearch} onChange={e => setFriendSearch(e.target.value)} placeholder="Chercher…"
+              style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:13, color:"var(--pf-text)" }}/>
+          </div>
+          <div style={{ display:"flex", flexDirection:"column" }}>
+            {filteredFriends.map(fr => <FriendRow key={fr.friend.id} friend={fr.friend} selected={selectedFriends.includes(fr.friend.id)} onToggle={() => toggle(fr.friend.id)} primaryColor={primaryColor}/>)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ================================================================ PAGE */
 export default function NewEventPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { primaryColor, primaryHoverColor, primaryLightColor } = useTheme();
+  const { primaryColor } = useTheme();
   const { showToast } = useToast();
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [friends, setFriends] = useState<Friendship[]>([]);
-  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [conflicts, setConflicts] = useState<Record<string, { id: string; title: string; date: string }[]>>({});
+  const [conflicts, setConflicts] = useState<Record<string, { id:string; title:string; date:string }[]>>({});
   const [loadingConflicts, setLoadingConflicts] = useState(false);
-  const [conflictsChecked, setConflictsChecked] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [friendSearch, setFriendSearch] = useState("");
+  const [showMobileFriends, setShowMobileFriends] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState<"date"|"location"|"visibility"|null>(null);
 
-  const totalConflicts = Object.values(conflicts).reduce((acc, arr) => acc + (arr?.length || 0), 0);
-
-  // Récupérer la date depuis l'URL si elle existe
-  const dateFromUrl = searchParams.get('date');
+  const locationRef = useRef<HTMLInputElement>(null);
+  const dateFromUrl = searchParams.get("date");
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    title: "", description: "",
     date: dateFromUrl ? `${dateFromUrl}T12:00` : "",
-    location: "",
-    visibility: "friends", // par défaut : visible aux amis
-    eventTypeId: "", // Type d'événement (optionnel)
+    location: "", visibility: "friends",
   });
 
+  useEffect(() => { fetchFriends(); }, []);
   useEffect(() => {
-    fetchFriends();
-    fetchEventTypes();
-  }, []);
+    if (mobileOpen === "location") setTimeout(() => locationRef.current?.focus(), 50);
+  }, [mobileOpen]);
 
-  // Vérifier les conflits quand la date ou la sélection d'amis change (debounce)
   useEffect(() => {
-    let mounted = true;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-
-    const shouldFetch = formData.date && selectedFriends.length > 0;
-
-    const fetchConflicts = async () => {
-      setLoadingConflicts(true);
-      setConflictsChecked(false);
-      try {
-        const res = await fetch('/api/events/conflicts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userIds: selectedFriends, date: formData.date }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (mounted) setConflicts(data.conflicts || {});
-        } else {
-          setConflicts({});
-        }
-      } catch (err) {
-        console.error('Erreur fetch conflits', err);
-        if (mounted) setConflicts({});
-      } finally {
-        if (mounted) setLoadingConflicts(false);
-        if (mounted) setConflictsChecked(true);
-      }
-    };
-
-    if (shouldFetch) {
-      // debounce 300ms
-      timer = setTimeout(fetchConflicts, 300);
-    } else {
-      // clear conflicts if no date or no selected friends
-      setConflicts({});
-      setConflictsChecked(false);
-    }
-
-    return () => {
-      mounted = false;
-      if (timer) clearTimeout(timer);
-    };
+    let mounted = true, timer: ReturnType<typeof setTimeout>|null = null;
+    if (formData.date && selectedFriends.length > 0) {
+      timer = setTimeout(async () => {
+        setLoadingConflicts(true);
+        try {
+          const r = await fetch("/api/events/conflicts", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ userIds:selectedFriends, date:formData.date }) });
+          if (r.ok && mounted) setConflicts((await r.json()).conflicts || {});
+        } catch { if (mounted) setConflicts({}); }
+        finally { if (mounted) setLoadingConflicts(false); }
+      }, 300);
+    } else setConflicts({});
+    return () => { mounted=false; if (timer) clearTimeout(timer); };
   }, [formData.date, selectedFriends]);
 
-  const fetchFriends = async () => {
-    try {
-      const res = await fetch("/api/friends?status=accepted");
-      if (res.ok) {
-        const data = await res.json();
-        setFriends(data);
-      }
-    } catch (error) {
-      console.error("Erreur chargement amis:", error);
-    }
+  const fetchFriends = async () => { try { const r = await fetch("/api/friends?status=accepted"); if (r.ok) setFriends((await r.json()).filter((f: Friendship) => f.friend != null)); } catch { /* liste d'amis indisponible : on conserve la liste vide */ } };
+  const toggle = (id: string) => setSelectedFriends(p => p.includes(id) ? p.filter(x=>x!==id) : [...p,id]);
+
+  const totalConflicts = Object.values(conflicts).reduce((a,arr) => a+arr.length, 0);
+
+  const visLabel = formData.visibility==="private" ? "Privé — invités seulement" : "Amis";
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!formData.title.trim()) return;
+    if (totalConflicts > 0) { setShowConfirmModal(true); return; }
+    await proceedCreate();
   };
 
-  const fetchEventTypes = async () => {
-    try {
-      const res = await fetch("/api/event-types");
-      if (res.ok) {
-        const data = await res.json();
-        setEventTypes(data);
-      }
-    } catch (error) {
-      console.error("Erreur chargement types d'événements:", error);
-    }
-  };
-
-  const toggleFriend = (friendId: string) => {
-    setSelectedFriends(prev =>
-      prev.includes(friendId)
-        ? prev.filter(id => id !== friendId)
-        : [...prev, friendId]
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    // Ne pas démarrer la création tout de suite — vérifier s'il y a des conflits
-    const totalConflicts = Object.values(conflicts).reduce((acc, arr) => acc + (arr?.length || 0), 0);
-    if (totalConflicts > 0) {
-      // afficher modal de confirmation
-      setShowConfirmModal(true);
-      return;
-    }
-
-    // pas de conflit -> procéder à la création
-    await proceedCreateEvent();
-  };
-
-  // Fonction qui exécute la création réelle de l'événement
-  const proceedCreateEvent = async () => {
+  const proceedCreate = async () => {
     setLoading(true);
-    setError("");
     try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
+      const res = await fetch("/api/events",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(formData) });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur lors de la création");
-      }
-
-      // Si des amis sont sélectionnés, les ajouter comme participants
+      if (!res.ok) throw new Error(data.error||"Erreur");
       if (selectedFriends.length > 0) {
-        await fetch(`/api/events/${data.id}/participants`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userIds: selectedFriends }),
-        });
+        await fetch(`/api/events/${data.id}/participants`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ userIds:selectedFriends }) });
       }
-
-      // Afficher le toast de succès
-      const toastMessage = selectedFriends.length > 0
-        ? `Événement créé et ${selectedFriends.length} invitation(s) envoyée(s) !`
-        : "Événement créé avec succès !";
-      
-      showToast(toastMessage, "success");
-
-      // Rediriger vers la liste des événements après un court délai pour voir le toast
-      setTimeout(() => {
-        router.push("/events");
-      }, 1500);
-    } catch (err: any) {
-      setError(err.message);
-      showToast(err.message || "Erreur lors de la création de l'événement", "error");
-    } finally {
-      setLoading(false);
-      setShowConfirmModal(false);
+      showToast(selectedFriends.length > 0 ? `Événement créé · ${selectedFriends.length} invitation(s)` : "Événement créé !", "success");
+      setTimeout(() => router.push("/events"), 1200);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur";
+      showToast(msg,"error");
     }
+    finally { setLoading(false); setShowConfirmModal(false); }
   };
 
+  const filteredFriends = friends.filter(fr => fr.friend != null && (fr.friend.name||fr.friend.email).toLowerCase().includes(friendSearch.toLowerCase()));
+
+  /* ================================================================ RENDER */
   return (
-    <div className="min-h-screen bg-slate-950 pb-24 md:pb-8">
-      {/* Subtle background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-slate-900/30 to-transparent"></div>
+    <div style={{ minHeight:"100vh", background:"var(--pf-bg)" }}>
+
+      {/* ---- sticky header ---- */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 16px", position:"sticky", top:0, zIndex:10, background:"var(--pf-bg)", borderBottom:"1px solid var(--pf-border)" }}>
+        <button type="button" onClick={() => router.back()}
+          style={{ width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:10, color:"var(--pf-text-dim)", cursor:"pointer" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <span style={{ fontSize:14, fontWeight:600, color:"var(--pf-text)", letterSpacing:"-0.01em" }}>Nouvel événement</span>
+        <button type="button" onClick={() => { void handleSubmit(); }} disabled={loading||!formData.title.trim()}
+          style={{ padding:"7px 16px", borderRadius:10, background: primaryColor, color:"#fff", fontSize:13, fontWeight:600, border:"none", cursor:"pointer", opacity: loading||!formData.title.trim() ? 0.4 : 1 }}>
+          {loading ? "…" : "Créer"}
+        </button>
       </div>
 
-      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-6">
-        {/* Header */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-4 sm:p-6 mb-6 animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            {/* Titre et icône */}
-            <div className="flex items-center gap-3 flex-1">
-              <div
-                className="w-12 h-12 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-xl flex-shrink-0"
-                style={{ backgroundColor: primaryColor }}
-              >
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                  Créer un événement
-                </h1>
-                <p className="text-slate-400 text-xs sm:text-sm">
-                  Planifiez un nouveau moment avec vos amis
-                </p>
-              </div>
+      {/* ================================================================ MOBILE (< md) */}
+      <div className="md:hidden" style={{ padding:"24px 16px 120px" }}>
+
+        {/* Title */}
+        <input type="text" value={formData.title} onChange={e => setFormData({...formData, title:e.target.value})}
+          placeholder="Nom de l'événement" className="w-full"
+          style={{ background:"transparent", border:"none", outline:"none", fontSize:26, fontWeight:600, letterSpacing:"-0.025em", color:"var(--pf-text)", marginBottom:24, display:"block", width:"100%" }}/>
+
+        {/* Field rows card */}
+        <div style={{ background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:16, overflow:"hidden", marginBottom:14 }}>
+          <MFieldRow icon={<IcoCal/>} label="Date" value={formData.date ? fmtDate(formData.date) : null} placeholder="Choisir une date"
+            onClick={() => setMobileOpen(p => p==="date" ? null : "date")}/>
+          <MFieldRow icon={<IcoClock/>} label="Heure" value={formData.date ? fmtTime(formData.date) : null} placeholder="—" divider
+            onClick={() => setMobileOpen(p => p==="date" ? null : "date")}/>
+          <MFieldRow icon={<IcoPin/>} label="Lieu" value={formData.location||null} placeholder="Ajouter un lieu" divider
+            onClick={() => setMobileOpen(p => p==="location" ? null : "location")}/>
+          <MFieldRow icon={<IcoVis/>} label="Visibilité" value={visLabel} divider
+            onClick={() => setMobileOpen(p => p==="visibility" ? null : "visibility")}/>
+        </div>
+
+        {/* Inline expanded panels */}
+        {mobileOpen === "date" && (
+          <div style={{ marginBottom:14 }}>
+            <CalPicker value={formData.date} onChange={v => setFormData({...formData, date:v})} minDate={new Date()}/>
+          </div>
+        )}
+        {mobileOpen === "location" && (
+          <div style={{ marginBottom:14 }}>
+            <input ref={locationRef} type="text" value={formData.location} onChange={e => setFormData({...formData, location:e.target.value})}
+              placeholder="Restaurant, adresse…"
+              style={{ width:"100%", background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:12, padding:"12px 14px", fontSize:14, color:"var(--pf-text)", outline:"none", boxSizing:"border-box" }}/>
+          </div>
+        )}
+        {mobileOpen === "visibility" && (
+          <div style={{ display:"flex", gap:8, marginBottom:14 }}>
+            <VisChip label="Privé" active={formData.visibility==="private"} onClick={() => setFormData({...formData, visibility:"private"})}/>
+            <VisChip label="Amis" active={formData.visibility==="friends"} onClick={() => setFormData({...formData, visibility:"friends"})}/>
+          </div>
+        )}
+
+        {/* Friends */}
+        <MobileFriendSection
+          selectedFriends={selectedFriends}
+          friends={friends}
+          filteredFriends={filteredFriends}
+          friendSearch={friendSearch}
+          setFriendSearch={setFriendSearch}
+          showMobileFriends={showMobileFriends}
+          setShowMobileFriends={setShowMobileFriends}
+          toggle={toggle}
+          primaryColor={primaryColor}
+        />
+
+        {/* Description */}
+        <div style={{ background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:16, padding:14, marginTop:4 }}>
+          <div style={{ fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--pf-text-muted)", marginBottom:6 }}>Description</div>
+          <textarea value={formData.description} onChange={e => setFormData({...formData, description:e.target.value})}
+            placeholder="Détails de l'événement…" rows={3}
+            style={{ width:"100%", background:"transparent", border:"none", outline:"none", resize:"none", color:"var(--pf-text)", fontFamily:"inherit", fontSize:14, minHeight:70 }}/>
+        </div>
+      </div>
+
+      {/* ================================================================ DESKTOP (≥ md) */}
+      <div className="hidden md:grid" style={{ gridTemplateColumns:"1fr 420px", minHeight:"calc(100vh - 57px)" }}>
+
+        {/* LEFT: form */}
+        <div style={{ padding:"40px 56px", overflowY:"auto", borderRight:"1px solid var(--pf-border)" }}>
+          <div style={{ maxWidth:640 }}>
+
+            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title:e.target.value})}
+              placeholder="Nom de l'événement"
+              style={{ width:"100%", background:"transparent", border:"none", outline:"none", fontSize:40, fontWeight:600, letterSpacing:"-0.035em", color:"var(--pf-text)", marginBottom:8, padding:0, display:"block" }}/>
+
+            <input type="text" value={formData.description} onChange={e => setFormData({...formData, description:e.target.value})}
+              placeholder="Ajouter une description courte…"
+              style={{ width:"100%", background:"transparent", border:"none", outline:"none", fontSize:16, color:"var(--pf-text-dim)", marginBottom:36, padding:0, display:"block" }}/>
+
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+
+              <DFormField label="Date">
+                <button type="button" onClick={() => setMobileOpen(p => p==="date" ? null : "date")}
+                  style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer", width:"100%", background:"transparent", border:"none", padding:0 }}>
+                  <span style={{ color: formData.date ? "var(--pf-text)" : "var(--pf-text-muted)" }}>
+                    {formData.date ? fmtDate(formData.date) : "Choisir une date"}
+                  </span>
+                  <IcoCal/>
+                </button>
+              </DFormField>
+
+              <DFormField label="Heure">
+                <button type="button" onClick={() => setMobileOpen(p => p==="date" ? null : "date")}
+                  style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer", width:"100%", background:"transparent", border:"none", padding:0 }}>
+                  <span style={{ fontFamily:"monospace", color: formData.date ? "var(--pf-text)" : "var(--pf-text-muted)" }}>
+                    {formData.date ? fmtTime(formData.date) : "—"}
+                  </span>
+                  <IcoClock/>
+                </button>
+              </DFormField>
+
+              {mobileOpen === "date" && (
+                <div style={{ gridColumn:"span 2" }}>
+                  <CalPicker value={formData.date} onChange={v => setFormData({...formData, date:v})} minDate={new Date()}/>
+                </div>
+              )}
+
+              <DFormField label="Lieu" span={2}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location:e.target.value})}
+                    placeholder="Bar Le Calbar · adresse"
+                    style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:500, color:"var(--pf-text)" }}/>
+                  <IcoPin/>
+                </div>
+              </DFormField>
+
+              <DFormField label="Visibilité" span={2}>
+                <div style={{ display:"flex", gap:8 }}>
+                  <VisChip label="Privé — invités" active={formData.visibility==="private"} onClick={() => setFormData({...formData, visibility:"private"})}/>
+                  <VisChip label="Amis" active={formData.visibility==="friends"} onClick={() => setFormData({...formData, visibility:"friends"})}/>
+                </div>
+              </DFormField>
             </div>
 
-            {/* Bouton créer un sondage */}
-            <div className="flex justify-end sm:ml-auto">
-              <button
-                type="button"
-                onClick={() => router.push('/polls/new')}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/60 border border-slate-700 text-xs sm:text-sm text-white hover:bg-slate-800 transition-colors whitespace-nowrap"
-              >
-                🗳️ Créer un sondage
-              </button>
-            </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-3xl shadow-2xl p-4 sm:p-8 animate-slide-up">
-          {error && (
-            <div 
-              className="mb-6 border rounded-2xl p-4 flex items-center gap-3 animate-shake"
-              style={{
-                backgroundColor: '#dc262620',
-                borderColor: '#dc262640'
-              }}
-            >
-              <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <span className="text-red-400 text-sm">{error}</span>
+        {/* RIGHT: invite panel */}
+        <div style={{ padding:"32px 28px", background:"var(--pf-bg-2)", overflowY:"auto" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+            <span style={{ fontSize:16, fontWeight:700, color:"var(--pf-text)", letterSpacing:"-0.01em" }}>Inviter</span>
+            {selectedFriends.length > 0 && (
+              <span style={{ fontSize:12, fontWeight:600, padding:"3px 10px", borderRadius:999, background:"var(--pf-surface-2)", border:"1px solid var(--pf-border)", color:"var(--pf-text-dim)" }}>
+                {selectedFriends.length} sélectionné{selectedFriends.length>1?"s":""}
+              </span>
+            )}
+          </div>
+
+          <div style={{ display:"flex", alignItems:"center", gap:8, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--pf-text-dim)", marginBottom:16 }}>
+            <IcoSearch/>
+            <input type="text" value={friendSearch} onChange={e => setFriendSearch(e.target.value)} placeholder="Chercher un ami ou un email"
+              style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:13, color:"var(--pf-text)" }}/>
+          </div>
+
+          {friends.length === 0 ? (
+            <p style={{ fontSize:13, color:"var(--pf-text-muted)" }}>Aucun ami pour l&apos;instant.</p>
+          ) : (
+            <>
+              <div style={{ fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", color:"var(--pf-text-muted)", marginBottom:8 }}>Récents</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+                {filteredFriends.map(fr => (
+                  <FriendRow key={fr.friend.id} friend={fr.friend} selected={selectedFriends.includes(fr.friend.id)} onToggle={() => toggle(fr.friend.id)} primaryColor={primaryColor}/>
+                ))}
+              </div>
+            </>
+          )}
+
+          {totalConflicts > 0 && !loadingConflicts && (
+            <div style={{ marginTop:16, padding:12, background:"rgba(255,180,84,0.1)", border:"1px solid rgba(255,180,84,0.25)", borderRadius:10 }}>
+              <p style={{ fontSize:12, fontWeight:600, color:"var(--pf-warn)", marginBottom:4 }}>{totalConflicts} conflit(s)</p>
+              {friends.filter(f => selectedFriends.includes(f.friend.id) && (conflicts[f.friend.id]?.length??0)>0).map(f => (
+                <p key={f.friend.id} style={{ fontSize:12, color:"var(--pf-warn)" }}>
+                  {f.friend.name||f.friend.email} — {(conflicts[f.friend.id]||[]).map(e=>e.title).join(", ")}
+                </p>
+              ))}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Titre */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-2">
-                Titre *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg 
-                    className="w-5 h-5 transition-colors" 
-                    style={{ color: focusedInput === 'title' ? primaryLightColor : '#64748b' }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                  </svg>
-                </div>
-                <input
-                  id="title"
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  onFocus={() => setFocusedInput('title')}
-                  onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
-                  style={{
-                    borderColor: focusedInput === 'title' ? primaryLightColor : undefined
-                  }}
-                  placeholder="Ex: Anniversaire de Marie"
-                />
-              </div>
-            </div>
-
-            {/* Date */}
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-slate-300 mb-2">
-                Date et heure *
-              </label>
-              <DateTimePicker
-                value={formData.date}
-                onChange={(value) => setFormData({ ...formData, date: value })}
-                onFocus={() => setFocusedInput('date')}
-                onBlur={() => setFocusedInput(null)}
-                required
-                minDate={new Date()}
-              />
-            </div>
-
-            {/* Lieu */}
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-slate-300 mb-2">
-                Lieu
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg 
-                    className="w-5 h-5 transition-colors" 
-                    style={{ color: focusedInput === 'location' ? primaryLightColor : '#64748b' }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <input
-                  id="location"
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  onFocus={() => setFocusedInput('location')}
-                  onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition text-sm sm:text-base"
-                  style={{
-                    borderColor: focusedInput === 'location' ? primaryLightColor : undefined
-                  }}
-                  placeholder="Ex: Restaurant Le Jardin, Paris"
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
-                Description
-              </label>
-              <div className="relative">
-                <div className="absolute top-3 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg
-                    className="w-5 h-5 transition-colors"
-                    style={{ color: focusedInput === 'description' ? primaryLightColor : '#64748b' }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                  </svg>
-                </div>
-                <textarea
-                  id="description"
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  onFocus={() => setFocusedInput('description')}
-                  onBlur={() => setFocusedInput(null)}
-                  className="w-full pl-11 sm:pl-12 pr-3 sm:pr-4 py-3 bg-slate-950/50 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-2 transition resize-none text-sm sm:text-base"
-                  style={{
-                    borderColor: focusedInput === 'description' ? primaryLightColor : undefined
-                  }}
-                  placeholder="Détails de l'événement..."
-                />
-              </div>
-            </div>
-
-            {/* Type d'événement */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Type d'événement
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {/* Option "Aucun" */}
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, eventTypeId: "" })}
-                  className={`px-3 sm:px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
-                    formData.eventTypeId === ""
-                      ? 'border-slate-500 bg-slate-500/20 text-white'
-                      : 'border-slate-700 bg-slate-800/40 text-slate-400 hover:border-slate-600'
-                  }`}
-                >
-                  <span className="text-xs sm:text-sm font-medium">Aucun</span>
-                </button>
-
-                {/* Types d'événements disponibles */}
-                {eventTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, eventTypeId: type.id })}
-                    className={`px-3 sm:px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
-                      formData.eventTypeId === type.id
-                        ? 'border-2 scale-105'
-                        : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                    }`}
-                    style={formData.eventTypeId === type.id ? {
-                      borderColor: type.color,
-                      backgroundColor: `${type.color}33`
-                    } : {}}
-                  >
-                    <div
-                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: type.color }}
-                    ></div>
-                    <span
-                      className="text-xs sm:text-sm font-medium whitespace-nowrap"
-                      style={formData.eventTypeId === type.id ? { color: type.color } : { color: '#cbd5e1' }}
-                    >
-                      {type.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Visibilité */}
-            <div>
-              <label htmlFor="visibility" className="block text-sm font-medium text-slate-300 mb-2">
-                Visibilité
-              </label>
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'private' })}
-                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                    formData.visibility === 'private'
-                      ? 'border-purple-500 bg-purple-500/20'
-                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🔒</div>
-                  <div className={`text-xs sm:text-sm font-medium ${
-                    formData.visibility === 'private' ? 'text-purple-400' : 'text-slate-300'
-                  }`}>
-                    Privé
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Seulement moi</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'friends' })}
-                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                    formData.visibility === 'friends'
-                      ? 'border-2 bg-opacity-20'
-                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                  }`}
-                  style={formData.visibility === 'friends' ? {
-                    borderColor: primaryColor,
-                    backgroundColor: `${primaryColor}33`
-                  } : {}}
-                >
-                  <div className="text-xl sm:text-2xl mb-1 sm:mb-2">👥</div>
-                  <div className={`text-xs sm:text-sm font-medium ${
-                    formData.visibility === 'friends' ? '' : 'text-slate-300'
-                  }`}
-                  style={formData.visibility === 'friends' ? { color: primaryLightColor } : {}}
-                  >
-                    Amis
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1 hidden sm:block">Amis seulement</div>
-                </button>
-              </div>
-            </div>
-
-            {/* Inviter des amis */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <svg 
-                  className="w-5 h-5" 
-                  style={{ color: primaryLightColor }}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <label className="text-sm font-medium text-slate-300">
-                  Inviter des amis à cet événement
-                </label>
-              </div>
-              {friends.length === 0 ? (
-                <div 
-                  className="p-4 rounded-2xl border"
-                  style={{
-                    backgroundColor: `${primaryColor}1A`,
-                    borderColor: `${primaryColor}4D`
-                  }}
-                >
-                  <p className="text-slate-400 text-sm">
-                    Vous n'avez pas encore d'amis. Ajoutez-en depuis la page Amis !
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto bg-slate-950/50 border border-slate-700 rounded-2xl p-3">
-                  {friends.map((friendship) => {
-                    const isSelected = selectedFriends.includes(friendship.friend.id);
-                    return (
-                      <label
-                        key={friendship.friend.id}
-                        className="flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl cursor-pointer transition-all group"
-                      >
-                        {/* Input checkbox caché mais accessible */}
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleFriend(friendship.friend.id)}
-                          className="sr-only"
-                        />
-                        
-                        {/* Checkbox personnalisée animée */}
-                        <div className="relative flex items-center justify-center">
-                          <div 
-                            className={`w-6 h-6 rounded-lg border-2 transition-all duration-300 ease-out flex items-center justify-center ${
-                              isSelected 
-                                ? 'scale-100 rotate-0' 
-                                : 'scale-95'
-                            }`}
-                            style={{
-                              borderColor: isSelected ? primaryColor : '#475569',
-                              backgroundColor: isSelected ? primaryColor : 'transparent'
-                            }}
-                          >
-                            <svg 
-                              className={`w-4 h-4 text-white transition-all duration-300 ${
-                                isSelected 
-                                  ? 'opacity-100 scale-100 rotate-0' 
-                                  : 'opacity-0 scale-50 -rotate-90'
-                              }`}
-                              fill="none" 
-                              stroke="currentColor" 
-                              viewBox="0 0 24 24"
-                              strokeWidth={3}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          {/* Effet de pulse lors de la sélection */}
-                          {isSelected && (
-                            <div 
-                              className="absolute inset-0 rounded-lg animate-ping opacity-75"
-                              style={{ backgroundColor: primaryColor }}
-                            />
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-3 flex-1">
-                          <div
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold ring-2 ring-slate-700 group-hover:ring-slate-600 transition overflow-hidden"
-                            style={{ backgroundColor: primaryColor }}
-                          >
-                            {friendship.friend.profileImageUrl ? (
-                              <img
-                                src={friendship.friend.profileImageUrl}
-                                alt={friendship.friend.name || "Photo de profil"}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span>{friendship.friend.name?.[0]?.toUpperCase() || friendship.friend.email[0].toUpperCase()}</span>
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium text-white">
-                              {friendship.friend.name || friendship.friend.email}
-                            </p>
-                            {friendship.friend.name && (
-                              <p className="text-xs text-slate-500">{friendship.friend.email}</p>
-                            )}
-                          </div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-              {selectedFriends.length > 0 && (
-                <div 
-                  className="mt-3 p-3 rounded-2xl border flex items-center gap-2"
-                  style={{
-                    backgroundColor: `${primaryColor}1A`,
-                    borderColor: `${primaryColor}4D`
-                  }}
-                >
-                  <svg 
-                    className="w-5 h-5" 
-                    style={{ color: primaryLightColor }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm" style={{ color: primaryLightColor }}>
-                    {selectedFriends.length} ami(s) sélectionné(s)
-                  </span>
-                </div>
-              )}
-
-              {/* Conflits d'agenda des amis sélectionnés pour la date choisie */}
-              {totalConflicts > 0 && (
-                <div className="mt-3 p-3 rounded-2xl border" style={{ backgroundColor: '#2b2b2b' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm font-medium text-white">Conflits détectés</div>
-                    <div className="text-xs text-slate-400">{loadingConflicts ? 'Chargement...' : 'Même jour'}</div>
-                  </div>
-
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {friends
-                      .filter(f => selectedFriends.includes(f.friend.id))
-                      .map(f => {
-                        const list = conflicts[f.friend.id] || [];
-                        if (list.length === 0) return null;
-                        return (
-                          <div key={f.friend.id} className="p-2 rounded-lg bg-slate-800/40">
-                            <div className="flex items-center justify-between">
-                              <div className="text-sm font-medium text-white">{f.friend.name || f.friend.email}</div>
-                              <div className="text-xs text-slate-400">{list.length} événement(s)</div>
-                            </div>
-                            <div className="mt-2 text-xs text-slate-300">
-                              {list.map(ev => (
-                                <div key={ev.id} className="flex items-center justify-between">
-                                  <div>{new Date(ev.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                  <div className="ml-3 truncate">{ev.title}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {/* Message lorsque tous les amis sélectionnés sont disponibles */}
-              {selectedFriends.length > 0 && formData.date && !loadingConflicts && totalConflicts === 0 && (
-                <div className="mt-3 p-3 rounded-2xl border flex items-center gap-2" style={{ backgroundColor: '#063f1a', borderColor: '#065f3a' }}>
-                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-green-200">Tous les amis sélectionnés sont disponibles à la date choisie.</span>
-                </div>
-              )}
-            </div>
-
-            {/* Boutons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="sm:flex-1 px-6 py-3.5 sm:py-3 bg-slate-800 text-slate-300 rounded-2xl hover:bg-slate-700 transition font-medium shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="sm:flex-1 px-6 py-3.5 sm:py-3 text-white rounded-2xl transition font-medium shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                style={{
-                  backgroundColor: loading ? '#64748b' : primaryColor
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = primaryHoverColor;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = primaryColor;
-                  }
-                }}
-              >
-                {loading ? (
-                  <>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Création...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Créer l'événement
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Confirmation modal when conflicts exist */}
-          <ConfirmModal
-            isOpen={showConfirmModal}
-            title="Conflits détectés"
-            description={totalConflicts > 0 ? `Attention : ${totalConflicts} conflit(s) détecté(s) pour les amis sélectionnés le même jour. Voulez-vous quand même créer l'événement ?` : undefined}
-            confirmLabel="Créer quand même"
-            cancelLabel="Annuler"
-            loading={loading}
-            onConfirm={async () => {
-              await proceedCreateEvent();
-            }}
-            onCancel={() => setShowConfirmModal(false)}
-          />
+          <div style={{ marginTop:18, padding:12, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:10, fontSize:12, color:"var(--pf-text-dim)", lineHeight:1.5 }}>
+            <strong style={{ color:"var(--pf-text)" }}>Astuce</strong> · Les invités reçoivent une notification push. Ils peuvent répondre sans créer de compte.
+          </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Conflits détectés"
+        description={`${totalConflicts} conflit(s) pour les amis sélectionnés. Créer quand même ?`}
+        confirmLabel="Créer quand même" cancelLabel="Annuler"
+        loading={loading} onConfirm={proceedCreate} onCancel={() => setShowConfirmModal(false)}/>
     </div>
   );
 }
