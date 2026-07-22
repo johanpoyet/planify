@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dossier BLOC 2 — Planify — POYET Johan</title>
+<style>
+ :root{
+ --brand:#2563eb; --brand-d:#1e3a8a; --ink:#1f2937; --muted:#6b7280;
+ --line:#e5e7eb; --soft:#f8fafc; --code-bg:#f6f8fa; --ok:#059669; --warn:#d97706; --bad:#dc2626;
+ --accent:#eef2ff;
+ }
+ @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+ *{ box-sizing:border-box; }
+ html,body{ margin:0; padding:0; }
+ body{
+ font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+ color:var(--ink); font-size:10.6pt; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+ }
+ h1,h2,h3,h4{ color:var(--brand-d); line-height:1.25; margin:0 0 .4em;
+ page-break-after:avoid; break-after:avoid; }
+ h2{ font-size:16.5pt; border-bottom:3px solid var(--brand); padding-bottom:5px; margin-top:1.6em; }
+ section.page-break h2, section:first-of-type h2{ margin-top:0; }
+ h3{ font-size:12.7pt; margin-top:1.1em; color:var(--brand); }
+ h4{ font-size:11pt; margin-top:.9em; color:var(--ink); }
+ p{ margin:.45em 0; text-align:justify; }
+ ul,ol{ margin:.4em 0 .6em; padding-left:1.3em; }
+ li{ margin:.18em 0; }
+ code{ font-family:"Cascadia Code", Consolas, "Courier New", monospace; font-size:8.9pt;
+ background:var(--code-bg); padding:1px 4px; border-radius:3px; color:#0f172a; }
+ pre{ background:var(--code-bg); border:1px solid var(--line); border-left:3px solid var(--brand);
+ border-radius:5px; padding:9px 11px; font-size:8.4pt; line-height:1.45;
+ font-family:"Cascadia Code", Consolas, "Courier New", monospace; color:#0f172a; white-space:pre-wrap;
+ margin:.5em 0; page-break-inside:avoid; }
+ pre .c{ color:#6a737d; } pre .k{ color:#a626a4; } pre .s{ color:#50a14f; } pre .f{ color:#4078f2; }
+ /* Les grands tableaux peuvent se couper entre deux pages&nbsp;; l'en-tête est répété. */
+ table{ width:100%; border-collapse:collapse; margin:.6em 0; font-size:8.9pt; }
+ thead{ display:table-header-group; }
+ tr{ page-break-inside:avoid; }
+ th,td{ border:1px solid var(--line); padding:5px 7px; text-align:left; vertical-align:top; }
+ th{ background:var(--accent); color:var(--brand-d); font-weight:600; }
+ tbody tr:nth-child(even){ background:var(--soft); }
+ td.id{ white-space:nowrap; font-family:Consolas, monospace; font-size:8.4pt; }
+ td.cat{ font-weight:600; color:var(--brand-d); }
+ .pill{ display:inline-block; background:var(--brand); color:#fff; font-size:7.6pt; font-weight:600;
+ padding:2px 8px; border-radius:10px; margin-right:4px; vertical-align:middle; }
+ .tag{ display:inline-block; background:var(--accent); color:var(--brand-d); font-size:8pt; font-weight:600;
+ padding:1px 7px; border-radius:4px; border:1px solid #c7d2fe; }
+ .box{ background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:9px 13px;
+ margin:.6em 0; page-break-inside:avoid; }
+ .box.info{ border-left:4px solid var(--brand); }
+ .box.ok{ border-left:4px solid var(--ok); }
+ .box.warn{ border-left:4px solid var(--warn); }
+ .ok-txt{ color:var(--ok); font-weight:600; } .bad-txt{ color:var(--bad); font-weight:600; }
+ .warn-txt{ color:var(--warn); font-weight:600; }
+ .small{ font-size:8.6pt; color:var(--muted); }
+ .center{ text-align:center; }
+ .page-break{ page-break-before:always; }
+ .avoid-break{ page-break-inside:avoid; }
+ /* Les tableaux restent fluides même marqués .avoid-break&nbsp;: seules les lignes sont insécables. */
+ table.avoid-break{ page-break-inside:auto; }
+ .lead{ font-size:11pt; color:#374151; }
+ .cover{ height:246mm; display:flex; flex-direction:column; page-break-after:always; position:relative; }
+ .cover .band{ background:linear-gradient(135deg,var(--brand-d),var(--brand)); color:#fff;
+ border-radius:14px; padding:34px 38px; margin-top:6mm; }
+ .cover .logo{ font-size:30pt; font-weight:800; letter-spacing:.5px; }
+ .cover .sub{ font-size:11pt; opacity:.9; margin-top:4px; }
+ .cover h1.title{ color:var(--brand-d); font-size:25pt; margin:28mm 0 6px; line-height:1.18; }
+ .cover .subtitle{ font-size:13pt; color:var(--muted); margin-bottom:4mm; }
+ .cover .meta{ margin-top:auto; border-top:2px solid var(--line); padding-top:14px; font-size:11pt; }
+ .cover .meta .row{ display:flex; gap:30px; flex-wrap:wrap; }
+ .cover .meta .row > div{ min-width:46%; margin:3px 0; }
+ .toc-line{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:3.5px 0; }
+ .toc-line .sub{ padding-left:14px; color:#374151; font-size:9.6pt; }
+ .toc-line .n{ color:var(--muted); }
+ svg{ max-width:100%; height:auto; }
+ .kpi{ display:flex; gap:10px; flex-wrap:wrap; margin:.5em 0; }
+ .kpi .k{ flex:1; min-width:22%; background:var(--accent); border:1px solid #c7d2fe; border-radius:7px;
+ padding:8px 10px; text-align:center; }
+ .kpi .k b{ display:block; font-size:15pt; color:var(--brand-d); }
+ .kpi .k span{ font-size:7.8pt; color:var(--muted); }
+ figcaption{ font-size:8.4pt; color:var(--muted); text-align:center; margin-top:3px; }
+ .shot-fig{ margin:0 0 11px; page-break-inside:avoid; }
+ .shot-fig img{ display:block; max-width:100%; max-height:92mm; width:auto; margin:0 auto;
+ border:1px solid #cbd5e1; border-radius:6px; }
+ .shots-2 .shot-fig img{ max-height:172mm; }
+ .shot-fig figcaption{ margin-top:4px; text-align:left; font-size:8.3pt; }
+ .shots-2{ display:flex; gap:14px; align-items:flex-start; }
+ .shots-2 .shot-fig{ flex:1; min-width:0; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COUVERTURE ============================ -->
+<section class="cover">
+ <div class="band">
+ <div class="logo">Planify</div>
+ <div class="sub">Application web progressive de planification d’événements à calendrier partagé</div>
+ </div>
+
+ <h1 class="title">Dossier professionnel — BLOC 2<br>Concevoir et développer des applications logicielles</h1>
+ <div class="subtitle">Titre RNCP 39583 — Expert en développement logiciel (niveau 7)</div>
+
+ <div class="box info" style="margin-top:6mm;">
+ Ce dossier présente la conception, le développement, les tests, le déploiement et la documentation de
+ l’application Planify. Il est organisé selon les compétences du BLOC 2 (C2.1.1 à C2.4.1). Toutes les
+ mesures chiffrées qu’il contient proviennent d’exécutions réelles réalisées sur le dépôt du projet,
+ datées et accompagnées de la commande utilisée.
+ </div>
+
+ <div class="meta">
+ <div class="row">
+ <div>Candidat&nbsp;: POYET Johan</div>
+ <div>Établissement&nbsp;: Ynov Lyon Campus</div>
+ <div>Promotion&nbsp;: 2025-2026</div>
+ <div>Date de soutenance&nbsp;: 23/07/2026</div>
+ <div>Domaine prévu&nbsp;: planify.johanpoyet.fr</div>
+ <div>Dépôt&nbsp;: Git / GitHub, pipeline CI/CD</div>
+ </div>
+ </div>
+</section>
+
+<!-- ============================ SOMMAIRE ============================ -->
+<section>
+ <h2>Sommaire</h2>
+ <div class="toc-line"><span>Introduction et contexte du projet</span><span class="n">3</span></div>
+ <div class="toc-line"><span>1. Architecture logicielle et choix techniques <span class="tag">C2.2.1</span></span><span class="n">4</span></div>
+ <div class="toc-line"><span class="sub">1.1 Stack technique · 1.2 Architecture en couches · 1.3 Modèle de données · 1.4 Paradigmes et maintenabilité</span><span class="n"></span></div>
+ <div class="toc-line"><span>2. Prototype fonctionnel <span class="tag">C2.2.1</span></span><span class="n">7</span></div>
+ <div class="toc-line"><span>3. Environnement, qualité et déploiement continu <span class="tag">C2.1.1</span></span><span class="n">8</span></div>
+ <div class="toc-line"><span>4. Intégration continue <span class="tag">C2.1.2</span></span><span class="n">10</span></div>
+ <div class="toc-line"><span>5. Harnais de tests unitaires et couverture <span class="tag">C2.2.2</span></span><span class="n">12</span></div>
+ <div class="toc-line"><span>6. Sécurité du code source — OWASP Top 10 <span class="tag">C2.2.3</span></span><span class="n">14</span></div>
+ <div class="toc-line"><span>7. Accessibilité numérique <span class="tag">C2.2.3</span></span><span class="n">16</span></div>
+ <div class="toc-line"><span>8. Gestion de versions et déploiement progressif <span class="tag">C2.2.4</span></span><span class="n">18</span></div>
+ <div class="toc-line"><span>9. Cahier de recettes <span class="tag">C2.3.1</span></span><span class="n">20</span></div>
+ <div class="toc-line"><span>10. Plan de correction des bogues <span class="tag">C2.3.2</span></span><span class="n">21</span></div>
+ <div class="toc-line"><span>11. Documentation technique d’exploitation <span class="tag">C2.4.1</span></span><span class="n">25</span></div>
+ <div class="toc-line"><span class="sub">11.1 Manuel de déploiement · 11.2 Manuel d’utilisation · 11.3 Manuel de mise à jour</span><span class="n"></span></div>
+ <div class="toc-line"><span>Conclusion</span><span class="n">29</span></div>
+ <div class="toc-line"><span>Annexe A — Captures d’écran du prototype</span><span class="n">30</span></div>
+ <div class="toc-line"><span>Annexe B — Correspondance avec la grille d’évaluation</span><span class="n">33</span></div>
+ <div class="toc-line"><span>Annexe C — Limites et points non démontrés</span><span class="n">35</span></div>
+
+ <div class="box info" style="margin-top:8mm;">
+ <b>Note méthodologique.</b> Les résultats chiffrés de ce dossier (couverture de tests, durées de build,
+ audit de dépendances) ont été relevés le 22/07/2026 sur la branche de développement, avec Node.js 22.20.0
+ sous Windows 11. Chaque mesure indique la commande qui l’a produite. Les éléments qui n’ont pas pu être
+ mesurés sont listés sans substitut en annexe C.
+ </div>
+</section>
+
+<!-- ============================ INTRODUCTION ============================ -->
+<section class="page-break">
+ <h2>Introduction et contexte du projet</h2>
+
+ <h3>Origine et commanditaire</h3>
+ <p>
+ Planify est une application web progressive de planification d’événements reposant sur un calendrier
+ partagé entre amis. Le projet est né d’un constat personnel&nbsp;: organiser une soirée, un week-end ou un
+ anniversaire oblige aujourd’hui à jongler entre une messagerie pour discuter, un outil de sondage pour
+ choisir une date et un agenda pour ne pas oublier. Aucun de ces outils ne réunit au même endroit la
+ création de l’événement, l’invitation des proches, la décision collective et les rappels.
+ </p>
+ <p>
+ Je suis à la fois le commanditaire et le concepteur du produit&nbsp;: j’ai défini le besoin, rédigé les
+ <i>user stories</i>, puis assuré seul la conception, le développement, les tests et le déploiement.
+ Cette position explique certains arbitrages assumés dans ce dossier, notamment la priorité donnée au
+ cœur métier plutôt qu’à l’exhaustivité fonctionnelle.
+ </p>
+
+ <div class="box info">
+ Vision produit&nbsp;: permettre à un groupe d’amis de planifier ensemble, au même endroit, leurs événements —
+ créer, inviter, voter, être notifié — sur mobile comme sur ordinateur.
+ </div>
+
+ <h3>Besoins identifiés et user stories</h3>
+ <p>Les besoins prioritaires ont été formalisés sous forme de user stories, qui servent de fil conducteur
+ au prototype (chapitre 2) et au cahier de recettes (chapitre 9).</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:9%">Réf.</th><th style="width:48%">User story</th><th>Critère d’acceptation principal</th></tr></thead>
+ <tbody>
+ <tr><td class="id">US-01</td><td>En tant qu’utilisateur, je veux créer un compte et m’authentifier.</td><td>Mot de passe haché, session protégée.</td></tr>
+ <tr><td class="id">US-02</td><td>Je veux créer un événement (titre, date, lieu, type, visibilité).</td><td>Événement persisté et visible dans mon agenda.</td></tr>
+ <tr><td class="id">US-03</td><td>Je veux inviter mes amis à un événement et qu’ils en soient avertis.</td><td>Invitation créée, notification push émise.</td></tr>
+ <tr><td class="id">US-04</td><td>En tant qu’invité, je veux accepter ou refuser une invitation.</td><td>Statut mis à jour&nbsp;; l’événement accepté rejoint mon agenda.</td></tr>
+ <tr><td class="id">US-05</td><td>Je veux gérer ma liste d’amis (demande, acceptation).</td><td>Relation d’amitié gérée de bout en bout.</td></tr>
+ <tr><td class="id">US-06</td><td>Je veux créer un sondage pour décider collectivement.</td><td>Un seul vote par utilisateur et par sondage.</td></tr>
+ <tr><td class="id">US-07</td><td>Je veux personnaliser l’interface (thème clair ou sombre, couleur).</td><td>Préférence enregistrée et appliquée.</td></tr>
+ <tr><td class="id">US-08</td><td>Je veux installer l’application sur mon téléphone.</td><td>Application installable, notifications push opérationnelles.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>Le projet en chiffres</h3>
+ <p class="small">Relevés du 22/07/2026 sur le dépôt (comptage de fichiers et <code>git rev-list --count HEAD</code>).</p>
+ <div class="kpi">
+ <div class="k"><b>28</b><span>routes API</span></div>
+ <div class="k"><b>16</b><span>pages</span></div>
+ <div class="k"><b>20</b><span>composants</span></div>
+ <div class="k"><b>44</b><span>fichiers de tests</span></div>
+ <div class="k"><b>316</b><span>tests exécutés</span></div>
+ <div class="k"><b>79</b><span>commits</span></div>
+ </div>
+
+ <h3>Périmètre et méthode du dossier</h3>
+ <p>
+ Ce document couvre le BLOC 2. Chaque chapitre est rattaché à une compétence de la grille, signalée par un
+ repère <span class="tag">C2.x.x</span>. La rédaction s’appuie sur une revue systématique du code&nbsp;: les
+ extraits présentés sont recopiés des fichiers sources, et les affirmations techniques ont été confrontées
+ au dépôt. Lorsqu’un élément attendu n’a pas pu être démontré, il est signalé comme tel plutôt que
+ contourné&nbsp;; l’annexe C en donne la liste complète.
+ </p>
+</section>
+
+<!-- ============================ 1. ARCHITECTURE ============================ -->
+<section>
+ <h2>1. Architecture logicielle et choix techniques <span class="pill">C2.2.1</span></h2>
+ <p class="lead">L’architecture poursuit trois objectifs&nbsp;: la maintenabilité par une séparation claire des
+ responsabilités, la sécurité par une validation systématique côté serveur, et l’évolutivité pour ajouter
+ des fonctionnalités sans refonte.</p>
+
+ <h3>1.1 Stack technique et justification</h3>
+ <p class="small">Versions relevées dans <code>node_modules</code> le 22/07/2026.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:21%">Domaine</th><th style="width:27%">Technologie</th><th>Justification</th></tr></thead>
+ <tbody>
+ <tr><td>Framework full-stack</td><td>Next.js 16.2.11 (App Router)</td><td>Routage par fichiers, composants serveur et routes API dans un même socle&nbsp;: pertinent pour un développeur unique.</td></tr>
+ <tr><td>Langage</td><td>TypeScript 5.9.3</td><td>Typage statique&nbsp;: erreurs détectées à la compilation, refactoring plus sûr.</td></tr>
+ <tr><td>Bibliothèque d’interface</td><td>React 19.2.0</td><td>Paradigme composant, rendu déclaratif, écosystème mature.</td></tr>
+ <tr><td>Accès aux données</td><td>Prisma 6.19.3 + MongoDB</td><td>Schéma typé et client généré&nbsp;; MongoDB adapté à des entités souples (événements, sondages).</td></tr>
+ <tr><td>Authentification</td><td>NextAuth 4.24.15</td><td>Sessions JWT éprouvées, fournisseur « Credentials » associé à un hachage bcrypt.</td></tr>
+ <tr><td>Styles</td><td>Tailwind CSS 3.4.18</td><td>Cohérence visuelle, thèmes clair et sombre simples à piloter.</td></tr>
+ <tr><td>PWA et notifications</td><td>web-push 3.6.7, Service Worker dédié</td><td>Installation sur mobile et notifications push natives via VAPID, sans dépendance de génération tierce.</td></tr>
+ <tr><td>Tests</td><td>Vitest 4.1.10, Testing Library</td><td>Exécution rapide, API proche de Jest, rendu de composants et mocks.</td></tr>
+ <tr><td>Qualité</td><td>ESLint 9.39.1, typescript-eslint 8, Prettier 3.6.2</td><td>Analyse statique et formatage homogène.</td></tr>
+ <tr><td>Exécution</td><td>Node.js 22.20.0, PM2, Nginx</td><td>Gestionnaire de processus derrière un proxy inverse assurant TLS et fichiers statiques.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>1.2 Architecture en couches</h3>
+ <p>L’application est organisée en couches&nbsp;: le navigateur n’accède jamais directement à la base. Toute
+ opération passe par une route API qui authentifie la requête, valide les données, applique les règles
+ métier, puis délègue à la couche d’accès aux données.</p>
+
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 350" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12">
+ <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#475569"/></marker></defs>
+ <rect x="20" y="20" width="680" height="64" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+ <text x="34" y="42" fill="#1e3a8a" font-weight="700">Couche présentation — client (navigateur, PWA)</text>
+ <text x="34" y="64" fill="#475569" font-size="11">Pages et composants React · Tailwind CSS · Service Worker · notifications push</text>
+ <rect x="20" y="104" width="680" height="64" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+ <text x="34" y="126" fill="#1e3a8a" font-weight="700">Couche applicative — routes API Next.js (serveur)</text>
+ <text x="34" y="148" fill="#475569" font-size="11">Authentification · validation des entrées · règles métier · contrôles d’autorisation</text>
+ <rect x="20" y="188" width="680" height="58" rx="8" fill="#e0e7ff" stroke="#a5b4fc"/>
+ <text x="34" y="210" fill="#1e3a8a" font-weight="700">Couche services — lib/ (auth, prisma, push, hooks, contextes)</text>
+ <text x="34" y="230" fill="#475569" font-size="11">Fonctions transverses réutilisables&nbsp;: envoi push VAPID, contexte de thème, hooks métier</text>
+ <rect x="20" y="266" width="330" height="62" rx="8" fill="#dcfce7" stroke="#86efac"/>
+ <text x="34" y="288" fill="#065f46" font-weight="700">Accès aux données — client Prisma</text>
+ <text x="34" y="308" fill="#475569" font-size="11">Schéma typé · requêtes · contraintes d’unicité</text>
+ <rect x="370" y="266" width="330" height="62" rx="8" fill="#f1f5f9" stroke="#cbd5e1"/>
+ <text x="384" y="288" fill="#0f172a" font-weight="700">Base de données — MongoDB</text>
+ <text x="384" y="308" fill="#475569" font-size="11">Collections&nbsp;: users, events, polls, friends…</text>
+ <line x1="360" y1="84" x2="360" y2="104" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+ <line x1="360" y1="168" x2="360" y2="188" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+ <line x1="185" y1="246" x2="185" y2="266" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+ <line x1="350" y1="297" x2="370" y2="297" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+ </svg>
+ <figcaption>Figure 1 — Architecture en couches de Planify</figcaption>
+ </figure>
+
+ <p>Cette organisation se lit directement dans l’arborescence du projet.</p>
+ <pre><span class="c">planify/</span>
+├── app/                 <span class="c"># présentation et API (App Router)</span>
+│   ├── (pages)/         <span class="c"># events, polls, friends, settings, auth… (16 pages)</span>
+│   ├── components/      <span class="c"># composants liés au gabarit (navigation…)</span>
+│   └── api/             <span class="c"># 28 routes REST (route.ts)</span>
+├── components/          <span class="c"># composants d'interface réutilisables</span>
+├── lib/                 <span class="c"># services transverses (auth, prisma, push, hooks)</span>
+├── prisma/schema.prisma <span class="c"># modèle de données typé</span>
+├── tests/               <span class="c"># mocks et utilitaires de test</span>
+└── .github/workflows/   <span class="c"># pipeline CI/CD</span></pre>
+
+ <h4>Modèle de rendu réellement utilisé</h4>
+ <p>
+ Next.js autorise plusieurs stratégies de rendu. Le build de production indique celle qui s’applique à
+ chaque route&nbsp;: sur les 45 entrées produites, 14 pages sont <b>prérendues statiquement</b> à la compilation
+ (connexion, inscription, agenda, invitations, sondages, paramètres…) et 31 routes sont
+ <b>rendues dynamiquement à la demande</b> — les 28 routes API ainsi que les trois pages paramétrées
+ <code>/events/[id]</code>, <code>/events/[id]/edit</code> et <code>/polls/[id]</code>. Les données
+ utilisateur sont donc chargées côté client ou par appel aux routes API, et non par un rendu serveur
+ systématique de chaque page.
+ </p>
+</section>
+
+<section>
+ <h3>1.3 Modèle de données</h3>
+ <p>Le modèle est déclaré dans <code>prisma/schema.prisma</code> et compte dix entités. Prisma sert ici à
+ décrire un schéma typé, à générer le client d’accès (<code>prisma generate</code>) et à synchroniser le
+ modèle avec la base (<code>prisma db push</code>). MongoDB ne fonctionnant pas avec des migrations
+ versionnées comme une base relationnelle, cette synchronisation remplace le mécanisme de migration.</p>
+ <p>Les relations sont volontairement exprimées par référence d’identifiant plutôt que par des relations
+ Prisma complètes, afin d’éviter les transactions multi-documents coûteuses sous MongoDB. L’intégrité
+ métier est garantie par des contraintes d’unicité&nbsp;: un seul vote par sondage et par utilisateur, une
+ seule participation par couple (événement, utilisateur).</p>
+
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="10.5">
+ <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#64748b"/></marker></defs>
+ <rect x="290" y="14" width="140" height="46" rx="6" fill="#eef2ff" stroke="#6366f1"/>
+ <text x="360" y="33" text-anchor="middle" fill="#1e3a8a" font-weight="700">User</text>
+ <text x="360" y="50" text-anchor="middle" fill="#475569">email · password · thème</text>
+ <rect x="40" y="120" width="150" height="46" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+ <text x="115" y="139" text-anchor="middle" fill="#1e3a8a" font-weight="700">Event</text>
+ <text x="115" y="156" text-anchor="middle" fill="#475569">titre · date · visibilité</text>
+ <rect x="40" y="240" width="150" height="44" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+ <text x="115" y="258" text-anchor="middle" fill="#0f172a" font-weight="700">EventType</text>
+ <text x="115" y="274" text-anchor="middle" fill="#475569">nom · couleur</text>
+ <rect x="285" y="120" width="150" height="46" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+ <text x="360" y="139" text-anchor="middle" fill="#1e3a8a" font-weight="700">EventParticipant</text>
+ <text x="360" y="156" text-anchor="middle" fill="#475569">statut d’invitation</text>
+ <rect x="530" y="120" width="150" height="46" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+ <text x="605" y="139" text-anchor="middle" fill="#1e3a8a" font-weight="700">Friend</text>
+ <text x="605" y="156" text-anchor="middle" fill="#475569">statut d’amitié</text>
+ <rect x="285" y="240" width="150" height="44" rx="6" fill="#ede9fe" stroke="#8b5cf6"/>
+ <text x="360" y="258" text-anchor="middle" fill="#5b21b6" font-weight="700">Poll</text>
+ <text x="360" y="274" text-anchor="middle" fill="#475569">question · statut</text>
+ <rect x="470" y="240" width="100" height="44" rx="6" fill="#ede9fe" stroke="#8b5cf6"/>
+ <text x="520" y="258" text-anchor="middle" fill="#5b21b6" font-weight="700">PollOption</text>
+ <text x="520" y="274" text-anchor="middle" fill="#475569">texte</text>
+ <rect x="585" y="240" width="95" height="44" rx="6" fill="#ede9fe" stroke="#8b5cf6"/>
+ <text x="632" y="258" text-anchor="middle" fill="#5b21b6" font-weight="700">PollVote</text>
+ <text x="632" y="274" text-anchor="middle" fill="#475569">1 par user</text>
+ <line x1="330" y1="60" x2="140" y2="120" stroke="#64748b" marker-end="url(#ar2)"/>
+ <line x1="360" y1="60" x2="360" y2="120" stroke="#64748b" marker-end="url(#ar2)"/>
+ <line x1="400" y1="60" x2="600" y2="120" stroke="#64748b" marker-end="url(#ar2)"/>
+ <line x1="360" y1="60" x2="360" y2="240" stroke="#64748b" stroke-dasharray="3,3" marker-end="url(#ar2)"/>
+ <line x1="115" y1="166" x2="115" y2="240" stroke="#64748b" marker-end="url(#ar2)"/>
+ <line x1="360" y1="284" x2="470" y2="262" stroke="#64748b" marker-end="url(#ar2)"/>
+ <line x1="435" y1="262" x2="585" y2="262" stroke="#64748b" marker-end="url(#ar2)"/>
+ </svg>
+ <figcaption>Figure 2 — Entités principales et relations. S’y ajoutent <code>Notification</code> et <code>PushSubscription</code>.</figcaption>
+ </figure>
+
+ <p>Extrait du schéma&nbsp;: l’entité <code>Event</code> et la contrainte d’unicité des participations.</p>
+ <pre><span class="k">model</span> Event {
+  id          String   <span class="f">@id @default(auto()) @map("_id") @db.ObjectId</span>
+  title       String
+  date        DateTime
+  visibility  String   <span class="f">@default("friends")</span> <span class="c">// public | friends | private</span>
+  createdById String   <span class="f">@db.ObjectId</span>
+  eventType   EventType? <span class="f">@relation("EventToEventType", ...)</span>
+}
+
+<span class="k">model</span> EventParticipant {
+  eventId String <span class="f">@db.ObjectId</span>
+  userId  String <span class="f">@db.ObjectId</span>
+  status  String <span class="f">@default("pending")</span> <span class="c">// pending | accepted | declined</span>
+  <span class="f">@@unique([eventId, userId])</span> <span class="c">// une seule invitation par couple</span>
+}</pre>
+
+ <h3>1.4 Paradigmes de développement et maintenabilité</h3>
+ <ul>
+ <li><b>Programmation par composants</b> — l’interface est décomposée en composants React autonomes
+ (<code>EventCard</code>, <code>PollCard</code>, <code>DateTimePicker</code>, <code>ConfirmModal</code>…),
+ ce qui permet la réutilisation et des tests unitaires ciblés.</li>
+ <li><b>Séparation des responsabilités</b> — la logique transverse est isolée dans <code>lib/</code>,
+ distincte de la présentation et des routes API.</li>
+ <li><b>Programmation déclarative et typée</b> — React pour le rendu, Prisma pour le schéma, TypeScript
+ pour les contrats de types&nbsp;: le code se documente en partie lui-même.</li>
+ <li><b>API REST conventionnelle</b> — routes ressources <code>/api/events</code>, <code>/api/polls</code>,
+ verbes HTTP et codes de statut normalisés (200, 201, 400, 401, 403, 404, 500).</li>
+ <li><b>Factorisation par hooks</b> — la logique répétée est extraite dans des hooks personnalisés
+ (<code>useFriendRequests</code>, <code>useEventInvitations</code>, <code>usePushNotifications</code>).</li>
+ </ul>
+ <p>Concrètement, ajouter une fonctionnalité revient à créer une route API, un composant et éventuellement
+ un hook, sans toucher au cœur existant. Le typage statique sécurise ces évolutions&nbsp;: lors de l’audit
+ décrit au chapitre 10, la vérification de types a permis de détecter dix-huit anomalies qui n’étaient pas
+ visibles à l’exécution.</p>
+</section>
+
+<!-- ============================ 2. PROTOTYPE ============================ -->
+<section>
+ <h2>2. Prototype fonctionnel <span class="pill">C2.2.1</span></h2>
+ <p class="lead">Le prototype retenu pour la démonstration couvre la création d’un événement et l’invitation
+ d’amis, jusqu’à la réponse de l’invité et la mise à jour de son agenda.</p>
+
+ <h3>2.1 Justification du parcours retenu</h3>
+ <p>
+ Ce parcours a été choisi parce qu’il constitue le cœur métier du produit et qu’il mobilise, en une seule
+ chaîne, l’ensemble des couches de l’application&nbsp;: l’interface (formulaire, sélection d’invités),
+ l’authentification, un contrôle d’autorisation (seul le créateur peut inviter), la persistance avec
+ contrainte d’unicité, l’envoi d’une notification push et une règle métier de consolidation de l’agenda.
+ Il répond directement aux user stories US-02, US-03 et US-04, et il est utilisable aussi bien sur
+ ordinateur que sur mobile.
+ </p>
+
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 110" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="10.5">
+ <defs><marker id="ar3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+ <g text-anchor="middle">
+ <rect x="8" y="34" width="120" height="44" rx="22" fill="#eef2ff" stroke="#6366f1"/><text x="68" y="60" fill="#1e3a8a" font-weight="600">1. Créer l’événement</text>
+ <rect x="158" y="34" width="120" height="44" rx="22" fill="#eef2ff" stroke="#6366f1"/><text x="218" y="55" fill="#1e3a8a" font-weight="600">2. Inviter</text><text x="218" y="69" fill="#1e3a8a" font-weight="600">des amis</text>
+ <rect x="308" y="34" width="120" height="44" rx="22" fill="#dbeafe" stroke="#3b82f6"/><text x="368" y="55" fill="#1e3a8a" font-weight="600">3. Notification</text><text x="368" y="69" fill="#1e3a8a" font-weight="600">push émise</text>
+ <rect x="458" y="34" width="120" height="44" rx="22" fill="#dcfce7" stroke="#22c55e"/><text x="518" y="55" fill="#065f46" font-weight="600">4. L’invité</text><text x="518" y="69" fill="#065f46" font-weight="600">répond</text>
+ <rect x="608" y="34" width="104" height="44" rx="22" fill="#dcfce7" stroke="#22c55e"/><text x="660" y="55" fill="#065f46" font-weight="600">5. Agenda</text><text x="660" y="69" fill="#065f46" font-weight="600">mis à jour</text>
+ <line x1="128" y1="56" x2="156" y2="56" stroke="#2563eb" marker-end="url(#ar3)"/>
+ <line x1="278" y1="56" x2="306" y2="56" stroke="#2563eb" marker-end="url(#ar3)"/>
+ <line x1="428" y1="56" x2="456" y2="56" stroke="#2563eb" marker-end="url(#ar3)"/>
+ <line x1="578" y1="56" x2="606" y2="56" stroke="#2563eb" marker-end="url(#ar3)"/>
+ </g>
+ </svg>
+ <figcaption>Figure 3 — Parcours démontré&nbsp;: créer, inviter, notifier, répondre, consolider l’agenda</figcaption>
+ </figure>
+
+ <h3>2.2 Composants d’interface mobilisés</h3>
+ <table class="avoid-break">
+ <thead><tr><th style="width:26%">Composant ou page</th><th style="width:32%">Rôle</th><th>Éléments d’interface</th></tr></thead>
+ <tbody>
+ <tr><td><code>app/events/new</code></td><td>Création d’un événement</td><td>Champs texte, sélecteur de date et d’heure, choix du type et de la visibilité, bouton de validation.</td></tr>
+ <tr><td><code>DateTimePicker</code></td><td>Saisie de la date et de l’heure</td><td>Calendrier interactif et sélection horaire.</td></tr>
+ <tr><td>Panneau « Inviter »</td><td>Sélection des invités</td><td>Recherche, liste d’amis, interrupteurs de sélection.</td></tr>
+ <tr><td><code>app/events/invitations</code></td><td>Réponse aux invitations reçues</td><td>Cartes d’invitation et actions de réponse.</td></tr>
+ <tr><td><code>ConfirmModal</code></td><td>Confirmation d’action sensible</td><td>Fenêtre modale, boutons Confirmer et Annuler.</td></tr>
+ <tr><td><code>MobileBottomNav</code>, <code>DesktopNav</code></td><td>Navigation adaptative</td><td>Barre basse sur mobile, navigation latérale sur ordinateur.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>2.3 Logique serveur du prototype</h3>
+ <p>L’ajout de participants est protégé&nbsp;: seule la personne ayant créé l’événement peut inviter, les
+ doublons sont neutralisés par la contrainte d’unicité et chaque invité reçoit une notification. Extrait
+ de <code>app/api/events/[id]/participants/route.ts</code>&nbsp;:</p>
+ <pre><span class="c">// Contrôle d'autorisation : l'appelant doit être le créateur de l'événement</span>
+<span class="k">if</span> (event.createdById !== user.id) {
+  <span class="k">return</span> NextResponse.json(
+    { error: <span class="s">'Seul le créateur peut ajouter des participants'</span> }, { status: <span class="f">403</span> });
+}
+<span class="c">// upsert : la contrainte @@unique(eventId, userId) neutralise les doublons</span>
+<span class="k">await</span> prisma.eventParticipant.upsert({
+  where: { eventId_userId: { eventId, userId } },
+  create: { eventId, userId, status: <span class="s">'pending'</span> }, update: {} });
+<span class="c">// Notification push envoyée à chaque invité</span>
+<span class="k">await</span> sendPushNotification(userId, {
+  title: <span class="s">'Nouvelle invitation'</span>,
+  body: <span class="s">`${creatorName} vous a invité à "${eventTitle}"`</span> });</pre>
+
+ <p>Les captures d’écran du prototype en fonctionnement figurent en annexe A. L’application est également
+ exécutable en environnement de développement pour une démonstration en direct&nbsp;; le domaine
+ <code>planify.johanpoyet.fr</code> est réservé pour la mise en production, décrite au chapitre 11.1.</p>
+</section>
+
+<!-- ============================ 3. ENVIRONNEMENT / CD ============================ -->
+<section>
+ <h2>3. Environnement, qualité et déploiement continu <span class="pill">C2.1.1</span></h2>
+ <p class="lead">Ce chapitre décrit l’outillage de développement, les critères de qualité et de performance
+ retenus, puis le protocole de déploiement qui porte chaque modification jusqu’au serveur de production.</p>
+
+ <h3>3.1 Environnement de développement et d’exécution</h3>
+ <table class="avoid-break">
+ <thead><tr><th style="width:25%">Composant</th><th style="width:30%">Outil retenu</th><th>Rôle</th></tr></thead>
+ <tbody>
+ <tr><td>Éditeur de code</td><td>Visual Studio Code</td><td>Développement, extensions ESLint, Prettier et Prisma, intégration Git.</td></tr>
+ <tr><td>Compilateur</td><td>TypeScript 5.9.3 (<code>tsc</code>) et Turbopack</td><td>Vérification de types&nbsp;; Turbopack assure la compilation du bundle Next.js.</td></tr>
+ <tr><td>Gestionnaire de paquets</td><td>npm 10.9.3</td><td>Dépendances verrouillées par <code>package-lock.json</code>, scripts de build et de test.</td></tr>
+ <tr><td>Gestion des sources</td><td>Git et GitHub</td><td>Versionnage, branches de fonctionnalité, déclenchement du pipeline.</td></tr>
+ <tr><td>Qualité du code</td><td>ESLint 9.39.1, typescript-eslint 8, Prettier 3.6.2</td><td>Analyse statique et formatage homogène.</td></tr>
+ <tr><td>Environnement de test</td><td>Vitest 4.1.10, jsdom, Testing Library</td><td>Exécution des tests unitaires et de composants, mesure de couverture.</td></tr>
+ <tr><td>Serveur d’application</td><td>Next.js (<code>next start</code>), Node.js 22.20.0</td><td>Sert l’application compilée sur le port 3000.</td></tr>
+ <tr><td>Gestionnaire de processus</td><td>PM2</td><td>Maintient le service actif, redémarrage automatique, plafond mémoire configuré à 400 Mo.</td></tr>
+ <tr><td>Proxy inverse</td><td>Nginx</td><td>Terminaison TLS, service des fichiers statiques, relais vers Next.js.</td></tr>
+ <tr><td>Base de données</td><td>MongoDB</td><td>Stockage des données applicatives.</td></tr>
+ <tr><td>Production (cible)</td><td>VPS Ubuntu</td><td>Cible d’hébergement sur <code>planify.johanpoyet.fr</code>&nbsp;; procédure décrite au chapitre 11.1, mise en service non encore réalisée.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>3.2 Critères de qualité et de performance</h3>
+ <p>Les critères ci-dessous sont ceux que le projet sait mesurer aujourd’hui. Chaque ligne indique la
+ commande utilisée et la valeur relevée le 22/07/2026, en environnement de développement
+ (Windows 11, Node.js 22.20.0). Les mesures qui n’ont pas pu être réalisées sont écartées de ce tableau et
+ listées en annexe C plutôt que remplacées par une estimation.</p>
+ <table>
+ <thead><tr><th style="width:22%">Critère</th><th style="width:26%">Commande</th><th style="width:18%">Objectif</th><th style="width:17%">Valeur relevée</th><th>État</th></tr></thead>
+ <tbody>
+ <tr><td>Absence d’erreur de types</td><td><code>npm run typecheck</code></td><td>0 erreur</td><td>0 erreur (sortie 0)</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Absence d’erreur de lint</td><td><code>npm run lint</code></td><td>0 erreur</td><td>0 erreur, 443 avertissements</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Build de production</td><td><code>npx next build</code></td><td>Build réussi</td><td>Sortie 0 en 20 s (compilation 6,3 s)</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Couverture de tests</td><td><code>npx vitest run --coverage</code></td><td>&gt; 70 % des lignes</td><td>76,6 % des lignes</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Tests au vert</td><td><code>npx vitest run</code></td><td>Suite complète</td><td>316 / 316</td><td class="ok-txt">Atteint</td></tr>
+ <tr><td>Dépendances sans vulnérabilité critique</td><td><code>npm audit --omit=dev</code></td><td>0 critique</td><td>0 critique, 4 au total</td><td class="ok-txt">Atteint</td></tr>
+ </tbody>
+ </table>
+ <p class="small">Les six critères sont atteints. Le plafond mémoire PM2 de 400 Mo est une limite de
+ configuration, et non une mesure de la consommation réelle&nbsp;: cette dernière n’a pas été relevée
+ (annexe C).</p>
+
+ <h3>3.3 Protocole de déploiement continu</h3>
+ <p>Le déploiement est déclenché automatiquement lorsqu’une modification est intégrée sur la branche
+ <code>main</code>, et uniquement si les contrôles de qualité ont réussi (chapitre 4). GitHub Actions se
+ connecte alors en SSH au VPS et exécute le script de déploiement.</p>
+
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 96" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="9.6">
+ <defs><marker id="ar4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+ <g text-anchor="middle">
+ <rect x="6" y="30" width="100" height="40" rx="6" fill="#dcfce7" stroke="#22c55e"/><text x="56" y="48" fill="#065f46" font-weight="600">CI réussie</text><text x="56" y="62" fill="#065f46">sur main</text>
+ <rect x="122" y="30" width="96" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="170" y="48" fill="#1e3a8a" font-weight="600">SSH vers</text><text x="170" y="62" fill="#1e3a8a" font-weight="600">le VPS</text>
+ <rect x="234" y="30" width="90" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="279" y="54" fill="#1e3a8a" font-weight="600">git pull</text>
+ <rect x="340" y="30" width="100" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="390" y="48" fill="#1e3a8a" font-weight="600">npm ci +</text><text x="390" y="62" fill="#1e3a8a" font-weight="600">prisma generate</text>
+ <rect x="456" y="30" width="90" height="40" rx="6" fill="#e0e7ff" stroke="#a5b4fc"/><text x="501" y="54" fill="#1e3a8a" font-weight="600">build</text>
+ <rect x="562" y="30" width="150" height="40" rx="6" fill="#dcfce7" stroke="#22c55e"/><text x="637" y="48" fill="#065f46" font-weight="600">pm2 reload</text><text x="637" y="62" fill="#065f46">puis vérifications</text>
+ <line x1="106" y1="50" x2="120" y2="50" stroke="#2563eb" marker-end="url(#ar4)"/>
+ <line x1="218" y1="50" x2="232" y2="50" stroke="#2563eb" marker-end="url(#ar4)"/>
+ <line x1="324" y1="50" x2="338" y2="50" stroke="#2563eb" marker-end="url(#ar4)"/>
+ <line x1="440" y1="50" x2="454" y2="50" stroke="#2563eb" marker-end="url(#ar4)"/>
+ <line x1="546" y1="50" x2="560" y2="50" stroke="#2563eb" marker-end="url(#ar4)"/>
+ </g>
+ </svg>
+ <figcaption>Figure 4 — Séquences du déploiement, déclenché après succès des contrôles de qualité</figcaption>
+ </figure>
+
+ <p>Séquence exécutée sur le serveur par <code>deploy.sh</code>&nbsp;:</p>
+ <pre><span class="c">#!/bin/bash</span>
+cd ~/apps/planify
+git pull origin main           <span class="c"># récupère la version validée</span>
+npm ci                         <span class="c"># installation reproductible (lockfile)</span>
+npx prisma generate            <span class="c"># régénère le client Prisma</span>
+npm run build                  <span class="c"># build de production</span>
+pm2 reload ecosystem.config.js <span class="c"># rechargement sans coupure de service</span></pre>
+ <p class="small">Ce script réside sur le serveur et n’est pas versionné dans le dépôt&nbsp;: c’est une limite
+ identifiée en annexe C. Les secrets de connexion (hôte, utilisateur, clé SSH) sont stockés dans les
+ secrets GitHub et n’apparaissent jamais dans le dépôt.</p>
+</section>
+
+<!-- ============================ 4. CI ============================ -->
+<section>
+ <h2>4. Intégration continue <span class="pill">C2.1.2</span></h2>
+ <p class="lead">L’intégration continue vérifie automatiquement chaque modification — analyse statique,
+ types, tests, build — avant toute mise en production, afin de réduire le risque de régression.</p>
+
+ <h3>4.1 Protocole et déclencheurs</h3>
+ <p>Le pipeline est décrit dans <code>.github/workflows/ci-cd.yml</code>. Il comporte deux tâches&nbsp;:</p>
+ <ul>
+ <li><b>quality</b> — déclenchée à chaque <code>push</code>, sur toutes les branches, ainsi qu’à chaque
+ pull request. Elle installe les dépendances de façon reproductible, génère le client Prisma, puis
+ enchaîne lint, vérification de types, tests avec couverture et build de production.</li>
+ <li><b>deploy</b> — déclenchée uniquement sur la branche <code>main</code>, lors d’un <code>push</code>,
+ et subordonnée à la réussite de <b>quality</b> par la directive <code>needs</code>.</li>
+ </ul>
+ <p>Cette dépendance est le point central du dispositif&nbsp;: si le lint, la vérification de types, un test ou
+ le build échoue, la tâche <b>deploy</b> n’est pas exécutée et la version fautive n’atteint pas le
+ serveur. Les étapes s’enchaînent également en séquence à l’intérieur de <b>quality</b> : la première qui
+ échoue interrompt la tâche.</p>
+
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 100" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="9.4">
+ <defs><marker id="ar5" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+ <g text-anchor="middle">
+ <rect x="4" y="30" width="86" height="42" rx="6" fill="#eef2ff" stroke="#6366f1"/><text x="47" y="48" fill="#1e3a8a" font-weight="600">npm ci</text><text x="47" y="62" fill="#475569">+ prisma</text>
+ <rect x="102" y="30" width="86" height="42" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="145" y="48" fill="#1e3a8a" font-weight="600">lint</text><text x="145" y="62" fill="#475569">ESLint</text>
+ <rect x="200" y="30" width="100" height="42" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="250" y="48" fill="#1e3a8a" font-weight="600">typecheck</text><text x="250" y="62" fill="#475569">tsc --noEmit</text>
+ <rect x="312" y="30" width="100" height="42" rx="6" fill="#e0e7ff" stroke="#a5b4fc"/><text x="362" y="48" fill="#1e3a8a" font-weight="600">tests</text><text x="362" y="62" fill="#475569">+ couverture</text>
+ <rect x="424" y="30" width="90" height="42" rx="6" fill="#e0e7ff" stroke="#a5b4fc"/><text x="469" y="54" fill="#1e3a8a" font-weight="600">build</text>
+ <rect x="540" y="30" width="176" height="42" rx="6" fill="#dcfce7" stroke="#22c55e"/><text x="628" y="46" fill="#065f46" font-weight="600">deploy (needs: quality)</text><text x="628" y="62" fill="#065f46">seulement si main et CI verte</text>
+ <line x1="90" y1="51" x2="100" y2="51" stroke="#2563eb" marker-end="url(#ar5)"/>
+ <line x1="188" y1="51" x2="198" y2="51" stroke="#2563eb" marker-end="url(#ar5)"/>
+ <line x1="300" y1="51" x2="310" y2="51" stroke="#2563eb" marker-end="url(#ar5)"/>
+ <line x1="412" y1="51" x2="422" y2="51" stroke="#2563eb" marker-end="url(#ar5)"/>
+ <line x1="514" y1="51" x2="538" y2="51" stroke="#2563eb" marker-end="url(#ar5)"/>
+ </g>
+ </svg>
+ <figcaption>Figure 5 — Enchaînement des contrôles et subordination du déploiement</figcaption>
+ </figure>
+
+ <h3>4.2 Configuration du pipeline</h3>
+ <pre><span class="k">name</span>: CI/CD
+<span class="k">on</span>:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: <span class="s">'22'</span>, cache: <span class="s">'npm'</span> }
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint         <span class="c"># analyse statique</span>
+      - run: npm run typecheck    <span class="c"># tsc --noEmit</span>
+      - run: npx vitest run --coverage
+      - uses: actions/upload-artifact@v4   <span class="c"># rapport de couverture archivé</span>
+        <span class="k">if</span>: always()
+        with: { name: coverage-report, path: coverage/ }
+      - run: npx next build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: quality              <span class="c"># subordination explicite</span>
+    <span class="k">if</span>: github.ref == <span class="s">'refs/heads/main'</span> &amp;&amp; github.event_name == <span class="s">'push'</span>
+    steps:
+      - uses: actions/checkout@v4
+      - uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: bash ~/apps/planify/deploy.sh</pre>
+
+ <h3>4.3 Fusion des sources et conduite à tenir en cas d’échec</h3>
+ <p>Le développement s’effectue sur des branches de fonctionnalité (par exemple
+ <code>feat/design-redesign</code>), fusionnées ensuite dans <code>main</code>. Comme la tâche
+ <b>quality</b> s’exécute aussi sur les pull requests, l’état des contrôles est connu avant la fusion.</p>
+ <p>En cas d’échec, la procédure est la suivante&nbsp;: identifier l’étape fautive dans le journal GitHub
+ Actions, reproduire l’erreur localement avec la même commande, corriger sur la branche concernée, puis
+ pousser à nouveau — ce qui relance le pipeline. Le rapport de couverture est archivé comme artefact à
+ chaque exécution, y compris en cas d’échec, ce qui permet de comparer deux exécutions.</p>
+ <div class="box ok">
+ <b>État actuel du pipeline.</b> Les cinq étapes de contrôle passent&nbsp;: analyse statique (0 erreur),
+ vérification des types (0 erreur), suite de tests (316 / 316), publication du rapport de couverture et
+ build de production. La barrière de qualité a joué son rôle pendant la préparation de ce dossier&nbsp;:
+ elle a mis en évidence 27 tests en échec issus de la refonte d’interface, tous corrigés depuis
+ (chapitre 10).
+ </div>
+ <p class="small">La protection de la branche <code>main</code> par règle de dépôt (blocage de la fusion
+ tant que les contrôles échouent) n’est pas activée à ce jour&nbsp;: la subordination du déploiement est
+ assurée au niveau du workflow. Ce point figure en annexe C.</p>
+</section>
+
+<!-- ============================ 5. TESTS ============================ -->
+<section>
+ <h2>5. Harnais de tests unitaires et couverture <span class="pill">C2.2.2</span></h2>
+ <p class="lead">Le harnais de tests couvre les routes API, les services et les composants d’interface. Il
+ compte 44 fichiers de tests et 307 cas exécutés.</p>
+
+ <h3>5.1 Outillage et configuration</h3>
+ <table class="avoid-break">
+ <thead><tr><th style="width:32%">Outil</th><th>Rôle</th></tr></thead>
+ <tbody>
+ <tr><td>Vitest 4.1.10</td><td>Lanceur de tests, environnement <code>jsdom</code>, API proche de Jest.</td></tr>
+ <tr><td>Testing Library (React)</td><td>Rendu des composants et interactions du point de vue de l’utilisateur.</td></tr>
+ <tr><td>Mocks dédiés (<code>tests/mocks/</code>)</td><td>Simulation de Prisma, NextAuth, web-push et de la navigation Next.js.</td></tr>
+ <tr><td>@vitest/coverage-v8 4.1.10</td><td>Mesure de couverture sur <code>lib/</code>, <code>app/api/</code> et les composants.</td></tr>
+ </tbody>
+ </table>
+ <pre><span class="c">// vitest.config.ts — périmètre de couverture et génération du rapport</span>
+test: {
+  globals: <span class="f">true</span>, environment: <span class="s">'jsdom'</span>,
+  setupFiles: [<span class="s">'./tests/setup.ts'</span>],
+  include: [<span class="s">'**/__tests__/**/*.test.{ts,tsx}'</span>],
+  coverage: {
+    provider: <span class="s">'v8'</span>,
+    reportOnFailure: <span class="f">true</span>,   <span class="c">// rapport produit même si des tests échouent</span>
+    reporter: [<span class="s">'text'</span>, <span class="s">'text-summary'</span>, <span class="s">'json-summary'</span>, <span class="s">'html'</span>],
+    include: [<span class="s">'lib/**'</span>, <span class="s">'app/api/**'</span>, <span class="s">'components/**'</span>, <span class="s">'app/components/**'</span>],
+    exclude: [<span class="s">'**/__tests__/**'</span>, <span class="s">'**/*.d.ts'</span>, <span class="s">'node_modules/**'</span>, <span class="s">'.next/**'</span>] } }</pre>
+
+ <h3>5.2 Résultats de couverture</h3>
+ <p>Mesure réalisée le 22/07/2026 avec <code>npx vitest run --coverage</code> (fournisseur v8). Le périmètre
+ analysé est celui déclaré ci-dessus&nbsp;: code applicatif uniquement, à l’exclusion des fichiers de tests, des
+ déclarations de types et des dossiers <code>node_modules</code> et <code>.next</code>. Aucun seuil
+ bloquant n’est configuré à ce jour.</p>
+ <table class="avoid-break">
+ <thead><tr><th>Indicateur</th><th style="width:18%">Couvert / total</th><th style="width:14%">Taux</th></tr></thead>
+ <tbody>
+ <tr><td>Instructions (statements)</td><td>1 268 / 1 657</td><td><b>76,52 %</b></td></tr>
+ <tr><td>Branches</td><td>705 / 949</td><td><b>74,28 %</b></td></tr>
+ <tr><td>Fonctions</td><td>235 / 327</td><td><b>71,86 %</b></td></tr>
+ <tr><td>Lignes</td><td>1 161 / 1 515</td><td><b>76,63 %</b></td></tr>
+ </tbody>
+ </table>
+ <p>La couverture atteint donc plus de 76 % des lignes du code applicatif&nbsp;: la majorité du code développé est
+ exercée par les tests. Le détail par domaine montre où porte l’effort et où subsistent des manques.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:26%">Domaine</th><th style="width:12%">Fichiers</th><th>Instructions</th><th>Branches</th><th>Fonctions</th><th>Lignes</th></tr></thead>
+ <tbody>
+ <tr><td><code>app/api/</code> (routes)</td><td>28</td><td>82,3 %</td><td>84,5 %</td><td>85,0 %</td><td>82,5 %</td></tr>
+ <tr><td><code>lib/</code> (services, hooks)</td><td>10</td><td>86,3 %</td><td>76,7 %</td><td>89,8 %</td><td>86,4 %</td></tr>
+ <tr><td><code>components/</code></td><td>13</td><td>79,5 %</td><td>75,8 %</td><td>72,4 %</td><td>79,8 %</td></tr>
+ <tr><td><code>app/components/</code></td><td>7</td><td>26,9 %</td><td>27,8 %</td><td>22,9 %</td><td>27,6 %</td></tr>
+ </tbody>
+ </table>
+ <p>Le cœur métier — routes API et services — est le mieux couvert, ce qui correspond à la priorité retenue&nbsp;:
+ protéger la logique d’authentification, d’autorisation et de persistance. Le point faible est
+ <code>app/components/</code> (26,8 % des lignes), qui regroupe les composants de gabarit récemment
+ remaniés lors de la refonte d’interface&nbsp;; c’est la zone de travail prioritaire identifiée au chapitre 10.</p>
+
+ <h3>5.3 Exemple de jeu de tests&nbsp;: la route <code>/api/events</code></h3>
+ <p>La fonctionnalité mise en avant au chapitre 2 est couverte par un jeu de tests qui vérifie
+ l’authentification, la validation des entrées, la logique de consolidation (fusion des événements créés
+ et des invitations acceptées, déduplication, tri) et la création. Extrait conforme au fichier
+ <code>app/api/events/__tests__/route.test.ts</code>&nbsp;:</p>
+ <pre><span class="k">describe</span>(<span class="s">'POST /api/events'</span>, () =&gt; {
+  <span class="k">it</span>(<span class="s">'retourne 401 si non authentifie'</span>, <span class="k">async</span> () =&gt; {
+    getServerSessionMock.mockResolvedValueOnce(<span class="f">null</span>);
+    <span class="k">const</span> request = createMockRequest(<span class="s">'POST'</span>, { title: <span class="s">'Test'</span>, date: <span class="s">'2025-06-01'</span> });
+    <span class="k">const</span> response = <span class="k">await</span> POST(request <span class="k">as any</span>);
+    expect(response.status).toBe(<span class="f">401</span>);
+  });
+
+  <span class="k">it</span>(<span class="s">'retourne 400 si titre manquant'</span>, <span class="k">async</span> () =&gt; {
+    <span class="k">const</span> request = createMockRequest(<span class="s">'POST'</span>, { date: <span class="s">'2025-06-01'</span> });
+    <span class="k">const</span> response = <span class="k">await</span> POST(request <span class="k">as any</span>);
+    <span class="k">const</span> json = <span class="k">await</span> getResponseJson(response);
+    expect(json.error).toBe(<span class="s">'Le titre et la date sont requis'</span>);
+  });
+
+  <span class="k">it</span>(<span class="s">'retourne 201 et cree l\'evenement'</span>, <span class="k">async</span> () =&gt; {
+    prismaMock.event.create.mockResolvedValueOnce(createdEvent);
+    <span class="k">const</span> response = <span class="k">await</span> POST(createMockRequest(<span class="s">'POST'</span>, {
+      title: <span class="s">'Test'</span>, date: <span class="s">'2025-06-01T10:00:00Z'</span> }) <span class="k">as any</span>);
+    expect(response.status).toBe(<span class="f">201</span>);
+  });
+});</pre>
+
+ <h3>5.4 Résultat d’exécution et limites</h3>
+ <table class="avoid-break">
+ <thead><tr><th style="width:34%">Indicateur</th><th style="width:20%">Valeur</th><th>Commentaire</th></tr></thead>
+ <tbody>
+ <tr><td>Fichiers de tests</td><td>44</td><td>Tous au vert.</td></tr>
+ <tr><td>Tests exécutés</td><td>316</td><td>316 réussis, aucun en échec.</td></tr>
+ <tr><td>Durée d’exécution</td><td>≈ 22 s</td><td>Suite complète avec couverture.</td></tr>
+ </tbody>
+ </table>
+ <p>Ce résultat est l’aboutissement d’une remise à niveau menée pendant la préparation de ce dossier. La
+ suite ne s’exécutait initialement qu’à 66,7 %&nbsp;: dix-huit erreurs de syntaxe empêchaient huit fichiers
+ d’être analysés, et un neuvième échouait au chargement, si bien que neuf tests n’étaient pas même comptés
+ (anomalies BUG-06, BUG-07 et BUG-18). Une fois ces fichiers rendus exécutables, 27 tests se sont révélés
+ en échec, pour l’essentiel des tests de composants devenus obsolètes après la refonte d’interface. Leur
+ correction, détaillée au chapitre 10, a porté la suite à 316 tests tous conformes et la couverture de
+ 71,4 % à 76,6 % des lignes.</p>
+</section>
+
+<!-- ============================ 6. SECURITE ============================ -->
+<section>
+ <h2>6. Sécurité du code source — OWASP Top 10 <span class="pill">C2.2.3</span></h2>
+ <p class="lead">La démarche s’appuie sur le référentiel OWASP Top 10 (version 2021). Pour chacune des dix
+ catégories, le tableau ci-dessous indique la mesure réellement présente dans le code, le fichier
+ concerné, la façon dont elle a été vérifiée et, le cas échéant, la limite qui subsiste.</p>
+
+ <h3>6.1 Couverture des dix catégories</h3>
+ <table>
+ <thead><tr><th style="width:15%">Catégorie</th><th style="width:30%">Mesure en place</th><th style="width:22%">Fichier</th><th>Vérification et limite</th></tr></thead>
+ <tbody>
+ <tr><td class="cat">A01 Contrôle d’accès</td><td>Vérification de session sur chaque route protégée&nbsp;; contrôle de propriété (seul le créateur modifie ou invite)&nbsp;; cloisonnement des données par utilisateur.</td><td><code>app/api/**/route.ts</code></td><td>Tests automatisés SEC-01 et RS-01. Modèle fondé sur la session et la propriété des ressources&nbsp;; il n’existe pas de rôles applicatifs.</td></tr>
+ <tr><td class="cat">A02 Cryptographie</td><td>Mots de passe hachés avec bcrypt (coût 10, sel intégré)&nbsp;; le hachage n’est jamais renvoyé au client.</td><td><code>api/auth/register</code>, <code>lib/auth.ts</code></td><td>Test SEC-02. TLS assuré par Nginx&nbsp;; la configuration fournie doit encore être activée (annexe C).</td></tr>
+ <tr><td class="cat">A03 Injection</td><td>Accès aux données exclusivement via le client Prisma, avec requêtes structurées&nbsp;; aucune concaténation de requête.</td><td>Couche Prisma</td><td>Revue de code des 28 routes&nbsp;: aucune requête brute.</td></tr>
+ <tr><td class="cat">A04 Conception</td><td>Modèle d’autorisation défini en amont (visibilité <code>public</code>, <code>friends</code>, <code>private</code>&nbsp;; statuts d’invitation)&nbsp;; contraintes d’unicité métier.</td><td><code>prisma/schema.prisma</code></td><td>Test RS-04 (double vote refusé).</td></tr>
+ <tr><td class="cat">A05 Configuration</td><td>En-têtes de sécurité ajoutés sur toutes les réponses&nbsp;: <code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, <code>Strict-Transport-Security</code>. Secrets en variables d’environnement, hors dépôt.</td><td><code>next.config.js</code>, <code>.env</code></td><td>Ajoutés lors de l’audit (BUG-09). Aucune politique <code>Content-Security-Policy</code> n’est définie à ce jour.</td></tr>
+ <tr><td class="cat">A06 Composants vulnérables</td><td>Dépendances verrouillées par <code>package-lock.json</code>, installation reproductible par <code>npm ci</code>, audit régulier et suppression des dépendances inutilisées.</td><td><code>package-lock.json</code></td><td>Audit exécuté&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Voir 6.2.</td></tr>
+ <tr><td class="cat">A07 Authentification</td><td>Sessions JWT signées gérées par NextAuth&nbsp;; messages d’erreur identiques que le compte existe ou non, afin de ne pas révéler l’existence d’une adresse.</td><td><code>lib/auth.ts</code></td><td>Test SEC-03. Longueur minimale de mot de passe fixée à 6 caractères, sans exigence de complexité&nbsp;: c’est une politique faible. Aucune limitation du nombre de tentatives.</td></tr>
+ <tr><td class="cat">A08 Intégrité</td><td>Builds reproductibles (<code>npm ci</code>), pipeline CI/CD contrôlé, déploiement subordonné aux contrôles de qualité.</td><td><code>.github/workflows/</code></td><td>Chapitre 4.</td></tr>
+ <tr><td class="cat">A09 Journalisation</td><td>Journalisation des erreurs serveur par <code>console.error</code> dans chaque route, collectée par PM2 côté serveur.</td><td>routes API, PM2</td><td>Il s’agit d’une journalisation applicative d’erreurs, non d’une journalisation de sécurité&nbsp;: les tentatives d’authentification échouées ne sont pas tracées et il n’y a ni alerte ni conservation structurée.</td></tr>
+ <tr><td class="cat">A10 SSRF et accès fichiers</td><td>Aucune requête sortante construite à partir d’une URL fournie par l’utilisateur. Service de fichiers restreint à <code>public/uploads</code>&nbsp;: rejet des segments <code>..</code> et vérification que le chemin résolu reste dans ce dossier.</td><td><code>api/uploads/[...path]</code></td><td>Protection ajoutée lors de l’audit (BUG-08)&nbsp;; rattachée au test SEC-04.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>6.2 Audit des dépendances</h3>
+ <p>Commande exécutée le 22/07/2026&nbsp;: <code>npm audit --omit=dev</code> pour le périmètre de production, et
+ <code>npm audit</code> pour l’ensemble.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:34%">Périmètre</th><th>Critiques</th><th>Élevées</th><th>Moyennes</th><th>Faibles</th><th>Total</th></tr></thead>
+ <tbody>
+ <tr><td>Avant traitement (production)</td><td class="bad-txt">3</td><td>23</td><td>7</td><td>6</td><td><b>39</b></td></tr>
+ <tr><td>Avant traitement (toutes dépendances)</td><td class="bad-txt">5</td><td>25</td><td>7</td><td>7</td><td><b>44</b></td></tr>
+ <tr><td><b>Après traitement (toutes dépendances)</b></td><td class="ok-txt">0</td><td>2</td><td>2</td><td>0</td><td><b>4</b></td></tr>
+ </tbody>
+ </table>
+ <p>L’origine a été identifiée puis traitée. La bibliothèque <code>next-pwa</code> en version 2.6.3, qui
+ n’est plus maintenue, entraînait des dépendances transitives obsolètes (<code>workbox-build</code>,
+ <code>ejs</code>) portant les trois vulnérabilités critiques. Or l’analyse du code a montré qu’elle
+ n’était <b>utilisée nulle part</b>&nbsp;: le Service Worker de l’application est un fichier écrit à la main
+ (<code>public/sw.js</code>), enregistré par <code>lib/pwa.ts</code>. Sa suppression a retiré 655 paquets
+ de l’arbre de dépendances sans modifier une seule ligne de code applicatif. Une mise à jour des versions
+ correctives dans les bornes déclarées a ensuite ramené le total à quatre vulnérabilités.</p>
+ <p>Les quatre vulnérabilités résiduelles proviennent de l’arbre de dépendances de Next.js lui-même
+ (<code>postcss</code>, <code>sharp</code>). Le seul correctif proposé par l’outil consisterait à
+ rétrograder Next.js de la version 16 à la version 9 et NextAuth de la version 4 à la version 3&nbsp;:
+ ce n’est pas une correction mais une régression majeure, et elle n’a donc pas été appliquée. Ces
+ vulnérabilités seront levées par une version ultérieure de Next.js. L’action reste suivie sous BUG-10.
+ L’audit est aujourd’hui exécuté manuellement et n’est pas encore une étape bloquante du pipeline.</p>
+
+ <h3>6.3 Mesures illustrées</h3>
+ <h4>Hachage des mots de passe (A02)</h4>
+ <pre><span class="c">// app/api/auth/register/route.ts</span>
+<span class="k">const</span> hashedPassword = <span class="k">await</span> bcrypt.hash(password, <span class="f">10</span>);
+<span class="k">const</span> user = <span class="k">await</span> prisma.user.create({ data: { email, password: hashedPassword } });
+<span class="k">const</span> { password: _, ...userWithoutPassword } = user; <span class="c">// le hash n'est jamais renvoyé</span></pre>
+
+ <h4>Confinement du service de fichiers (A10)</h4>
+ <pre><span class="c">// app/api/uploads/[...path]/route.ts — ajouté lors de l'audit</span>
+<span class="k">const</span> uploadsRoot = path.resolve(process.cwd(), <span class="s">"public"</span>, <span class="s">"uploads"</span>);
+<span class="k">if</span> (pathSegments.some((s) =&gt; s === <span class="s">".."</span> || s.includes(<span class="s">"\0"</span>))) {
+  <span class="k">return</span> NextResponse.json({ error: <span class="s">"Chemin invalide"</span> }, { status: <span class="f">400</span> });
+}
+<span class="k">const</span> filePath = path.resolve(uploadsRoot, ...pathSegments);
+<span class="k">if</span> (filePath !== uploadsRoot &amp;&amp; !filePath.startsWith(uploadsRoot + path.sep)) {
+  <span class="k">return</span> NextResponse.json({ error: <span class="s">"Chemin invalide"</span> }, { status: <span class="f">400</span> });
+}</pre>
+
+ <p>Les dix catégories de l’OWASP Top 10 sont donc traitées par des mesures identifiables dans le code. Deux
+ d’entre elles restent partiellement couvertes et sont assumées comme telles&nbsp;: la politique de mot de
+ passe et l’absence de limitation des tentatives (A07), et les vulnérabilités de dépendances (A06). Ce
+ dossier ne prétend pas à une application exempte de faille, mais à un traitement documenté et vérifiable
+ de chaque catégorie de risque.</p>
+</section>
+
+<!-- ============================ 7. ACCESSIBILITE ============================ -->
+<section>
+ <h2>7. Accessibilité numérique <span class="pill">C2.2.3</span></h2>
+ <p class="lead">L’accessibilité vise à rendre l’application utilisable par le plus grand nombre, y compris
+ par les personnes en situation de handicap.</p>
+
+ <h3>7.1 Référentiel retenu et justification</h3>
+ <p>
+ Le référentiel principal retenu est le <b>RGAA version 4.1</b>, référence en France pour l’accessibilité
+ numérique et transposition des règles internationales WCAG 2.1 de niveau AA. Ce choix se justifie par
+ trois éléments&nbsp;: son statut de référence nationale, sa structuration en critères vérifiables un par un,
+ et sa compatibilité avec les WCAG, ce qui rend la démarche transposable hors de France. Les bonnes
+ pratiques <b>Opquast</b> le complètent sur la qualité d’usage, notamment la clarté des messages d’erreur
+ et la cohérence des formulaires.
+ </p>
+
+ <h3>7.2 Dispositions présentes dans l’application</h3>
+ <p>Les éléments ci-dessous ont été constatés par revue du code de l’interface.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:30%">Thématique</th><th>Disposition constatée dans le code</th></tr></thead>
+ <tbody>
+ <tr><td>Structure et sémantique</td><td>Emploi de balises sémantiques (<code>nav</code>, <code>main</code>, <code>button</code>) et de titres hiérarchisés, exploitables par un lecteur d’écran.</td></tr>
+ <tr><td>Alternatives textuelles</td><td>Attribut <code>alt</code> renseigné sur les images de profil&nbsp;; libellés textuels associés aux icônes de navigation.</td></tr>
+ <tr><td>Formulaires</td><td>Libellés associés aux champs et messages d’erreur explicites, par exemple « Le titre et la date sont requis », renvoyés par la route de création.</td></tr>
+ <tr><td>Adaptabilité</td><td>Interface entièrement responsive (Tailwind CSS), avec une navigation dédiée mobile et bureau (voir figures A.5 et A.6).</td></tr>
+ <tr><td>Confort visuel</td><td>Choix d’un mode clair ou sombre et d’une couleur d’accent parmi sept, enregistré par utilisateur (<code>themeMode</code>, <code>themeColor</code>).</td></tr>
+ <tr><td>Compréhension</td><td>Libellés en français courant et retours visuels systématiques après chaque action, via le système de notifications interne (<code>toastContext</code>).</td></tr>
+ </tbody>
+ </table>
+
+ <h3>7.3 Audit automatique réalisé</h3>
+ <p>Un audit a été conduit le 22/07/2026 avec <b>Lighthouse 13.4.1</b> (moteur Chromium, mode sans
+ interface), sur l’environnement de développement local. Les pages accessibles sans authentification ont
+ été auditées&nbsp;; les pages protégées redirigent vers la connexion tant qu’aucune session n’est ouverte,
+ elles n’ont donc pas pu être mesurées dans cette campagne.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:26%">Page auditée</th><th style="width:19%">Score initial</th><th style="width:19%">Score après correction</th><th>Critères en échec initialement</th></tr></thead>
+ <tbody>
+ <tr><td><code>/auth/login</code></td><td>94 / 100</td><td class="ok-txt">100 / 100</td><td>Contraste (2 éléments), absence de repère <code>main</code></td></tr>
+ <tr><td><code>/auth/register</code></td><td>94 / 100</td><td class="ok-txt">100 / 100</td><td>Contraste (2 éléments), absence de repère <code>main</code></td></tr>
+ </tbody>
+ </table>
+ <p class="small">Commande&nbsp;: <code>npx lighthouse &lt;url&gt; --only-categories=accessibility</code>.
+ Un audit automatique ne couvre qu’une partie des critères du référentiel&nbsp;: il ne remplace pas une
+ vérification manuelle.</p>
+
+ <h3>7.4 Anomalies détectées et corrigées</h3>
+ <p>Les cinq écarts relevés ont été corrigés, puis l’audit a été relancé pour vérifier le résultat.</p>
+ <table>
+ <thead><tr><th style="width:24%">Écart constaté</th><th style="width:19%">Mesure avant</th><th style="width:19%">Mesure après</th><th>Correction apportée</th></tr></thead>
+ <tbody>
+ <tr><td>Absence de repère principal (<code>landmark-one-main</code>)</td><td>Aucun élément <code>main</code></td><td class="ok-txt">Repère présent</td><td>Le conteneur de <code>BodyWrapper</code> devient un élément <code>main</code>, ce qui dote toutes les pages du repère&nbsp;; le <code>main</code> imbriqué de la page d’accueil a été supprimé.</td></tr>
+ <tr><td>Texte secondaire, mode sombre</td><td>3,08:1</td><td class="ok-txt">4,65:1</td><td><code>--pf-text-muted</code> éclairci de <code>#5E5E6B</code> à <code>#7A7A88</code>.</td></tr>
+ <tr><td>Texte secondaire, mode clair</td><td>3,03:1</td><td class="ok-txt">4,57:1</td><td><code>--pf-text-muted</code> assombri de <code>#8E8E99</code> à <code>#70707B</code>.</td></tr>
+ <tr><td>Bouton de soumission (texte blanc sur accent)</td><td>4,35:1</td><td class="ok-txt">4,85:1</td><td>Couleur d’accent par défaut ajustée de <code>#7C5CFF</code> à <code>#7454F5</code>.</td></tr>
+ <tr><td>Lien «&nbsp;Oublié&nbsp;?&nbsp;» (accent utilisé comme texte)</td><td>4,04:1</td><td class="ok-txt">5,90:1</td><td>Emploi de la variante claire <code>--pf-accent-strong</code>&nbsp;: une couleur lisible en fond de bouton ne l’est pas nécessairement en texte.</td></tr>
+ </tbody>
+ </table>
+ <p>Le seuil visé est celui du niveau AA pour du texte de taille normale, soit un rapport de contraste
+ d’au moins 4,5:1. Ces corrections sont enregistrées sous BUG-16 au chapitre 10.</p>
+
+ <h3>7.5 Écart connu et portée de la vérification</h3>
+ <p>Le contrôle des sept couleurs d’accent proposées à l’utilisateur montre que trois d’entre elles
+ n’atteignent pas le seuil lorsqu’elles portent du texte blanc&nbsp;: emerald (3,77:1), orange (3,56:1) et
+ yellow (2,94:1). Corriger ces teintes modifierait sensiblement l’identité visuelle du produit&nbsp;: la
+ décision est donc documentée plutôt que tranchée unilatéralement, et suivie sous BUG-17.</p>
+ <div class="box warn">
+ <p style="margin-top:0"><b>Portée de la campagne.</b> L’audit a porté sur deux pages publiques et sur les
+ seuls critères vérifiables automatiquement. N’ont pas été réalisés&nbsp;: l’audit des pages protégées par
+ authentification, le parcours complet au clavier, le test avec lecteur d’écran et le contrôle du zoom
+ à 200 %.</p>
+ <p style="margin-bottom:0">Ce dossier ne revendique donc <b>aucun niveau de conformité RGAA</b>. Les
+ scores obtenus attestent d’une conformité aux critères automatisables sur les pages mesurées, ce qui
+ constitue une étape de la démarche et non son aboutissement.</p>
+ </div>
+</section>
+
+<!-- ============================ 8. VERSIONS ============================ -->
+<section>
+ <h2>8. Gestion de versions et déploiement progressif <span class="pill">C2.2.4</span></h2>
+ <p class="lead">Le logiciel est versionné avec Git et déployé de façon incrémentale, chaque modification
+ intégrée sur <code>main</code> déclenchant le pipeline décrit au chapitre 4.</p>
+
+ <h3>8.1 Système de gestion de versions</h3>
+ <p>Le projet est suivi avec Git et hébergé sur GitHub. Au 22/07/2026, l’historique compte
+ <b>79 commits</b> (<code>git rev-list --count HEAD</code>). Les pratiques appliquées sont les
+ suivantes&nbsp;:</p>
+ <ul>
+ <li><b>Branches de fonctionnalité</b> — chaque évolution est développée sur une branche dédiée, par
+ exemple <code>feat/design-redesign</code> pour la refonte d’interface en cours, puis fusionnée dans
+ <code>main</code>.</li>
+ <li><b>Messages de commit explicites</b> — préfixes conventionnels <code>feat:</code>,
+ <code>fix:</code>, <code>chore:</code> décrivant l’intention de la modification.</li>
+ <li><b>Historique traçable et réversible</b> — chaque évolution est identifiable par son empreinte et
+ peut être annulée.</li>
+ <li><b>Version applicative</b> — le champ <code>version</code> de <code>package.json</code> vaut
+ <code>1.0.0</code>.</li>
+ </ul>
+
+ <h3>8.2 Jalons de l’historique</h3>
+ <p>Le tableau ci-dessous ne retient que des commits réellement présents dans l’historique, identifiés par
+ leur empreinte courte.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:14%">Commit</th><th style="width:34%">Intitulé</th><th>Apport</th></tr></thead>
+ <tbody>
+ <tr><td class="id">a3b30c0</td><td>Initial commit: Planify app with Next.js, Prisma, and NextAuth</td><td>Socle du projet&nbsp;: authentification et gestion d’événements.</td></tr>
+ <tr><td class="id">3377b66</td><td>Ajout des notifications push pour demandes d’amis et invitations</td><td>Notifications push VAPID (US-03, US-08).</td></tr>
+ <tr><td class="id">9ce1e6b</td><td>fix: add headers for Service Worker and manifest in production</td><td>Correction de la diffusion du Service Worker (BUG-05).</td></tr>
+ <tr><td class="id">baca205</td><td>Fix: ajout de prisma generate au script de build</td><td>Fiabilisation du build de production (BUG-02).</td></tr>
+ <tr><td class="id">2de5265</td><td>fix uploads&nbsp;: ajout des photos de profil dans toutes les pages</td><td>Homogénéisation de l’affichage des profils.</td></tr>
+ <tr><td class="id">ea014a1</td><td>fix VPS RAM usage&nbsp;: intervalle de rafraîchissement porté à 30 s</td><td>Première réduction de la charge serveur.</td></tr>
+ <tr><td class="id">a797b6c</td><td>fix VPS RAM usage&nbsp;: suppression du polling</td><td>Correction de la consommation mémoire (BUG-01).</td></tr>
+ <tr><td class="id">ad9b3af</td><td>feat: implémentation de la suite de tests</td><td>Mise en place du harnais de tests.</td></tr>
+ <tr><td class="id">13b8835</td><td>fix tests</td><td>Dernier commit de la branche principale de travail.</td></tr>
+ </tbody>
+ </table>
+ <p class="small">Aucune étiquette Git (<code>git tag</code>) n’a été posée à ce jour&nbsp;: les versions ne sont
+ donc pas matérialisées dans l’historique, ce qui limite la traçabilité des livraisons. La mise en place
+ d’étiquettes conformes au versionnage sémantique est identifiée en annexe C.</p>
+
+ <h3>8.3 Caractère progressif du déploiement</h3>
+ <ul>
+ <li><b>Incréments limités</b> — une fonctionnalité par branche, ce qui réduit le périmètre de chaque mise
+ en production et facilite l’analyse en cas d’anomalie.</li>
+ <li><b>Rechargement sans coupure</b> — <code>pm2 reload</code> remplace le processus sans interrompre le
+ service.</li>
+ <li><b>Réversibilité</b> — un retour à un commit antérieur est possible selon la procédure décrite
+ en 11.3.</li>
+ <li><b>Barrière de qualité</b> — depuis la mise en place du pipeline unifié, une version dont les
+ contrôles échouent n’atteint pas le serveur.</li>
+ </ul>
+
+ <h3>8.4 Vérification après déploiement</h3>
+ <p>La liste ci-dessous constitue le contrôle à dérouler après chaque mise en production. Elle est fournie
+ comme procédure de référence&nbsp;; la colonne de résultat est renseignée lors de chaque déploiement, par le
+ responsable du déploiement (le développeur, en l’occurrence).</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:8%">Réf.</th><th style="width:40%">Contrôle</th><th>Preuve attendue</th></tr></thead>
+ <tbody>
+ <tr><td class="id">V-01</td><td>L’application répond sur l’URL de production.</td><td>Page de connexion affichée.</td></tr>
+ <tr><td class="id">V-02</td><td>Authentification avec un compte de démonstration.</td><td>Accès à l’agenda.</td></tr>
+ <tr><td class="id">V-03</td><td>Création d’un événement.</td><td>Événement visible dans l’agenda.</td></tr>
+ <tr><td class="id">V-04</td><td>Invitation d’un ami puis réponse depuis le second compte.</td><td>Statut mis à jour, événement consolidé.</td></tr>
+ <tr><td class="id">V-05</td><td>Création d’un sondage et vote.</td><td>Vote unique enregistré.</td></tr>
+ <tr><td class="id">V-06</td><td>État du processus applicatif.</td><td><code>pm2 status</code>&nbsp;: processus <code>online</code>.</td></tr>
+ <tr><td class="id">V-07</td><td>Absence d’erreur récente dans les journaux.</td><td><code>pm2 logs planify --lines 100</code>.</td></tr>
+ <tr><td class="id">V-08</td><td>Consommation mémoire du processus.</td><td><code>pm2 status</code>&nbsp;: valeur relevée, plafond 400 Mo.</td></tr>
+ </tbody>
+ </table>
+ <p class="small">Aucun test utilisateur formalisé n’a été conduit à ce jour&nbsp;: le dossier ne présente donc
+ pas de retour d’usage. Ce point figure en annexe C.</p>
+</section>
+
+<!-- ============================ 9. CAHIER DE RECETTES ============================ -->
+<section>
+ <h2>9. Cahier de recettes <span class="pill">C2.3.1</span></h2>
+ <p class="lead">Le cahier de recettes décrit les scénarios de vérification et les résultats attendus, pour
+ l’ensemble des fonctionnalités attendues. Il combine des tests fonctionnels, structurels et de sécurité.</p>
+
+ <div class="box info">
+ <b>Conditions d’exécution.</b> Version testée&nbsp;: 1.0.0 (branche <code>feat/design-redesign</code>).
+ Date d’exécution&nbsp;: 22/07/2026. Environnement&nbsp;: poste de développement, Node.js 22.20.0, base MongoDB de
+ développement. Les scénarios repérés « automatisé » sont rejoués à chaque exécution du pipeline&nbsp;; les
+ autres sont vérifiés manuellement sur le prototype. Précondition commune aux scénarios fonctionnels&nbsp;:
+ deux comptes de démonstration existants et liés en amis (Camille Dubois et Thomas Martin).
+ </div>
+
+ <h3>9.1 Tests fonctionnels</h3>
+ <table>
+ <thead><tr><th style="width:7%">Réf.</th><th style="width:7%">US</th><th style="width:29%">Scénario</th><th style="width:29%">Résultat attendu</th><th style="width:13%">Preuve</th><th>Résultat</th></tr></thead>
+ <tbody>
+ <tr><td class="id">RF-01</td><td class="id">US-01</td><td>Création d’un compte avec une adresse valide et un mot de passe d’au moins 6 caractères.</td><td>Compte créé (HTTP 201), redirection vers la connexion.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-02</td><td class="id">US-01</td><td>Connexion avec des identifiants corrects.</td><td>Session ouverte, accès à l’agenda.</td><td>Manuel, fig. A.1</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-03</td><td class="id">US-02</td><td>Création d’un événement avec titre et date.</td><td>Événement créé (HTTP 201) et visible dans l’agenda.</td><td>Automatisé, fig. A.2</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-04</td><td class="id">US-03</td><td>Invitation d’un ami à un événement.</td><td>Participant ajouté au statut <code>pending</code> et notification émise.</td><td>Automatisé, fig. A.2</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-05</td><td class="id">US-04</td><td>Acceptation d’une invitation reçue.</td><td>Statut porté à <code>accepted</code>&nbsp;; l’événement rejoint l’agenda de l’invité.</td><td>Manuel, fig. A.3 et A.4</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-06</td><td class="id">US-05</td><td>Envoi puis acceptation d’une demande d’ami.</td><td>Relation d’amitié établie et visible des deux côtés.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-07</td><td class="id">US-06</td><td>Création d’un sondage puis vote.</td><td>Sondage créé, un seul vote enregistré par utilisateur.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-08</td><td class="id">US-07</td><td>Changement de mode d’affichage et de couleur d’accent.</td><td>Préférence enregistrée et appliquée immédiatement.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RF-09</td><td class="id">US-08</td><td>Installation de l’application sur mobile et abonnement aux notifications.</td><td>Application installable, abonnement push enregistré.</td><td>Manuel</td><td class="ok-txt">Conforme</td></tr>
+ </tbody>
+ </table>
+
+ <h3>9.2 Tests structurels</h3>
+ <table>
+ <thead><tr><th style="width:7%">Réf.</th><th style="width:36%">Scénario</th><th style="width:29%">Résultat attendu</th><th style="width:13%">Preuve</th><th>Résultat</th></tr></thead>
+ <tbody>
+ <tr><td class="id">RS-01</td><td><code>GET /api/events</code> sans session valide.</td><td>HTTP 401, message « Non authentifié ».</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-02</td><td><code>POST /api/events</code> sans titre.</td><td>HTTP 400, message de validation explicite.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-03</td><td>Consolidation des événements créés et des invitations acceptées.</td><td>Liste dédoublonnée et triée par date croissante.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-04</td><td>Second vote d’un même utilisateur sur un sondage.</td><td>Vote mis à jour, sans création d’un doublon.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-05</td><td>Build de production complet.</td><td>Compilation sans erreur, sortie 0.</td><td><code>npx next build</code></td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-06</td><td>Vérification des types sur l’ensemble du dépôt.</td><td>Aucune erreur de type.</td><td><code>npm run typecheck</code></td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">RS-07</td><td>Détection des conflits d’agenda pour plusieurs utilisateurs.</td><td>Un conflit remonté par utilisateur concerné.</td><td>Automatisé</td><td class="ok-txt">Conforme après BUG-11</td></tr>
+ <tr><td class="id">RS-08</td><td><code>GET /api/polls/[id]</code> avec options et votes.</td><td>HTTP 200 et sondage complet.</td><td>Automatisé</td><td class="ok-txt">Conforme après BUG-12</td></tr>
+ <tr><td class="id">RS-09</td><td>Rendu des composants d’interface après refonte.</td><td>Composants conformes aux tests existants.</td><td>Automatisé</td><td class="ok-txt">Conforme après BUG-13</td></tr>
+ </tbody>
+ </table>
+
+ <h3>9.3 Tests de sécurité</h3>
+ <table>
+ <thead><tr><th style="width:8%">Réf.</th><th style="width:36%">Scénario</th><th style="width:28%">Résultat attendu</th><th style="width:13%">Preuve</th><th>Résultat</th></tr></thead>
+ <tbody>
+ <tr><td class="id">SEC-01</td><td>Ajout d’un participant par un utilisateur qui n’est pas le créateur de l’événement.</td><td>HTTP 403, action refusée.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">SEC-02</td><td>Inspection de la réponse de l’API d’inscription.</td><td>Le hachage du mot de passe est absent de la réponse.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">SEC-03</td><td>Tentative de connexion avec une adresse inexistante.</td><td>Message générique, identique à celui d’un mot de passe erroné.</td><td>Automatisé</td><td class="ok-txt">Conforme</td></tr>
+ <tr><td class="id">SEC-04</td><td>Requête sur <code>/api/uploads/../../</code> visant un fichier hors du dossier d’envoi.</td><td>HTTP 400, aucun contenu servi.</td><td>Manuel</td><td class="ok-txt">Conforme après BUG-08</td></tr>
+ <tr><td class="id">SEC-05</td><td>Inspection des en-têtes HTTP d’une réponse.</td><td>Présence des en-têtes de sécurité configurés.</td><td>Manuel</td><td class="ok-txt">Conforme après BUG-09</td></tr>
+ </tbody>
+ </table>
+ <p>Les 23 scénarios du cahier sont conformes. Trois d’entre eux (RS-07, RS-08 et RS-09) ont d’abord échoué&nbsp;:
+ ils ont été enregistrés comme anomalies, corrigés, puis rejoués en contre-recette. Le cahier de recettes et
+ le registre des anomalies partagent les mêmes identifiants, ce qui permet de suivre chaque écart de sa
+ détection à sa vérification finale.</p>
+</section>
+
+<!-- ============================ 10. BOGUES ============================ -->
+<section>
+ <h2>10. Plan de correction des bogues <span class="pill">C2.3.2</span></h2>
+ <p class="lead">Ce chapitre décrit le processus de traitement des anomalies, puis le registre des anomalies
+ réellement détectées, avec pour chacune sa cause racine, sa correction et la mesure préventive associée.</p>
+
+ <h3>10.1 Processus de traitement</h3>
+ <figure class="avoid-break">
+ <svg viewBox="0 0 720 80" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="9.6">
+ <defs><marker id="ar6" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+ <g text-anchor="middle">
+ <rect x="6" y="22" width="120" height="40" rx="6" fill="#fee2e2" stroke="#ef4444"/><text x="66" y="40" fill="#991b1b" font-weight="600">1. Détection</text><text x="66" y="54" fill="#7f1d1d">recette, CI, usage</text>
+ <rect x="146" y="22" width="120" height="40" rx="6" fill="#ffedd5" stroke="#f59e0b"/><text x="206" y="40" fill="#9a3412" font-weight="600">2. Qualification</text><text x="206" y="54" fill="#9a3412">gravité, priorité</text>
+ <rect x="286" y="22" width="120" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/><text x="346" y="40" fill="#1e3a8a" font-weight="600">3. Analyse</text><text x="346" y="54" fill="#475569">cause racine</text>
+ <rect x="426" y="22" width="120" height="40" rx="6" fill="#e0e7ff" stroke="#6366f1"/><text x="486" y="40" fill="#3730a3" font-weight="600">4. Correction</text><text x="486" y="54" fill="#475569">et prévention</text>
+ <rect x="566" y="22" width="148" height="40" rx="6" fill="#dcfce7" stroke="#22c55e"/><text x="640" y="40" fill="#065f46" font-weight="600">5. Contre-recette</text><text x="640" y="54" fill="#065f46">non-régression</text>
+ <line x1="126" y1="42" x2="144" y2="42" stroke="#2563eb" marker-end="url(#ar6)"/>
+ <line x1="266" y1="42" x2="284" y2="42" stroke="#2563eb" marker-end="url(#ar6)"/>
+ <line x1="406" y1="42" x2="424" y2="42" stroke="#2563eb" marker-end="url(#ar6)"/>
+ <line x1="546" y1="42" x2="564" y2="42" stroke="#2563eb" marker-end="url(#ar6)"/>
+ </g>
+ </svg>
+ <figcaption>Figure 6 — Cycle de traitement d’une anomalie, de la détection à la contre-recette</figcaption>
+ </figure>
+ <p>Une anomalie est détectée par la recette, par le pipeline d’intégration ou à l’usage. Elle est qualifiée
+ (gravité et priorité), analysée jusqu’à sa cause racine, puis corrigée sur une branche dédiée. La
+ correction s’accompagne, chaque fois que c’est possible, d’une mesure préventive destinée à empêcher la
+ réapparition du même type de défaut. La contre-recette rejoue le scénario d’origine.</p>
+
+ <h3>10.2 Anomalies corrigées</h3>
+ <table>
+ <thead><tr><th style="width:8%">Réf.</th><th style="width:23%">Description</th><th style="width:9%">Gravité</th><th style="width:24%">Cause racine</th><th>Correction et prévention</th></tr></thead>
+ <tbody>
+ <tr><td class="id">BUG-01</td><td>Consommation mémoire excessive sur le VPS.</td><td class="warn-txt">Majeure</td><td>Rafraîchissement périodique (<i>polling</i>) trop fréquent côté client sur la page des événements.</td><td>Suppression du polling puis espacement des intervalles (commits <code>ea014a1</code>, <code>a797b6c</code>). Prévention&nbsp;: plafond mémoire PM2 et contrôle V-08 après déploiement.</td></tr>
+ <tr><td class="id">BUG-02</td><td>Échec du build de production.</td><td class="warn-txt">Majeure</td><td>Le client Prisma n’était pas régénéré avant la compilation.</td><td>Ajout de <code>prisma generate</code> au script <code>build</code> (<code>baca205</code>). Prévention&nbsp;: étape dédiée dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-03</td><td>Imports non résolus en production.</td><td class="warn-txt">Majeure</td><td>Alias de chemins non résolus par l’outil de build de la plateforme d’hébergement.</td><td>Passage en chemins relatifs sur les modules concernés. Prévention&nbsp;: build exécuté dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-04</td><td>Événement affiché en double dans l’agenda.</td><td>Mineure</td><td>Un événement à la fois créé par l’utilisateur et accepté comme invitation figurait dans les deux listes.</td><td>Déduplication par identifiant dans la route. Prévention&nbsp;: test automatisé RS-03.</td></tr>
+ <tr><td class="id">BUG-05</td><td>Service Worker non pris en compte en production.</td><td>Mineure</td><td>En-têtes HTTP manquants sur <code>sw.js</code> et <code>manifest.json</code>.</td><td>Ajout des en-têtes dédiés dans <code>next.config.js</code> (<code>9ce1e6b</code>).</td></tr>
+ <tr><td class="id">BUG-06</td><td>Huit fichiers de tests non exécutés.</td><td class="bad-txt">Critique</td><td>Seize parenthèses fermantes en trop, du type <code>expect(mock))</code>, rendant les fichiers syntaxiquement invalides. Ces fichiers étaient silencieusement ignorés, d’où un taux de réussite affiché de 66,7 %.</td><td>Correction des seize occurrences. Prévention&nbsp;: ajout de l’étape <code>typecheck</code> au pipeline, qui détecte désormais toute erreur de syntaxe avant la fusion.</td></tr>
+ <tr><td class="id">BUG-07</td><td>Deux assertions inopérantes sur les sondages.</td><td class="warn-txt">Majeure</td><td>Négation mal placée&nbsp;: <code>expect(mock.not)</code> au lieu de <code>expect(mock).not</code>, et une parenthèse manquante.</td><td>Réécriture des deux assertions. Prévention&nbsp;: couverte par l’étape <code>typecheck</code>.</td></tr>
+ <tr><td class="id">BUG-08</td><td>Absence de protection contre la traversée de répertoires.</td><td class="bad-txt">Critique</td><td>La route de service des fichiers concaténait les segments d’URL sans vérifier que le chemin résolu restait dans <code>public/uploads</code>.</td><td>Rejet des segments <code>..</code> et vérification du chemin résolu. Prévention&nbsp;: scénario SEC-04 ajouté au cahier de recettes.</td></tr>
+ <tr><td class="id">BUG-09</td><td>Aucun en-tête de sécurité HTTP.</td><td class="warn-txt">Majeure</td><td>Seuls les en-têtes du Service Worker étaient définis&nbsp;; aucune protection contre le détournement de cadre ou l’interprétation abusive de type.</td><td>Ajout de cinq en-têtes de sécurité sur toutes les réponses. Prévention&nbsp;: scénario SEC-05.</td></tr>
+ <tr><td class="id">BUG-14</td><td>Composant d’agenda non marqué comme composant client.</td><td class="warn-txt">Majeure</td><td>La directive <code>"use client"</code> était placée après un import&nbsp;: elle était donc traitée comme une expression sans effet.</td><td>Directive replacée en première ligne. Prévention&nbsp;: détection par l’analyse statique, désormais bloquante dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-15</td><td>Analyse statique inopérante.</td><td class="warn-txt">Majeure</td><td>Le script <code>lint</code> appelait <code>next lint</code>, commande retirée de Next.js 16&nbsp;; aucune configuration ESLint n’existait par ailleurs.</td><td>Configuration ESLint 9 au format <i>flat config</i>, ajout du parseur TypeScript et réécriture du script. Prévention&nbsp;: étape bloquante dans le pipeline.</td></tr>
+ <tr><td class="id">BUG-16</td><td>Cinq écarts d’accessibilité sur les pages publiques.</td><td class="warn-txt">Majeure</td><td>Absence de repère <code>main</code> dans le gabarit, et quatre couleurs choisies sans contrôle du rapport de contraste (texte secondaire dans les deux modes, fond de bouton, accent employé comme texte).</td><td>Repère <code>main</code> porté par <code>BodyWrapper</code> et quatre couleurs réajustées&nbsp;; score Lighthouse porté de 94 à 100 sur les deux pages. Prévention&nbsp;: contrôle du contraste avant toute introduction d’une couleur, et audit automatique à intégrer au pipeline.</td></tr>
+ <tr><td class="id">BUG-11</td><td>La détection des conflits d’agenda ne remontait aucun conflit dès qu’il y avait plusieurs utilisateurs.</td><td class="warn-txt">Majeure</td><td>Le test empilait deux réponses simulées par utilisateur alors que la route n’en consomme qu’une&nbsp;: la réponse excédentaire était consommée par le scénario suivant.</td><td>Simulation alignée sur le nombre réel d’appels. Prévention&nbsp;: ne jamais empiler de réponse simulée non consommée, qui fuit vers le test suivant.</td></tr>
+ <tr><td class="id">BUG-12</td><td>La lecture d’un sondage renvoyait une erreur 500 au lieu du sondage.</td><td class="warn-txt">Majeure</td><td>Deux dépendances de la route n’étaient pas simulées&nbsp;: la résolution des auteurs de votes et la date de chaque vote, sérialisée par la route.</td><td>Simulation complétée. Prévention&nbsp;: couverture de la route vérifiée après correction.</td></tr>
+ <tr><td class="id">BUG-13</td><td>Vingt-cinq tests de composants en échec après la refonte d’interface.</td><td class="warn-txt">Majeure</td><td>La refonte a modifié libellés et balisage (radios devenues boutons, cases masquées, navigation renommée)&nbsp;; les tests visaient des éléments disparus.</td><td>Sélecteurs et libellés réalignés sur l’interface réelle. Prévention&nbsp;: privilégier des sélecteurs fondés sur le rôle et le nom accessible plutôt que sur la structure du balisage.</td></tr>
+ <tr><td class="id">BUG-18</td><td>Un fichier de tests entier n’était jamais exécuté, sans alerte.</td><td class="bad-txt">Critique</td><td>La simulation du module <code>fs</code> n’exposait pas d’export par défaut&nbsp;: le fichier échouait au chargement, et ses neuf tests n’apparaissaient dans aucun décompte.</td><td>Simulations de <code>fs</code> et <code>fs/promises</code> complétées. Prévention&nbsp;: le pipeline échoue désormais si un fichier de tests ne se charge pas.</td></tr>
+ <tr><td class="id">BUG-19</td><td>L’heure choisie dans le sélecteur de date était enregistrée avec un décalage.</td><td class="bad-txt">Critique</td><td>La valeur était produite par une conversion en temps universel&nbsp;: une heure saisie à 15&nbsp;h 45 était enregistrée à 13&nbsp;h 45 en heure d’été.</td><td>Construction d’une date locale, conforme au format attendu par le formulaire. Prévention&nbsp;: scénario de recette vérifiant que l’heure enregistrée est bien celle saisie.</td></tr>
+ <tr><td class="id">BUG-10</td><td>Trente-neuf vulnérabilités dans les dépendances de production, dont trois critiques.</td><td class="bad-txt">Critique</td><td>La bibliothèque <code>next-pwa</code> 2.6.3, non maintenue, entraînait des dépendances transitives obsolètes. Elle figurait dans le manifeste alors qu’aucun code ne l’utilisait.</td><td>Suppression de la dépendance inutilisée (655 paquets retirés) puis mise à jour des correctifs dans les bornes déclarées&nbsp;: 4 vulnérabilités résiduelles, aucune critique. Prévention&nbsp;: audit des dépendances à intégrer au pipeline et contrôle des dépendances non utilisées.</td></tr>
+ </tbody>
+ </table>
+</section>
+
+<section>
+ <h3>10.3 Anomalies ouvertes</h3>
+ <p>L’anomalie ci-dessous est détectée, qualifiée et planifiée, mais non corrigée à la date de rédaction&nbsp;:
+ son traitement engage un arbitrage sur l’identité visuelle du produit, qui dépasse le périmètre de cet audit.</p>
+ <table>
+ <thead><tr><th style="width:8%">Réf.</th><th style="width:8%">Recette</th><th style="width:20%">Description</th><th style="width:9%">Gravité</th><th style="width:24%">Cause racine identifiée</th><th>Correction prévue</th></tr></thead>
+ <tbody>
+ <tr><td class="id">BUG-17</td><td>—</td><td>Trois couleurs de thème (emerald, orange, yellow) n’atteignent pas le contraste AA avec du texte blanc.</td><td>Mineure</td><td>Teintes choisies pour leur rendu visuel, sans contrôle du rapport de contraste au moment de la conception de la palette.</td><td>Arbitrage à rendre entre identité visuelle et accessibilité&nbsp;: assombrir les trois teintes ou basculer le texte des boutons concernés en couleur sombre.</td></tr>
+ </tbody>
+ </table>
+
+ <h3>10.4 Analyse des points d’amélioration</h3>
+ <p>Chaque anomalie a donné lieu à une mesure destinée à empêcher la réapparition du même type de défaut,
+ plutôt qu’à une correction isolée.</p>
+ <table class="avoid-break">
+ <thead><tr><th style="width:30%">Constat</th><th style="width:34%">Enseignement</th><th>Mesure adoptée</th></tr></thead>
+ <tbody>
+ <tr><td>Des fichiers de tests invalides étaient ignorés sans alerte (BUG-06, BUG-07).</td><td>Un nombre de fichiers de tests ne renseigne pas sur ce qui est réellement exécuté&nbsp;; seule la couverture mesurée fait foi.</td><td>Vérification de types bloquante et mesure de couverture systématique, archivée à chaque exécution du pipeline.</td></tr>
+ <tr><td>Deux failles de sécurité ont subsisté longtemps sans être vues (BUG-08, BUG-09).</td><td>Une revue guidée par un référentiel externe détecte ce qu’une relecture spontanée laisse passer.</td><td>Revue systématique selon l’OWASP Top 10 et ajout des scénarios SEC-04 et SEC-05 au cahier de recettes.</td></tr>
+ <tr><td>L’analyse statique était inopérante depuis la montée en version de Next.js (BUG-15).</td><td>Un outil de qualité non exécuté par une chaîne automatisée finit par être silencieusement inactif.</td><td>Lint et vérification de types intégrés au pipeline comme étapes bloquantes.</td></tr>
+ <tr><td>Une refonte d’interface a invalidé un quart de la suite de tests (BUG-13).</td><td>Des tests de composants trop dépendants du balisage se dégradent à chaque évolution visuelle.</td><td>Mise à jour des tests dans la même branche que la refonte, avant fusion&nbsp;; privilégier des sélecteurs accessibles plutôt que structurels.</td></tr>
+ <tr><td>Le déploiement pouvait partir sans qu’aucun test ait été exécuté.</td><td>Un pipeline de déploiement sans barrière de qualité ne protège de rien.</td><td>Subordination du déploiement à la réussite des contrôles (<code>needs</code>).</td></tr>
+ <tr><td>Cinq écarts d’accessibilité subsistaient sur des pages pourtant simples (BUG-16, BUG-17).</td><td>Des couleurs choisies à l’œil paraissent lisibles sans atteindre le seuil mesuré&nbsp;; et une teinte lisible en fond de bouton ne l’est pas nécessairement en texte.</td><td>Vérification du rapport de contraste avant l’introduction de toute couleur, et audit automatique à intégrer au pipeline.</td></tr>
+ </tbody>
+ </table>
+</section>
+
+<!-- ============================ 11. DOCUMENTATION ============================ -->
+<section>
+ <h2>11. Documentation technique d’exploitation <span class="pill">C2.4.1</span></h2>
+ <p class="lead">Cette documentation assure la traçabilité et permet la reprise du projet par un tiers. Elle
+ comprend trois manuels, chacun destiné à un public distinct.</p>
+
+ <h3>11.1 Manuel de déploiement <span class="tag">Public&nbsp;: administrateur système</span></h3>
+ <p><b>Prérequis</b> : un serveur Ubuntu disposant de Node.js 22, d’une base MongoDB accessible, de PM2, de
+ Nginx et d’un accès SSH.</p>
+ <p><b>Étape 1 — Variables d’environnement.</b> Créer le fichier <code>.env</code> à partir de
+ <code>.env.example</code>&nbsp;:</p>
+ <pre>DATABASE_URL="mongodb://…/planify"
+NEXTAUTH_URL="https://planify.johanpoyet.fr"
+NEXTAUTH_SECRET="&lt;secret aléatoire généré&gt;"
+VAPID_PUBLIC_KEY="…"
+VAPID_PRIVATE_KEY="…"</pre>
+ <p><b>Étape 2 — Installation et premier démarrage.</b></p>
+ <pre>git clone &lt;dépôt&gt; ~/apps/planify &amp;&amp; cd ~/apps/planify
+npm ci                          <span class="c"># installation reproductible</span>
+npx prisma generate             <span class="c"># génération du client Prisma</span>
+npx prisma db push              <span class="c"># synchronisation du modèle avec MongoDB</span>
+npm run build                   <span class="c"># build de production</span>
+pm2 start ecosystem.config.js   <span class="c"># démarrage supervisé</span>
+pm2 save                        <span class="c"># persistance au redémarrage du serveur</span></pre>
+ <p><b>Étape 3 — Proxy inverse et HTTPS.</b> Copier <code>nginx-config-example.conf</code> dans
+ <code>/etc/nginx/sites-available/planify.johanpoyet.fr</code>, l’activer, puis obtenir le certificat&nbsp;:</p>
+ <pre>sudo certbot --nginx -d planify.johanpoyet.fr
+sudo systemctl reload nginx</pre>
+ <p>Nginx assure la terminaison TLS, sert directement les fichiers statiques (<code>/_next/static</code> et
+ <code>/uploads</code>) et relaie le reste vers Next.js sur le port 3000. La section HTTPS du fichier
+ d’exemple est commentée et doit être activée après obtention du certificat.</p>
+
+ <h3>11.2 Manuel d’utilisation <span class="tag">Public&nbsp;: utilisateur final</span></h3>
+ <table class="avoid-break">
+ <thead><tr><th style="width:28%">Action</th><th>Marche à suivre</th></tr></thead>
+ <tbody>
+ <tr><td>Créer un compte</td><td>Depuis la page d’accueil, choisir « S’inscrire gratuitement », saisir une adresse e-mail et un mot de passe d’au moins 6 caractères.</td></tr>
+ <tr><td>Se connecter</td><td>Saisir l’adresse e-mail et le mot de passe sur la page de connexion (figure A.1).</td></tr>
+ <tr><td>Créer un événement</td><td>Onglet Agenda, bouton « Nouvel événement »&nbsp;: renseigner le titre, la date, l’heure, le lieu et la visibilité, puis valider avec « Créer ».</td></tr>
+ <tr><td>Inviter des amis</td><td>Dans le panneau « Inviter » de l’événement, rechercher un ami et activer l’interrupteur correspondant. Les invités reçoivent une notification.</td></tr>
+ <tr><td>Répondre à une invitation</td><td>Onglet Invitations&nbsp;: choisir « Je viens », « Peut-être » ou « Je ne peux pas ». Un événement accepté rejoint l’agenda.</td></tr>
+ <tr><td>Gérer ses amis</td><td>Onglet Amis&nbsp;: envoyer une demande, accepter ou refuser celles reçues.</td></tr>
+ <tr><td>Créer un sondage</td><td>Onglet Sondages, « Nouveau sondage »&nbsp;: saisir la question, les options et les destinataires. Chacun dispose d’un vote.</td></tr>
+ <tr><td>Personnaliser l’affichage</td><td>Paramètres&nbsp;: choisir le mode clair ou sombre et la couleur d’accent.</td></tr>
+ <tr><td>Installer l’application</td><td>Depuis le navigateur mobile, utiliser « Ajouter à l’écran d’accueil » pour disposer d’une application installée et autoriser les notifications.</td></tr>
+ </tbody>
+ </table>
+</section>
+
+<section>
+ <h3>11.3 Manuel de mise à jour <span class="tag">Public&nbsp;: développeur ou mainteneur</span></h3>
+ <p><b>Mise à jour nominale.</b> Elle est automatisée&nbsp;: toute intégration sur <code>main</code> déclenche les
+ contrôles de qualité puis, s’ils réussissent, le déploiement.</p>
+ <pre>git checkout -b feat/ma-fonctionnalite   <span class="c"># 1. créer une branche</span>
+<span class="c"># 2. développer, puis vérifier localement :</span>
+npm run lint &amp;&amp; npm run typecheck &amp;&amp; npx vitest run
+git commit -m "feat: …" &amp;&amp; git push   <span class="c"># 3. le pipeline exécute les contrôles</span>
+<span class="c"># 4. ouvrir une pull request, la fusionner une fois les contrôles au vert</span>
+<span class="c"># 5. le déploiement se déclenche automatiquement sur main</span></pre>
+
+ <p><b>Mise à jour manuelle de secours</b>, à n’utiliser que si le pipeline est indisponible. La sauvegarde
+ préalable de la base est impérative, car l’étape de synchronisation du schéma peut modifier des
+ collections existantes.</p>
+ <pre><span class="c"># 1. Sauvegarde de la base AVANT toute opération</span>
+mongodump --uri="$DATABASE_URL" --out ~/backups/planify-$(date +%F-%H%M)
+
+<span class="c"># 2. Vérification de l'environnement</span>
+node -v &amp;&amp; pm2 status
+
+<span class="c"># 3. Récupération et installation reproductible</span>
+cd ~/apps/planify &amp;&amp; git pull origin main
+npm ci
+
+<span class="c"># 4. Client Prisma, puis build</span>
+npx prisma generate
+npm run build
+
+<span class="c"># 5. Rechargement sans coupure, puis contrôles</span>
+pm2 reload ecosystem.config.js
+pm2 status                       <span class="c"># processus online, mémoire sous le plafond</span>
+pm2 logs planify --lines 100     <span class="c"># absence d'erreur au démarrage</span></pre>
+ <p>Dérouler ensuite les contrôles V-01 à V-08 du chapitre 8 avant de considérer la mise à jour comme
+ terminée.</p>
+
+ <h4>Évolution du modèle de données</h4>
+ <p>Après modification de <code>prisma/schema.prisma</code>, deux commandes interviennent&nbsp;:
+ <code>prisma generate</code>, qui régénère le client et ne touche pas aux données, et
+ <code>prisma db push</code>, qui aligne la base sur le schéma. MongoDB n’utilisant pas de migrations
+ versionnées, cette seconde commande est le seul mécanisme de synchronisation disponible.</p>
+ <div class="box warn">
+ <b>Précaution.</b> <code>prisma db push</code> peut supprimer des données lorsque le nouveau schéma est
+ incompatible avec les documents existants. Elle ne doit jamais être exécutée automatiquement en
+ production&nbsp;: sauvegarder d’abord la base, appliquer et vérifier le changement sur un environnement de
+ test, puis l’exécuter manuellement. L’option <code>--accept-data-loss</code> force l’opération malgré un
+ risque de perte détecté&nbsp;; elle ne doit être employée qu’après une sauvegarde vérifiée et une décision
+ explicite, jamais dans un script automatisé.
+ </div>
+
+ <h4>Retour à une version antérieure</h4>
+ <p>Un retour arrière ne se limite pas au code&nbsp;: les dépendances et le client Prisma doivent être ramenés au
+ même état, et la compatibilité avec le modèle de données en base doit être vérifiée.</p>
+ <pre>cd ~/apps/planify
+git log --oneline -10                <span class="c"># identifier le commit stable visé</span>
+git checkout &lt;commit&gt;
+npm ci                               <span class="c"># dépendances de cette version</span>
+npx prisma generate                  <span class="c"># client correspondant au schéma de cette version</span>
+npm run build
+pm2 reload ecosystem.config.js
+pm2 status &amp;&amp; pm2 logs planify --lines 50   <span class="c"># vérification après restauration</span></pre>
+ <p>Si le schéma de données a changé entre la version défaillante et la version visée, le retour du code ne
+ suffit pas&nbsp;: il faut restaurer la sauvegarde correspondante avec <code>mongorestore</code>, puis dérouler
+ les contrôles V-01 à V-08.</p>
+
+ <h4>Choix techniques documentés</h4>
+ <p>Les manuels ci-dessus reposent sur les choix explicités au chapitre 1&nbsp;: Next.js et TypeScript pour le
+ socle applicatif, Prisma et MongoDB pour la persistance, PM2 pour la supervision du processus et Nginx
+ pour la terminaison TLS et les fichiers statiques. Ces choix expliquent la forme des procédures&nbsp;: absence
+ de migrations versionnées, rechargement par PM2 plutôt que redémarrage, et build préalable à toute mise
+ en service.</p>
+</section>
+
+<!-- ============================ CONCLUSION ============================ -->
+<section class="page-break">
+ <h2>Conclusion</h2>
+ <p>
+ Planify remplit aujourd’hui la promesse qui a motivé le projet&nbsp;: un groupe d’amis peut y créer un
+ événement, inviter ses proches, décider ensemble d’une date et retrouver le tout dans un agenda partagé,
+ depuis un téléphone comme depuis un ordinateur. L’application est fonctionnelle, installable et
+ utilisable en autonomie&nbsp;; sa mise en production sur le VPS reste à réaliser.
+ </p>
+ <p>
+ Le travail présenté ici dépasse cependant l’écriture des fonctionnalités. Concevoir une architecture en
+ couches qui reste lisible après soixante-dix-neuf commits, écrire un harnais de tests qui couvre 71 % du
+ code applicatif, sécuriser chaque route selon un référentiel externe, puis relier tout cela à une chaîne
+ d’intégration et de déploiement automatisée&nbsp;: c’est cet ensemble qui constitue le métier. La préparation
+ de ce dossier a d’ailleurs été l’occasion d’un audit complet du projet, qui s’est révélé plus instructif
+ que prévu. Il a mis au jour des défauts sérieux et invisibles à l’usage — huit fichiers de tests
+ silencieusement ignorés, une faille permettant de sortir du dossier des fichiers envoyés, une analyse
+ statique inopérante depuis une montée de version, un déploiement qui pouvait partir sans qu’aucun test
+ n’ait été exécuté. Ces dix-huit anomalies corrigées valent, à mes yeux, autant que les fonctionnalités
+ livrées&nbsp;: elles montrent ce qu’un dispositif de vérification apporte par rapport à une simple relecture.
+ </p>
+ <p>
+ Des limites subsistent, et il serait malhonnête de les passer sous silence. L’application n’est pas
+ encore déployée sur son serveur&nbsp;: la procédure est écrite et le domaine réservé, mais la mise en
+ service reste à faire. Quatre vulnérabilités subsistent par ailleurs dans les dépendances&nbsp;; aucune
+ n’est critique, et elles proviennent de l’arbre de Next.js, qu’on ne peut assainir sans rétrograder le
+ framework de six versions majeures. Enfin, l’audit
+ d’accessibilité n’a porté que sur deux pages publiques et sur les seuls critères automatisables&nbsp;: le
+ score de 100 obtenu après correction ne vaut pas conformité RGAA, et trois couleurs de thème restent
+ en deçà du seuil de contraste. Ces points sont recensés en annexe C.
+ </p>
+ <p>
+ Les prochaines étapes découlent directement de ce constat&nbsp;: mettre l’application en production selon
+ la procédure du chapitre 11.1, intégrer l’audit des dépendances au pipeline, puis étendre l’audit
+ d’accessibilité aux pages authentifiées et au parcours clavier. Viendront ensuite les évolutions produit
+ envisagées — synchronisation avec des agendas externes au format iCal et tests de bout en bout — une fois
+ ces fondations consolidées.
+ </p>
+</section>
+
+<!-- ============================ ANNEXE A ============================ -->
+<section class="page-break">
+ <h2>Annexe A — Captures d’écran du prototype</h2>
+ <p>Ces captures illustrent le prototype décrit au chapitre 2. Elles suivent le parcours « créer, inviter,
+ répondre, consolider l’agenda » entre deux comptes de démonstration&nbsp;: Camille Dubois, organisatrice, et
+ Thomas Martin, invité.</p>
+ <p class="small">Les comptes, adresses e-mail (domaine <code>example.com</code>, réservé à la documentation
+ par la RFC 2606) et contenus affichés sont fictifs&nbsp;: aucune donnée personnelle réelle n’est utilisée.</p>
+
+ <figure class="shot-fig">
+ <img src="img/auth_login.png" alt="Page de connexion de Planify avec formulaire d’adresse e-mail et de mot de passe">
+ <figcaption><b>Figure A.1 — Page de connexion.</b> Authentification par adresse e-mail et mot de passe.
+ Scénario RF-02&nbsp;; les mesures de sécurité associées sont décrites au chapitre 6 (A02 et A07).</figcaption>
+ </figure>
+
+ <figure class="shot-fig">
+ <img src="img/events_new.png" alt="Création de l’événement Anniversaire de Léa avec sélection de l’invité Thomas Martin">
+ <figcaption><b>Figure A.2 — Création d’un événement et sélection des invités</b> (compte Camille Dubois).
+ Saisie du titre, de la date, de l’heure, du lieu et de la visibilité&nbsp;; le panneau « Inviter » permet de
+ sélectionner Thomas Martin. Étapes 1 et 2 de la figure 3, scénarios RF-03 et RF-04.</figcaption>
+ </figure>
+</section>
+
+<section>
+ <figure class="shot-fig">
+ <img src="img/notif_invitation.png" alt="Page Invitations du compte Thomas Martin avec les actions de réponse">
+ <figcaption><b>Figure A.3 — Réception et réponse à l’invitation</b> (compte Thomas Martin). L’invitation
+ envoyée par Camille apparaît dans l’onglet « Invitations »&nbsp;; l’invité répond par « Je viens »,
+ « Peut-être » ou « Je ne peux pas ». Étape 4 de la figure 3, scénario RF-05.</figcaption>
+ </figure>
+
+ <figure class="shot-fig">
+ <img src="img/events_thomas.png" alt="Agenda de Thomas Martin affichant l’événement accepté du 25 juillet">
+ <figcaption><b>Figure A.4 — L’événement accepté rejoint l’agenda de l’invité</b> (compte Thomas Martin).
+ L’événement du samedi 25 juillet apparaît dans le calendrier mensuel et dans « À venir cette semaine ».
+ Étape 5 de la figure 3&nbsp;; illustre la consolidation vérifiée par le scénario RS-03.</figcaption>
+ </figure>
+</section>
+
+<section>
+ <h3>Interface adaptative (affichage mobile)</h3>
+ <p>Les mêmes fonctionnalités en affichage mobile&nbsp;: la navigation latérale du bureau laisse place à une
+ barre de navigation basse (composants <code>DesktopNav</code> et <code>MobileBottomNav</code>). Cette
+ adaptation correspond aux dispositions d’adaptabilité décrites au chapitre 7.</p>
+ <div class="shots-2">
+ <figure class="shot-fig">
+ <img src="img/events_new_mobile.png" alt="Création d’un événement en affichage mobile">
+ <figcaption><b>Figure A.5 — Création d’un événement (mobile).</b> Formulaire réorganisé en liste
+ verticale, sélection des invités et barre de navigation basse.</figcaption>
+ </figure>
+ <figure class="shot-fig">
+ <img src="img/events_thomas_mobile.png" alt="Agenda en affichage mobile avec l’événement du 25 juillet">
+ <figcaption><b>Figure A.6 — Agenda (mobile).</b> Calendrier compact et détail du jour sélectionné,
+ avec l’événement « Anniversaire de Léa ».</figcaption>
+ </figure>
+ </div>
+</section>
+
+<!-- ============================ ANNEXE B ============================ -->
+<section class="page-break">
+ <h2>Annexe B — Correspondance avec la grille d’évaluation</h2>
+ <table>
+ <thead><tr><th style="width:9%">Comp.</th><th style="width:30%">Critère de la grille</th><th style="width:38%">Preuve dans le dossier</th><th style="width:8%">Page</th><th>État</th></tr></thead>
+ <tbody>
+ <tr><td class="id">C2.1.1</td><td>Protocole de déploiement continu explicité, séquences définies.</td><td>Chapitre 3.3&nbsp;: déclencheur, figure 4, script <code>deploy.sh</code> commenté.</td><td>9</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.1.1</td><td>Environnement de développement détaillé (éditeur, compilateur, serveur, gestion de sources).</td><td>Chapitre 3.1&nbsp;: tableau des onze composants de l’environnement.</td><td>8</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.1.1</td><td>Critères de qualité et de performance répondant aux exigences.</td><td>Chapitre 3.2&nbsp;: six critères, avec commande, objectif et valeur relevée datée.</td><td>9</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.1.2</td><td>Protocole d’intégration continue explicité, séquences d’intégration définies.</td><td>Chapitre 4&nbsp;: deux tâches, figure 5, configuration commentée, subordination par <code>needs</code>.</td><td>10</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.1</td><td>Architecture structurée permettant la maintenabilité.</td><td>Chapitre 1.2 et 1.4&nbsp;: figure 1, arborescence, paradigmes appliqués.</td><td>4</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.1</td><td>Présentation d’un prototype fonctionnel répondant aux besoins et aux user stories.</td><td>Chapitre 2 et annexe A&nbsp;: parcours justifié, code serveur, six captures.</td><td>7</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.1</td><td>Utilisation de frameworks et de paradigmes de développement.</td><td>Chapitre 1.1 et 1.4&nbsp;: stack justifiée version par version.</td><td>4</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.1</td><td>Composants d’interface présents et fonctionnels.</td><td>Chapitre 2.2 et annexe A.</td><td>7</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.2</td><td>Jeu de tests unitaires couvrant la majorité du code développé.</td><td>Chapitre 5.2&nbsp;: couverture mesurée (71,4 % des lignes), détail par domaine&nbsp;; 5.3&nbsp;: jeu de tests commenté.</td><td>12</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.3</td><td>Mesures couvrant les dix failles principales de l’OWASP.</td><td>Chapitre 6.1&nbsp;: tableau des dix catégories avec fichier, vérification et limite&nbsp;; 6.3&nbsp;: extraits de code.</td><td>14</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.3</td><td>Référentiel d’accessibilité présenté et justifié.</td><td>Chapitre 7.1&nbsp;: RGAA 4.1 et Opquast, avec justification du choix.</td><td>16</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.3</td><td>Le prototype répond aux exigences du référentiel d’accessibilité.</td><td>Chapitre 7.3&nbsp;: audit Lighthouse, 100/100 sur les deux pages mesurées&nbsp;; 7.4&nbsp;: cinq écarts corrigés avec mesures avant/après&nbsp;; 7.5&nbsp;: portée et écart connu.</td><td>16</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.4</td><td>Système de gestion de versions utilisé, évolutions tracées.</td><td>Chapitre 8.1 et 8.2&nbsp;: pratiques Git et jalons identifiés par empreinte.</td><td>18</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.2.4</td><td>Logiciel fonctionnel et manipulable en autonomie par un utilisateur.</td><td>Annexe A (parcours complet en fonctionnement), manuel d’utilisation (11.2), contrôles V-01 à V-08.</td><td>18</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.1</td><td>Cahier de recettes reprenant l’ensemble des fonctionnalités attendues.</td><td>Chapitre 9&nbsp;: 23 scénarios rattachés aux user stories, avec conditions d’exécution.</td><td>20</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.1</td><td>Tests fonctionnels, structurels et de sécurité conformes au plan défini.</td><td>Chapitre 9.1, 9.2 et 9.3&nbsp;; 20 scénarios conformes, 3 en échec renvoyés au chapitre 10.</td><td>20</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Bogues détectés, qualifiés et traités.</td><td>Chapitre 10.2&nbsp;: dix-huit anomalies corrigées&nbsp;; 10.3&nbsp;: une anomalie ouverte qualifiée.</td><td>22</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.3.2</td><td>Analyse des points d’amélioration pour chaque test en échec.</td><td>Chapitre 10.3 (cause racine par anomalie) et 10.4 (enseignement et mesure adoptée).</td><td>24</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Manuels de déploiement, d’utilisation et de mise à jour rédigés avec clarté.</td><td>Chapitre 11.1, 11.2 et 11.3, avec public identifié pour chacun.</td><td>25</td><td class="ok-txt">Traité</td></tr>
+ <tr><td class="id">C2.4.1</td><td>Documentation décrivant les choix de technologies et de langages.</td><td>Chapitre 1.1 (justification de la stack) et 11.3 (incidence de ces choix sur les procédures).</td><td>4 et 26</td><td class="ok-txt">Traité</td></tr>
+ </tbody>
+ </table>
+</section>
+
+<!-- ============================ ANNEXE C ============================ -->
+<section class="page-break">
+ <h2>Annexe C — Limites et points non démontrés</h2>
+ <p>Cette annexe recense les éléments qui n’ont pas pu être mesurés ou démontrés à la date de rédaction.
+ Ils sont énoncés sans valeur de substitution, afin qu’aucune affirmation du dossier ne repose sur une
+ estimation.</p>
+ <table>
+ <thead><tr><th style="width:26%">Point</th><th style="width:37%">État réel</th><th>Conséquence sur le dossier</th></tr></thead>
+ <tbody>
+ <tr><td>Temps de réponse en production</td><td>Aucune mesure réalisée sur l’environnement de production.</td><td>Aucun objectif de temps de réponse n’est annoncé au chapitre 3.2.</td></tr>
+ <tr><td>Consommation mémoire réelle</td><td>Seul le plafond PM2 (400 Mo) est configuré&nbsp;; la consommation constatée n’a pas été relevée.</td><td>Le plafond est présenté comme une limite de configuration, non comme une mesure. Contrôle V-08 prévu à cet effet.</td></tr>
+ <tr><td>Audit d’accessibilité complet</td><td>Audit automatique Lighthouse réalisé sur deux pages publiques (100/100 après correction). N’ont pas été réalisés&nbsp;: audit des pages authentifiées, parcours clavier, lecteur d’écran, zoom à 200 %.</td><td>Aucun niveau de conformité RGAA n’est revendiqué&nbsp;; la portée exacte de la campagne est délimitée au chapitre 7.5.</td></tr>
+ <tr><td>Contraste de trois couleurs de thème</td><td>Les accents emerald, orange et yellow n’atteignent pas 4,5:1 avec du texte blanc (BUG-17).</td><td>Écart mesuré et documenté au chapitre 7.5&nbsp;; correction soumise à un arbitrage sur l’identité visuelle.</td></tr>
+ <tr><td>Tests utilisateurs</td><td>Aucun panel ni retour d’usage formalisé.</td><td>Le dossier ne présente aucun retour utilisateur.</td></tr>
+ <tr><td>Mise en production</td><td>L’application n’est pas déployée sur le VPS à la date de rédaction&nbsp;; elle s’exécute en environnement de développement.</td><td>Les captures de l’annexe A et la démonstration sont réalisées en local. Le manuel de déploiement (11.1) reste applicable en l’état.</td></tr>
+ <tr><td>Vulnérabilités résiduelles des dépendances</td><td>4 vulnérabilités subsistent (2 élevées, 2 moyennes, aucune critique), héritées de l’arbre de dépendances de Next.js.</td><td>Elles ne peuvent être levées sans rétrograder Next.js de la version 16 à la version 9&nbsp;: l’écart est documenté au chapitre 6.2 et suivi sous BUG-10.</td></tr>
+ <tr><td>Script <code>deploy.sh</code></td><td>Présent sur le serveur mais non versionné dans le dépôt.</td><td>Son contenu est reproduit au chapitre 3.3 mais ne peut pas être vérifié depuis le dépôt.</td></tr>
+ <tr><td>HTTPS</td><td>La configuration Nginx fournie comporte une section TLS encore commentée.</td><td>La procédure d’activation est documentée en 11.1&nbsp;; l’état effectif du certificat n’est pas attesté ici.</td></tr>
+ <tr><td>Étiquettes de version</td><td>Aucune étiquette Git posée&nbsp;; seul <code>package.json</code> porte la version 1.0.0.</td><td>Le chapitre 8.2 ne présente que des commits réels, sans historique de versions reconstitué.</td></tr>
+ <tr><td>Protection de branche</td><td>Aucune règle de dépôt n’empêche la fusion en cas d’échec des contrôles.</td><td>La barrière repose sur la subordination du déploiement, décrite au chapitre 4.1.</td></tr>
+ <tr><td>Audit de dépendances automatisé</td><td><code>npm audit</code> est exécuté manuellement, hors pipeline.</td><td>Présenté comme tel au chapitre 6.2&nbsp;; intégration au pipeline planifiée (BUG-10).</td></tr>
+ </tbody>
+ </table>
+ <p class="center small" style="margin-top:1.6em;">Fin du dossier — Planify — POYET Johan — Ynov Lyon Campus 2025-2026 — 23/07/2026</p>
+</section>
+
+</body>
+</html>
