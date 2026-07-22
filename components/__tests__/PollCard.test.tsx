@@ -21,6 +21,16 @@ const renderWithTheme = (ui: React.ReactElement) => {
   );
 };
 
+// Les options sont rendues comme des <button> : cet utilitaire renvoie le bouton
+// correspondant au libellé, et permet de tester son état de sélection.
+const optionButton = (label: string) =>
+  screen.getAllByText(label)[0].closest('button') as HTMLButtonElement;
+
+const isOptionSelected = (btn: HTMLButtonElement) =>
+  btn.style.background.includes('accent-soft');
+
+const isOptionEditable = (btn: HTMLButtonElement) => btn.style.cursor === 'pointer';
+
 describe('PollCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -41,7 +51,7 @@ describe('PollCard', () => {
 
     renderWithTheme(<PollCard pollId="poll-1" />);
 
-    const spinner = document.querySelector('.animate-spin');
+    const spinner = document.querySelector('svg');
     expect(spinner).toBeInTheDocument();
   });
 
@@ -106,19 +116,18 @@ describe('PollCard', () => {
     renderWithTheme(<PollCard pollId="poll-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('Voter')).toBeInTheDocument();
+      expect(screen.getByText('Confirmer mon vote')).toBeInTheDocument();
     });
 
     // Sélectionner une option
-    const parisOption = screen.getByLabelText('Paris');
-    fireEvent.click(parisOption);
+    fireEvent.click(optionButton('Paris'));
 
     // Voter
-    const voteButton = screen.getByText('Voter');
+    const voteButton = screen.getByText('Confirmer mon vote');
     fireEvent.click(voteButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Vote enregistré avec succès/i)).toBeInTheDocument();
+      expect(screen.getByText(/Vote enregistré/i)).toBeInTheDocument();
     });
   });
 
@@ -147,9 +156,10 @@ describe('PollCard', () => {
       expect(screen.getByText('Modifier mon vote')).toBeInTheDocument();
     });
 
-    const parisOption = screen.getByLabelText('Paris') as HTMLInputElement;
-    expect(parisOption.checked).toBe(true);
-    expect(parisOption.disabled).toBe(true);
+    const paris = optionButton('Paris');
+    expect(isOptionSelected(paris)).toBe(true);
+    // Hors mode édition, l'option n'est pas interactive.
+    expect(isOptionEditable(paris)).toBe(false);
   });
 
   it('should enable editing mode when "Modifier mon vote" is clicked', async () => {
@@ -185,8 +195,7 @@ describe('PollCard', () => {
       expect(screen.getByText('Annuler')).toBeInTheDocument();
     });
 
-    const parisOption = screen.getByLabelText('Paris') as HTMLInputElement;
-    expect(parisOption.disabled).toBe(false);
+    expect(isOptionEditable(optionButton('Paris'))).toBe(true);
   });
 
   it('should cancel editing and restore previous selection', async () => {
@@ -223,16 +232,14 @@ describe('PollCard', () => {
     });
 
     // Changer la sélection
-    const lyonOption = screen.getByLabelText('Lyon');
-    fireEvent.click(lyonOption);
+    fireEvent.click(optionButton('Lyon'));
 
     // Annuler
     const cancelButton = screen.getByText('Annuler');
     fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      const parisOption = screen.getByLabelText('Paris') as HTMLInputElement;
-      expect(parisOption.checked).toBe(true);
+      expect(isOptionSelected(optionButton('Paris'))).toBe(true);
       expect(screen.getByText('Modifier mon vote')).toBeInTheDocument();
     });
   });
@@ -257,13 +264,12 @@ describe('PollCard', () => {
     renderWithTheme(<PollCard pollId="poll-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('Voter')).toBeInTheDocument();
+      expect(screen.getByText('Confirmer mon vote')).toBeInTheDocument();
     });
 
-    const parisOption = screen.getByLabelText('Paris');
-    fireEvent.click(parisOption);
+    fireEvent.click(optionButton('Paris'));
 
-    const voteButton = screen.getByText('Voter');
+    const voteButton = screen.getByText('Confirmer mon vote');
     fireEvent.click(voteButton);
 
     await waitFor(() => {

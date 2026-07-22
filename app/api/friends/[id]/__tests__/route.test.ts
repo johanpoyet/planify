@@ -138,7 +138,7 @@ describe('PUT /api/friends/[id]', () => {
 
     expect(response.status).toBe(200);
     expect(json.status).toBe('accepted');
-    expect(prismaMock.friend.update)).toHaveBeenCalledWith({
+    expect(prismaMock.friend.update).toHaveBeenCalledWith({
       where: { id: 'friendship-1' },
       data: { status: 'accepted' },
     });

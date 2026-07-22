@@ -116,7 +116,7 @@ describe('GET /api/friends', () => {
     expect(json[0].status).toBe('pending');
 
     // Verify findMany was called with a status filter
-    expect(prismaMock.friend.findMany)).toHaveBeenCalledWith(
+    expect(prismaMock.friend.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           status: 'pending',
@@ -254,7 +254,7 @@ describe('POST /api/friends', () => {
       friendId: mockFriendUser.id,
       status: 'pending',
     });
-    expect(prismaMock.friend.create)).toHaveBeenCalledWith({
+    expect(prismaMock.friend.create).toHaveBeenCalledWith({
       data: {
         userId: mockUser.id,
         friendId: mockFriendUser.id,

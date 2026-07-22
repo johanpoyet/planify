@@ -12,6 +12,9 @@ export default defineConfig({
     reporters: ['verbose'],
     coverage: {
       provider: 'v8',
+      // Génère le rapport de couverture même si des tests échouent (utile en CI).
+      reportOnFailure: true,
+      reporter: ['text', 'text-summary', 'json-summary', 'html'],
       include: ['lib/**', 'app/api/**', 'components/**', 'app/components/**'],
       exclude: ['**/__tests__/**', '**/*.d.ts', 'node_modules/**', '.next/**'],
     },

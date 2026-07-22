@@ -118,10 +118,10 @@ describe('POST /api/polls/vote', () => {
     expect(json.createdEvent).toBeUndefined();
 
     // Verifie la creation du vote
-    expect(prismaMock.pollVote.create)).toHaveBeenCalledWith({
+    expect(prismaMock.pollVote.create).toHaveBeenCalledWith({
       data: { pollId: 'poll-1', optionId: 'option-1', userId: 'user-id-123' },
     });
-    expect(prismaMock.pollVote.update.not).toHaveBeenCalled();
+    expect(prismaMock.pollVote.update).not.toHaveBeenCalled();
   });
 
   it('met a jour un vote existant', async () => {
@@ -156,7 +156,7 @@ describe('POST /api/polls/vote', () => {
       where: { id: 'existing-vote' },
       data: { optionId: 'option-2' },
     });
-    expect(prismaMock.pollVote.create.not.toHaveBeenCalled();
+    expect(prismaMock.pollVote.create).not.toHaveBeenCalled();
   });
 
   it('consensus: cree un evenement quand tous les destinataires ont vote', async () => {

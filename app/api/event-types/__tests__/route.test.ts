@@ -1,6 +1,5 @@
 import { TEST_IDS } from '@/tests/helpers/objectid-helper';
 import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
-import { setupDefaultMocks } from '@/tests/helpers/test-helpers';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
@@ -63,7 +62,7 @@ describe('API /api/event-types', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(mockEventTypes);
-      expect(prismaMock.eventType.findMany)).toHaveBeenCalledWith({
+      expect(prismaMock.eventType.findMany).toHaveBeenCalledWith({
         where: { userId: TEST_IDS.user1 },
         orderBy: { createdAt: 'asc' },
       });
@@ -175,7 +174,7 @@ describe('API /api/event-types', () => {
 
       expect(response.status).toBe(201);
       expect(data).toEqual(newEventType);
-      expect(prismaMock.eventType.create)).toHaveBeenCalledWith({
+      expect(prismaMock.eventType.create).toHaveBeenCalledWith({
         data: {
           name: 'Travail',
           color: '#FF0000',

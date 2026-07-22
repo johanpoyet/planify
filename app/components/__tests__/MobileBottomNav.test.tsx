@@ -21,8 +21,10 @@ vi.mock('@/lib/useEventInvitations', () => ({
 
 // Mock Link component
 vi.mock('next/link', () => ({
-  default: ({ href, children, className }: any) => (
-    <a href={href} className={className}>
+  // Toutes les props sont transmises (style, aria-*, ...) afin que le mock
+  // reflète le rendu réel du composant Link.
+  default: ({ href, children, ...rest }: any) => (
+    <a href={href} {...rest}>
       {children}
     </a>
   ),
@@ -45,11 +47,12 @@ describe('MobileBottomNav', () => {
   it('should render all navigation items', () => {
     renderWithTheme(<MobileBottomNav />);
 
-    expect(screen.getByText('Accueil')).toBeInTheDocument();
-    expect(screen.getByText('Notifications')).toBeInTheDocument();
-    expect(screen.getByText('Nouveau')).toBeInTheDocument();
+    // Le bouton central de création n'affiche qu'une icône, sans libellé.
+    expect(screen.getByText('Agenda')).toBeInTheDocument();
     expect(screen.getByText('Amis')).toBeInTheDocument();
-    expect(screen.getByText('Paramètres')).toBeInTheDocument();
+    expect(screen.getByText('Sondages')).toBeInTheDocument();
+    expect(screen.getByText('Profil')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '' })).toBeInTheDocument();
   });
 
   it('should highlight active navigation item', () => {
@@ -57,12 +60,13 @@ describe('MobileBottomNav', () => {
 
     renderWithTheme(<MobileBottomNav />);
 
-    const friendsLink = screen.getByText('Amis');
-    expect(friendsLink).toBeInTheDocument();
-    
-    // Le parent du label devrait avoir scale-110 quand actif
-    const parentDiv = friendsLink.closest('div');
-    expect(parentDiv?.previousSibling).toHaveClass('scale-110');
+    // L'élément actif se distingue par sa couleur de texte : pleine si actif,
+    // atténuée sinon.
+    const activeLink = screen.getByText('Amis').closest('a') as HTMLElement;
+    expect(activeLink.style.color).toBe('var(--pf-text)');
+
+    const inactiveLink = screen.getByText('Agenda').closest('a') as HTMLElement;
+    expect(inactiveLink.style.color).toBe('var(--pf-text-muted)');
   });
 
   it('should show friend requests badge when pendingCount > 0', async () => {

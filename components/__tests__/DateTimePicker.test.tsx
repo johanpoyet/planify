@@ -17,6 +17,11 @@ describe('DateTimePicker', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Certains tests figent la date courante (vi.setSystemTime).
+    vi.useRealTimers();
+  });
+
   it('should render with placeholder when no value is provided', () => {
     const onChange = vi.fn();
 
@@ -24,7 +29,7 @@ describe('DateTimePicker', () => {
       <DateTimePicker value="" onChange={onChange} />
     );
 
-    expect(screen.getByText('Sélectionner une date et heure')).toBeInTheDocument();
+    expect(screen.getByText('Sélectionner une date')).toBeInTheDocument();
   });
 
   it('should display formatted date when value is provided', () => {
@@ -116,6 +121,10 @@ describe('DateTimePicker', () => {
 
   it('should select a date and call onChange', async () => {
     const onChange = vi.fn();
+
+    // Les jours passés sont désactivés : on fige la date du jour au 10 du mois
+    // pour que le 15 soit toujours sélectionnable.
+    vi.setSystemTime(new Date('2026-06-10T09:00:00'));
 
     renderWithTheme(
       <DateTimePicker value="" onChange={onChange} />

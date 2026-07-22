@@ -9,10 +9,20 @@ import * as fs from 'fs/promises';
 
 vi.mock('next-auth');
 vi.mock('@/lib/prisma');
-vi.mock('fs/promises');
-vi.mock('fs', () => ({
-  existsSync: vi.fn(),
-}));
+// Factory explicite : l'auto-mock ne produit pas de fonctions mockées exploitables
+// pour ce module.
+vi.mock('fs/promises', () => {
+  const writeFile = vi.fn();
+  const unlink = vi.fn();
+  const chmod = vi.fn();
+  return { writeFile, unlink, chmod, default: { writeFile, unlink, chmod } };
+});
+// L'export `default` est requis : d'autres modules du graphe importent `fs`
+// par défaut, et Vitest refuse un mock partiel sans lui.
+vi.mock('fs', () => {
+  const existsSync = vi.fn();
+  return { existsSync, default: { existsSync } };
+});
 
 describe('API /api/user/profile-image', () => {
   beforeEach(() => {
@@ -111,15 +121,17 @@ describe('API /api/user/profile-image', () => {
         id: TEST_IDS.user1,
       } as any);
 
-      const formData = new FormData();
-      const largeContent = new Array(6 * 1024 * 1024).fill('a').join('');
-      const file = new File([largeContent], 'test.jpg', { type: 'image/jpeg' });
-      formData.append('image', file);
+      // La sérialisation multipart de jsdom ne conserve pas la taille du fichier :
+      // on fournit directement le formulaire pour tester la règle de validation.
+      const file = {
+        name: 'test.jpg',
+        type: 'image/jpeg',
+        size: 6 * 1024 * 1024,
+      } as unknown as File;
 
-      const request = new NextRequest('http://localhost:3000/api/user/profile-image', {
-        method: 'POST',
-        body: formData,
-      });
+      const request = {
+        formData: async () => ({ get: () => file }),
+      } as unknown as NextRequest;
 
       const response = await POST(request);
       const data = await response.json();

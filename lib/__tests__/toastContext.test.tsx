@@ -128,7 +128,10 @@ describe('toastContext.tsx', () => {
       );
     }
 
-    const user = userEvent.setup({ delay: null });
+    // Ce scénario teste une fermeture manuelle : les timers simulés du beforeEach
+    // ne sont pas nécessaires et empêchent userEvent et waitFor de se résoudre.
+    vi.useRealTimers();
+    const user = userEvent.setup();
 
     render(
       <ToastProvider>

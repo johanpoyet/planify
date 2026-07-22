@@ -1,10 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { sendPushNotification } from '../push';
+// Le mock Prisma doit être évalué avant l'import de ../push, qui charge lib/prisma.
 import { prismaMock } from '@/tests/mocks/prisma';
+import { sendPushNotification } from '../push';
 import { TEST_IDS } from '@/tests/helpers/objectid-helper';
-import * as webpush from 'web-push';
 
-vi.mock('web-push');
+// vi.hoisted garantit que les mocks existent avant la remontée de vi.mock,
+// qui doit être déclaré dans ce fichier pour intercepter l'import de lib/push.ts.
+const { sendNotificationMock, setVapidDetailsMock } = vi.hoisted(() => ({
+  sendNotificationMock: vi.fn(),
+  setVapidDetailsMock: vi.fn(),
+}));
+
+vi.mock('web-push', () => ({
+  default: {
+    setVapidDetails: setVapidDetailsMock,
+    sendNotification: sendNotificationMock,
+  },
+  setVapidDetails: setVapidDetailsMock,
+  sendNotification: sendNotificationMock,
+}));
 
 describe('push.ts - sendPushNotification', () => {
   beforeEach(() => {
@@ -57,7 +71,7 @@ describe('push.ts - sendPushNotification', () => {
     ];
 
     vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
-    vi.mocked(webpush.sendNotification).mockResolvedValue({} as any);
+    sendNotificationMock.mockResolvedValue({} as any);
 
     const result = await sendPushNotification(TEST_IDS.user1, {
       title: 'Test',
@@ -69,7 +83,7 @@ describe('push.ts - sendPushNotification', () => {
     expect(result.ok).toBe(true);
     expect(result.successCount).toBe(2);
     expect(result.failureCount).toBe(0);
-    expect(webpush.sendNotification).toHaveBeenCalledTimes(2);
+    expect(sendNotificationMock).toHaveBeenCalledTimes(2);
   });
 
   it('devrait supprimer les subscriptions invalides (410/404)', async () => {
@@ -84,7 +98,7 @@ describe('push.ts - sendPushNotification', () => {
     ];
 
     prismaMock.pushSubscription.findMany.mockResolvedValue(mockSubscriptions as any);
-    vi.mocked(webpush.sendNotification).mockRejectedValue({ statusCode: 410 });
+    sendNotificationMock.mockRejectedValue({ statusCode: 410 });
     prismaMock.pushSubscription.delete.mockResolvedValue({} as any);
 
     const result = await sendPushNotification(TEST_IDS.user1, {
@@ -118,7 +132,7 @@ describe('push.ts - sendPushNotification', () => {
     ];
 
     vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
-    vi.mocked(webpush.sendNotification)
+    sendNotificationMock
       .mockResolvedValueOnce({} as any)
       .mockRejectedValueOnce(new Error('Network error'));
 
@@ -139,7 +153,7 @@ describe('push.ts - sendPushNotification', () => {
       title: 'Test',
     });
 
-    expect(webpush.setVapidDetails).toHaveBeenCalledWith(
+    expect(setVapidDetailsMock).toHaveBeenCalledWith(
       expect.stringContaining('mailto:'),
       'test-public-key',
       'test-private-key'
@@ -158,7 +172,7 @@ describe('push.ts - sendPushNotification', () => {
     ];
 
     vi.mocked(prismaMock.pushSubscription.findMany).mockResolvedValue(mockSubscriptions as any);
-    vi.mocked(webpush.sendNotification).mockResolvedValue({} as any);
+    sendNotificationMock.mockResolvedValue({} as any);
 
     await sendPushNotification('user1', {
       title: 'Test Title',
@@ -167,7 +181,7 @@ describe('push.ts - sendPushNotification', () => {
       tag: 'event-123',
     });
 
-    const callArgs = vi.mocked(webpush.sendNotification).mock.calls[0];
+    const callArgs = sendNotificationMock.mock.calls[0];
     const payload = JSON.parse(callArgs[1] as string);
 
     expect(payload.title).toBe('Test Title');

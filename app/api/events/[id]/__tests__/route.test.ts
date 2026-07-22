@@ -64,7 +64,7 @@ describe('GET /api/events/[id]', () => {
     expect(json.id).toBe('event-id-1');
     expect(json.title).toBe('Test Event');
     expect(json).toHaveProperty('eventType');
-    expect(prismaMock.event.findUnique)).toHaveBeenCalledWith({
+    expect(prismaMock.event.findUnique).toHaveBeenCalledWith({
       where: { id: 'event-id-1' },
       include: { eventType: true },
     });

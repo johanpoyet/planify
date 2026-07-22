@@ -4,7 +4,9 @@ import type { PrismaClient } from '@prisma/client';
 // Helper to cast to mocked function
 export const mockFn = vi.fn;
 
-// Create a properly mocked PrismaClient
+// Create a properly mocked PrismaClient.
+// Le type est volontairement inféré (et non casté en PrismaClient) afin que les
+// helpers de mock (mockResolvedValue, mockRejectedValue...) restent visibles dans les tests.
 export const prismaMock = {
   user: {
     findUnique: vi.fn(),
@@ -126,12 +128,15 @@ export const prismaMock = {
     updateMany: vi.fn(),
     count: vi.fn(),
   },
-  $transaction: vi.fn((callback) => callback(prismaMock)),
-} as unknown as PrismaClient;
+  $transaction: vi.fn((callback: (client: unknown) => unknown) => callback(prismaMock)),
+};
+
+// Le cast vers PrismaClient n'est appliqué qu'au point d'injection dans le module mocké.
+const prismaMockAsClient = prismaMock as unknown as PrismaClient;
 
 vi.mock('@/lib/prisma', () => ({
-  prisma: prismaMock,
-  default: prismaMock,
+  prisma: prismaMockAsClient,
+  default: prismaMockAsClient,
   prismaMock, // Export prismaMock for direct access in tests
 }));
 
