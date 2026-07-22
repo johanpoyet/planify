@@ -22,7 +22,7 @@ function getDayBg(isSelected: boolean, isToday: boolean, primaryColor: string): 
 function getDayColor(isPast: boolean, isSelected: boolean, isToday: boolean, primaryColor: string): string {
   if (isPast) return 'var(--pf-text-muted)';
   if (isSelected) return 'var(--pf-on-accent)';
-  if (isToday) return primaryColor;
+  if (isToday) return 'var(--pf-accent-strong)';
   return 'var(--pf-text)';
 }
 

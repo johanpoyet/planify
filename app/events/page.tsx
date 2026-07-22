@@ -314,6 +314,7 @@ export default function EventsPage() {
             </div>
           </div>
           <button type="button" onClick={() => router.push('/events/new')}
+            aria-label="Nouvel événement"
             style={{width:38, height:38, borderRadius:12, background:primaryColor, border:"none", display:"flex", alignItems:"center", justifyContent:"center", color: 'var(--pf-on-accent)', cursor:"pointer", marginTop:4}}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -325,12 +326,12 @@ export default function EventsPage() {
 
             {/* Month nav */}
             <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8}}>
-              <button type="button" onClick={prevMonth}
+              <button type="button" onClick={prevMonth} aria-label="Mois précédent"
                 style={{width:28, height:28, borderRadius:8, background:"var(--pf-surface-2)", border:"none", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--pf-text-dim)", cursor:"pointer"}}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 5-7 7 7 7"/></svg>
               </button>
               <span style={{fontSize:13, fontWeight:600, color:"var(--pf-text)", textTransform:"capitalize"}}>{monthName}</span>
-              <button type="button" onClick={nextMonth}
+              <button type="button" onClick={nextMonth} aria-label="Mois suivant"
                 style={{width:28, height:28, borderRadius:8, background:"var(--pf-surface-2)", border:"none", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--pf-text-dim)", cursor:"pointer"}}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 5 7 7-7 7"/></svg>
               </button>
@@ -419,11 +420,11 @@ export default function EventsPage() {
                 style={{padding:"5px 12px", borderRadius:8, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", fontSize:13, color:"var(--pf-text-dim)", cursor:"pointer"}}>
                 Aujourd&apos;hui
               </button>
-              <button type="button" onClick={prevMonth}
+              <button type="button" onClick={prevMonth} aria-label="Mois précédent"
                 style={{width:30, height:30, borderRadius:8, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--pf-text-dim)", cursor:"pointer"}}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 5-7 7 7 7"/></svg>
               </button>
-              <button type="button" onClick={nextMonth}
+              <button type="button" onClick={nextMonth} aria-label="Mois suivant"
                 style={{width:30, height:30, borderRadius:8, background:"var(--pf-surface)", border:"1px solid var(--pf-border)", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--pf-text-dim)", cursor:"pointer"}}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 5 7 7-7 7"/></svg>
               </button>

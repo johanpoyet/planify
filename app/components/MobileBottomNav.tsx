@@ -77,7 +77,12 @@ export default function MobileBottomNav() {
 
           if (item.fab) {
             return (
-              <Link key={item.href} href={item.href} className="flex items-center justify-center -mt-3">
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label={item.label}
+                className="flex items-center justify-center -mt-3"
+              >
                 <div
                   className="flex items-center justify-center transition-transform active:scale-95"
                   style={{ width: 48, height: 48, borderRadius: 14, background: primaryColor, color: 'var(--pf-on-accent)' }}

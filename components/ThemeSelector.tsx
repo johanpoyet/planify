@@ -11,8 +11,10 @@ export default function ThemeSelector() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Couleur du thème</h3>
-          <p className="text-sm text-slate-400">Personnalisez la couleur de votre application</p>
+          {/* h2 : la page Parametres expose deja un h1, la hierarchie des titres
+              ne doit pas sauter de niveau (RGAA 9.1). */}
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--pf-text)' }}>Couleur du thème</h2>
+          <p className="text-sm" style={{ color: 'var(--pf-text-dim)' }}>Personnalisez la couleur de votre application</p>
         </div>
       </div>
 

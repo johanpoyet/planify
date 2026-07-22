@@ -208,6 +208,7 @@ export default function FriendsPage() {
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center justify-center rounded-xl"
+            aria-label="Rechercher un ami"
             style={{ width: 36, height: 36, background: 'var(--pf-surface)', border: '1px solid var(--pf-border)', color: 'var(--pf-text-dim)' }}
           >
             <IcoPlus />

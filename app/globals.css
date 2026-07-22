@@ -20,8 +20,9 @@
   --pf-border-strong: #34343F;
   --pf-text: #ECECF0;
   --pf-text-dim: #9A9AA6;
-  /* Contraste porté à 4.65:1 sur --pf-bg (#0B0B0F) pour satisfaire le WCAG AA. */
-  --pf-text-muted: #7A7A88;
+  /* Contraste calibre sur la surface la plus claire (--pf-surface-3) et non
+     sur le fond de page : 4.88:1, au-dessus du seuil AA de 4.5:1. */
+  --pf-text-muted: #8E8E9C;
   --pf-accent: #7454F5;
   /* Texte pose sur la couleur d'accent. Recalcule par le contexte de theme
      selon la teinte choisie ; cette valeur couvre le premier rendu. */
@@ -224,8 +225,8 @@ body.light-mode {
   --pf-border-strong: #D0D0D7;
   --pf-text: #0E0E14;
   --pf-text-dim: #5A5A66;
-  /* Contraste porté à 4.57:1 sur --pf-bg (#F7F7F9) pour satisfaire le WCAG AA. */
-  --pf-text-muted: #70707B;
+  /* Contraste calibre sur la surface la plus foncee du mode clair : 4.70:1. */
+  --pf-text-muted: #66666F;
   --pf-accent: #6A48FF;
   --pf-accent-soft: rgba(106, 72, 255, 0.10);
   --pf-accent-strong: #5A38EE;

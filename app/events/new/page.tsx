@@ -37,7 +37,7 @@ function getDayBg(isSel: boolean, isTod: boolean, primaryColor: string): string 
 function getDayColor(isPast: boolean, isSel: boolean, isTod: boolean, primaryColor: string): string {
   if (isPast) return "var(--pf-border-strong)";
   if (isSel) return "var(--pf-on-accent)";
-  if (isTod) return primaryColor;
+  if (isTod) return "var(--pf-accent-strong)";
   return "var(--pf-text)";
 }
 
@@ -352,6 +352,7 @@ export default function NewEventPage() {
       {/* ---- sticky header ---- */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 16px", position:"sticky", top:0, zIndex:10, background:"var(--pf-bg)", borderBottom:"1px solid var(--pf-border)" }}>
         <button type="button" onClick={() => router.back()}
+          aria-label="Fermer"
           style={{ width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", background:"var(--pf-surface)", border:"1px solid var(--pf-border)", borderRadius:10, color:"var(--pf-text-dim)", cursor:"pointer" }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>

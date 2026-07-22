@@ -47,12 +47,13 @@ describe('MobileBottomNav', () => {
   it('should render all navigation items', () => {
     renderWithTheme(<MobileBottomNav />);
 
-    // Le bouton central de création n'affiche qu'une icône, sans libellé.
     expect(screen.getByText('Agenda')).toBeInTheDocument();
     expect(screen.getByText('Amis')).toBeInTheDocument();
     expect(screen.getByText('Sondages')).toBeInTheDocument();
     expect(screen.getByText('Profil')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '' })).toBeInTheDocument();
+    // Le bouton central n'affiche qu'une icône : son nom accessible provient
+    // d'un aria-label, sans lequel il serait annoncé « lien » sans intitulé.
+    expect(screen.getByRole('link', { name: 'Créer' })).toBeInTheDocument();
   });
 
   it('should highlight active navigation item', () => {

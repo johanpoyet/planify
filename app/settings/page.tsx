@@ -157,6 +157,9 @@ export default function SettingsPage() {
               <button
                 onClick={handleToggleVisibility}
                 disabled={saving}
+                aria-label="Rendre mon calendrier visible par mes amis"
+                role="switch"
+                aria-checked={settings.calendarVisibility}
                 className="flex-shrink-0 relative inline-flex h-7 w-12 items-center rounded-full transition-colors disabled:opacity-50"
                 style={{ backgroundColor: settings.calendarVisibility ? primaryColor : 'var(--pf-surface-3)' }}
               >
