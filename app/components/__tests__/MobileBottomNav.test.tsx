@@ -49,11 +49,9 @@ describe('MobileBottomNav', () => {
 
     expect(screen.getByText('Agenda')).toBeInTheDocument();
     expect(screen.getByText('Amis')).toBeInTheDocument();
+    expect(screen.getByText('Invitations')).toBeInTheDocument();
     expect(screen.getByText('Sondages')).toBeInTheDocument();
     expect(screen.getByText('Profil')).toBeInTheDocument();
-    // Le bouton central n'affiche qu'une icône : son nom accessible provient
-    // d'un aria-label, sans lequel il serait annoncé « lien » sans intitulé.
-    expect(screen.getByRole('link', { name: 'Créer' })).toBeInTheDocument();
   });
 
   it('should highlight active navigation item', () => {

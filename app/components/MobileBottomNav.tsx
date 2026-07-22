@@ -2,7 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTheme } from '@/lib/themeContext';
 import { useFriendRequests } from '@/lib/useFriendRequests';
 import { useEventInvitations } from '@/lib/useEventInvitations';
 
@@ -27,26 +26,25 @@ const ProfileIcon = () => (
     <circle cx="12" cy="8" r="3.5"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/>
   </svg>
 );
-const PlusIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 5v14M5 12h14"/>
+const InvitationsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 13h5l1 3h6l1-3h5"/><path d="M5 13 7 5h10l2 8v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z"/>
   </svg>
 );
 
 interface NavItem {
   href: string;
   label: string;
-  fab?: boolean;
   badge?: number;
   Icon?: React.ComponentType;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/events',     label: 'Agenda',   Icon: AgendaIcon  },
-  { href: '/friends',    label: 'Amis',     Icon: FriendsIcon },
-  { href: '/events/new', label: 'Créer',    fab: true         },
-  { href: '/polls',      label: 'Sondages', Icon: PollsIcon   },
-  { href: '/settings',   label: 'Profil',   Icon: ProfileIcon },
+  { href: '/events',             label: 'Agenda',      Icon: AgendaIcon      },
+  { href: '/friends',            label: 'Amis',        Icon: FriendsIcon     },
+  { href: '/events/invitations', label: 'Invitations', Icon: InvitationsIcon },
+  { href: '/polls',              label: 'Sondages',    Icon: PollsIcon       },
+  { href: '/settings',           label: 'Profil',      Icon: ProfileIcon     },
 ];
 
 function pathMatches(href: string, pathname: string | null) {
@@ -56,13 +54,12 @@ function pathMatches(href: string, pathname: string | null) {
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { primaryColor } = useTheme();
   const { pendingCount } = useFriendRequests();
   const { invitationsCount } = useEventInvitations();
 
   const badges: Record<string, number> = {
     '/friends': pendingCount,
-    '/polls': invitationsCount,
+    '/events/invitations': invitationsCount,
   };
 
   return (
@@ -74,25 +71,6 @@ export default function MobileBottomNav() {
         {NAV_ITEMS.map((item) => {
           const active = pathMatches(item.href, pathname);
           const badge = badges[item.href] ?? 0;
-
-          if (item.fab) {
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-label={item.label}
-                className="flex items-center justify-center -mt-3"
-              >
-                <div
-                  className="flex items-center justify-center transition-transform active:scale-95"
-                  style={{ width: 48, height: 48, borderRadius: 14, background: primaryColor, color: 'var(--pf-on-accent)' }}
-                >
-                  <PlusIcon />
-                </div>
-              </Link>
-            );
-          }
-
           const iconColor = active ? 'var(--pf-text)' : 'var(--pf-text-muted)';
           const { Icon } = item;
 
