@@ -43,5 +43,9 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
+# Fichiers envoyés par les utilisateurs (ne doivent pas être versionnés)
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Prisma
 prisma/.env
