@@ -5,12 +5,26 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/lib/themeContext';
 
+const EyeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+const EyeOffIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <path d="M1 1l22 22"/>
+  </svg>
+);
+
 export default function RegisterPage() {
   const router = useRouter();
   const { primaryColor } = useTheme();
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -108,24 +122,46 @@ export default function RegisterPage() {
 
           <div>
             <label htmlFor="password" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--pf-text-dim)' }}>Mot de passe</label>
-            <input
-              id="password" name="password" type="password" required
-              value={formData.password} onChange={handleChange}
-              placeholder="Min. 6 caractères"
-              className="w-full rounded-xl px-3.5 py-3 text-sm outline-none transition-all"
-              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
-            />
+            <div className="relative">
+              <input
+                id="password" name="password" type={showPassword ? 'text' : 'password'} required
+                value={formData.password} onChange={handleChange}
+                placeholder="Min. 6 caractères"
+                className="w-full rounded-xl px-3.5 py-3 pr-11 text-sm outline-none transition-all"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
+                style={{ color: 'var(--pf-text-muted)' }}
+              >
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--pf-text-dim)' }}>Confirmer le mot de passe</label>
-            <input
-              id="confirmPassword" name="confirmPassword" type="password" required
-              value={formData.confirmPassword} onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full rounded-xl px-3.5 py-3 text-sm outline-none transition-all"
-              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
-            />
+            <div className="relative">
+              <input
+                id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} required
+                value={formData.confirmPassword} onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full rounded-xl px-3.5 py-3 pr-11 text-sm outline-none transition-all"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(v => !v)}
+                aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
+                style={{ color: 'var(--pf-text-muted)' }}
+              >
+                {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
           </div>
 
           <button
