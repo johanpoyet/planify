@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -206,6 +206,23 @@ export default function SettingsPage() {
           <div className="px-5 py-4">
             <PushNotificationSettings />
           </div>
+        </Section>
+
+        {/* Compte */}
+        <Section>
+          <SectionHeader label="Compte" />
+          <button
+            onClick={() => signOut({ callbackUrl: '/auth/login', redirect: true })}
+            className="w-full flex items-center gap-2 px-5 py-4 text-left text-sm font-medium transition-colors"
+            style={{ color: 'var(--pf-danger)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--pf-surface-2)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            Déconnexion
+          </button>
         </Section>
       </div>
     </div>
