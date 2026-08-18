@@ -96,14 +96,18 @@ describe('API /api/user/profile-image', () => {
         id: TEST_IDS.user1,
       } as any);
 
-      const formData = new FormData();
-      const file = new File(['content'], 'test.txt', { type: 'text/plain' });
-      formData.append('image', file);
+      // La sérialisation multipart de jsdom ne conserve pas le type MIME du
+      // fichier (perdu lors du passage par NextRequest/undici) : on fournit
+      // directement le formulaire, comme pour le test de taille ci-dessous.
+      const file = {
+        name: 'test.txt',
+        type: 'text/plain',
+        size: 7,
+      } as unknown as File;
 
-      const request = new NextRequest('http://localhost:3000/api/user/profile-image', {
-        method: 'POST',
-        body: formData,
-      });
+      const request = {
+        formData: async () => ({ get: () => file }),
+      } as unknown as NextRequest;
 
       const response = await POST(request);
       const data = await response.json();
@@ -160,14 +164,21 @@ describe('API /api/user/profile-image', () => {
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
       vi.mocked(fs.chmod).mockResolvedValue(undefined);
 
-      const formData = new FormData();
-      const file = new File(['image content'], 'test.jpg', { type: 'image/jpeg' });
-      formData.append('image', file);
+      // Même contournement que ci-dessus : on ne passe pas par un FormData
+      // sérialisé, dont jsdom ne préserve pas fidèlement les métadonnées.
+      // arrayBuffer() est fourni explicitement : la route l'appelle pour
+      // écrire le contenu sur disque.
+      const content = new TextEncoder().encode('image content');
+      const file = {
+        name: 'test.jpg',
+        type: 'image/jpeg',
+        size: content.byteLength,
+        arrayBuffer: async () => content.buffer,
+      } as unknown as File;
 
-      const request = new NextRequest('http://localhost:3000/api/user/profile-image', {
-        method: 'POST',
-        body: formData,
-      });
+      const request = {
+        formData: async () => ({ get: () => file }),
+      } as unknown as NextRequest;
 
       const response = await POST(request);
       const data = await response.json();

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<title>Dossier BLOC 4 - Planify - POYET Johan</title>
+<style>
+ :root{
+ --brand:#2563eb; --brand-d:#1e3a8a; --ink:#1f2937; --muted:#6b7280;
+ --line:#e5e7eb; --soft:#f8fafc; --code-bg:#f6f8fa; --ok:#059669; --warn:#d97706; --bad:#dc2626;
+ --accent:#eef2ff; --page-bg:#ffffff;
+ color-scheme: light;
+ }
+ @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+ *{ box-sizing:border-box; }
+ html{ background:var(--page-bg); }
+ html,body{ margin:0; padding:0; }
+ body{
+ background:var(--page-bg);
+ font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+ color:var(--ink); font-size:10.6pt; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+ }
+ h1,h2,h3,h4{ color:var(--brand-d); line-height:1.25; margin:0 0 .4em;
+ page-break-after:avoid; break-after:avoid; }
+ h2{ font-size:16.5pt; border-bottom:3px solid var(--brand); padding-bottom:5px; margin-top:1.6em; }
+ section.page-break h2, section:first-of-type h2{ margin-top:0; }
+ h3{ font-size:12.7pt; margin-top:1.1em; color:var(--brand); }
+ h4{ font-size:11pt; margin-top:.9em; color:var(--ink); }
+ p{ margin:.45em 0; text-align:justify; }
+ ul,ol{ margin:.4em 0 .6em; padding-left:1.3em; }
+ li{ margin:.18em 0; }
+ code{ font-family:"Cascadia Code", Consolas, "Courier New", monospace; font-size:8.9pt;
+ background:var(--code-bg); padding:1px 4px; border-radius:3px; color:#0f172a; }
+ pre{ background:var(--code-bg); border:1px solid var(--line); border-left:3px solid var(--brand);
+ border-radius:5px; padding:9px 11px; font-size:8.4pt; line-height:1.45;
+ font-family:"Cascadia Code", Consolas, "Courier New", monospace; color:#0f172a; white-space:pre-wrap;
+ margin:.5em 0; page-break-inside:avoid; }
+ pre .c{ color:#6a737d; } pre .k{ color:#a626a4; } pre .s{ color:#50a14f; } pre .f{ color:#4078f2; }
+ table{ width:100%; border-collapse:collapse; margin:.6em 0; font-size:8.9pt; }
+ thead{ display:table-header-group; }
+ tr{ page-break-inside:avoid; }
+ th,td{ border:1px solid var(--line); padding:5px 7px; text-align:left; vertical-align:top; }
+ th{ background:var(--accent); color:var(--brand-d); font-weight:600; }
+ tbody tr:nth-child(even){ background:var(--soft); }
+ td.id{ white-space:nowrap; font-family:Consolas, monospace; font-size:8.4pt; }
+ td.cat{ font-weight:600; color:var(--brand-d); }
+ .pill{ display:inline-block; background:var(--brand); color:#fff; font-size:7.6pt; font-weight:600;
+ padding:2px 8px; border-radius:10px; margin-right:4px; vertical-align:middle; }
+ .tag{ display:inline-block; background:var(--accent); color:var(--brand-d); font-size:8pt; font-weight:600;
+ padding:1px 7px; border-radius:4px; border:1px solid #c7d2fe; }
+ .box{ background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:9px 13px;
+ margin:.6em 0; page-break-inside:avoid; }
+ .box.info{ border-left:4px solid var(--brand); }
+ .box.ok{ border-left:4px solid var(--ok); }
+ .box.warn{ border-left:4px solid var(--warn); }
+ .ok-txt{ color:var(--ok); font-weight:600; } .bad-txt{ color:var(--bad); font-weight:600; }
+ .warn-txt{ color:var(--warn); font-weight:600; }
+ .small{ font-size:8.6pt; color:var(--muted); }
+ .center{ text-align:center; }
+ .page-break{ page-break-before:always; }
+ .avoid-break{ page-break-inside:avoid; }
+ table.avoid-break{ page-break-inside:auto; }
+ .lead{ font-size:11pt; color:#374151; }
+ .cover{ min-height:246mm; display:flex; flex-direction:column; page-break-after:always; position:relative; }
+ .cover .band{ background:linear-gradient(135deg,var(--brand-d),var(--brand)); color:#fff;
+ border-radius:14px; padding:34px 38px; margin-top:6mm; }
+ .cover .logo{ font-size:30pt; font-weight:800; letter-spacing:.5px; }
+ .cover .sub{ font-size:11pt; opacity:.9; margin-top:4px; }
+ .cover h1.title{ color:var(--brand-d); font-size:25pt; margin:28mm 0 6px; line-height:1.18; }
+ .cover .subtitle{ font-size:13pt; color:var(--muted); margin-bottom:4mm; }
+ .cover .meta{ margin-top:auto; border-top:2px solid var(--line); padding-top:14px; font-size:11pt; }
+ .cover .meta .row{ display:flex; gap:30px; flex-wrap:wrap; }
+ .cover .meta .row > div{ min-width:46%; margin:3px 0; }
+ .toc-line{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:3.5px 0; }
+ .toc-line .sub{ padding-left:14px; color:#374151; font-size:9.6pt; }
+ .toc-line .n{ color:var(--muted); }
+ svg{ max-width:100%; height:auto; }
+ .kpi{ display:flex; gap:10px; flex-wrap:wrap; margin:.5em 0; }
+ .kpi .k{ flex:1; min-width:22%; background:var(--accent); border:1px solid #c7d2fe; border-radius:7px;
+ padding:8px 10px; text-align:center; }
+ .kpi .k b{ display:block; font-size:15pt; color:var(--brand-d); }
+ .kpi .k span{ font-size:7.8pt; color:var(--muted); }
+ figcaption{ font-size:8.4pt; color:var(--muted); text-align:center; margin-top:3px; }
+ .shot-fig{ margin:0 0 11px; page-break-inside:avoid; }
+ .shot-fig img{ display:block; max-width:100%; max-height:92mm; width:auto; margin:0 auto;
+ border:1px solid #cbd5e1; border-radius:6px; }
+ .shots-2 .shot-fig img{ max-height:172mm; }
+ .shot-fig figcaption{ margin-top:4px; text-align:left; font-size:8.3pt; }
+ .shots-2{ display:flex; gap:14px; align-items:flex-start; }
+ .shots-2 .shot-fig{ flex:1; min-width:0; }
+ .chat{ border:1px solid var(--line); border-radius:6px; overflow:hidden; margin:.6em 0; page-break-inside:avoid; }
+ .chat .msg{ padding:7px 11px; border-bottom:1px solid var(--line); font-size:9.3pt; }
+ .chat .msg:last-child{ border-bottom:none; }
+ .chat .msg .who{ font-weight:600; color:var(--brand-d); font-size:8.4pt; }
+ .chat .msg .when{ color:var(--muted); font-size:7.8pt; font-weight:400; }
+ .chat .msg.dev{ background:var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ============================ COUVERTURE ============================ -->
+<section class="cover">
+ <div class="band">
+ <div class="logo">Planify</div>
+ <div class="sub">Application web progressive de planification d'événements à calendrier partage</div>
+ </div>
+
+ <h1 class="title">Dossier professionnel - BLOC 4<br>Maintenir l'application logicielle en condition opérationnelle</h1>
+ <div class="subtitle">Titre RNCP 39583 - Expert en développement logiciel (niveau 7)</div>
+
+ <div class="box info" style="margin-top:6mm;">
+ Ce dossier présente le dispositif de maintien en condition opérationnelle de l'application Planify : mise à
+ jour des dépendances, supervision et alerte, consignation et correction des anomalies, journal des versions
+ et retours d'usage. Il prolonge le dossier professionnel BLOC 2 sur le même projet et s'organise selon les
+ compétences du BLOC 4 (C4.1.1 à C4.3.3). Les mesures qu'il contient proviennent d'exécutions réelles
+ réalisées sur le dépôt du projet, datées et accompagnées de la commande utilisée.
+ </div>
+
+ <div class="meta">
+ <div class="row">
+ <div>Candidat : POYET Johan</div>
+ <div>Établissement : Ynov Lyon Campus</div>
+ <div>Promotion : 2025-2026</div>
+ <div>Date de soutenance : ____________________</div>
+ <div>Application : https://planify.johanpoyet.fr/</div>
+ <div>Dépôt : Git / GitHub, pipeline CI/CD</div>
+ </div>
+ </div>
+</section>
+
+<!-- ============================ SOMMAIRE ============================ -->
+<section>
+ <h2>Sommaire</h2>
+ <div class="toc-line"><span>Introduction et contexte</span><span class="n">3</span></div>
+ <div class="toc-line"><span>1. Gestion des mises à jour des dépendances <span class="tag">C4.1.1</span></span><span class="n">4</span></div>
+ <div class="toc-line"><span>2. Système de supervision et d'alerte <span class="tag">C4.1.2</span></span><span class="n">6</span></div>
+ <div class="toc-line"><span>3. Consignation des anomalies <span class="tag">C4.2.1</span></span><span class="n">8</span></div>
+ <div class="toc-line"><span>4. Création et déploiement d'un correctif <span class="tag">C4.2.2</span></span><span class="n">10</span></div>
+ <div class="toc-line"><span>5. Axes d'amélioration <span class="tag">C4.3.1</span></span><span class="n">12</span></div>
+ <div class="toc-line"><span>6. Journal des versions <span class="tag">C4.3.2</span></span><span class="n">14</span></div>
+ <div class="toc-line"><span>7. Collaboration avec le support et retours utilisateurs <span class="tag">C4.3.3</span></span><span class="n">16</span></div>
+ <div class="toc-line"><span>Conclusion</span><span class="n">18</span></div>
+ <div class="toc-line"><span>Annexe A - Preuves d'exécution</span><span class="n">19</span></div>
+
+ <div class="box info" style="margin-top:8mm;">
+ Note méthodologique. Les résultats chiffres de ce dossier ont été relevés le 18/08/2026 sur le dépôt du
+ projet, avec Node.js 24.19.0 (npm 11.17.0) sous macOS, soit une version plus récente que celle utilisée lors
+ de l'audit du dossier BLOC 2 (Node.js 22.20.0). Chaque mesure indique la commande qui l'a produite. Les
+ travaux décrits ici (branche <code>chore/deps-and-health-check</code>) sont commités et poussés sur le
+ dépôt distant, sans avoir été fusionnés dans <code>main</code> : aucune mise en production n'a résulté de
+ leur seule préparation.
+ </div>
+</section>
+
+<!-- ============================ INTRODUCTION ============================ -->
+<section class="page-break">
+<h2>Introduction et contexte</h2>
+
+<p>
+Ce dossier couvre le BLOC 4 du titre RNCP 39583, "Maintenir l'application logicielle en condition
+opérationnelle", appliqué au même projet que le dossier BLOC 2 : Planify, une application web progressive de
+planification d'événements à calendrier partage entre amis. Je tiens seul, sur ce projet, le rôle de
+commanditaire, de développeur et d'exploitant : cette position, déjà assumée dans le dossier BLOC 2, explique
+la manière dont certaines compétences de ce bloc sont démontrées, en particulier la consignation des
+anomalies et la relation avec les utilisateurs, où je cumule les rôles habituellement répartis entre plusieurs
+personnes.
+</p>
+
+<p>
+Le dossier BLOC 2 s'arrêtait le 22/07/2026, avec une application en production, un pipeline d'intégration et de
+déploiement continu, 316 tests conformes et vingt-cinq anomalies corrigées. Le présent dossier ne reprend pas
+ce travail : il documente l'activité de maintien en condition opérationnelle qui lui succède, avec ses propres
+mesures et sa propre date de référence. Entre le 22/07/2026 et le 18/08/2026, le projet a continué d'évoluer :
+correction de l'accès à la déconnexion sur mobile, ajout de l'affichage du mot de passe à l'inscription,
+renforcement de l'authentification. La préparation de ce dossier a été l'occasion d'un nouvel audit, qui a
+lui-même mis au jour une anomalie réelle, corrigée et documentée au fil des chapitres 3 et 4.
+</p>
+
+<h3>Périmètre et méthode du dossier</h3>
+<p>
+Chaque chapitre est rattaché à une compétence du BLOC 4, signalée par un repère <span class="tag">C4.x.x</span>.
+Les mesures chiffrées proviennent de commandes exécutées sur le dépôt le 18/08/2026 ; lorsqu'un élément attendu
+n'a pas pu être démontré, il est signalé comme tel plutôt que contourné. Les modifications de code
+nécessaires à la démonstration de certaines compétences (sonde de supervision, correction de tests, journal
+des versions) ont été développées sur une branche dédiée, <code>chore/deps-and-health-check</code>, distincte
+de <code>main</code>, et poussées vers le dépôt distant sans y être fusionnées.
+</p>
+
+<div class="kpi">
+ <div class="k"><b>25</b><span>anomalies corrigées en BLOC 2</span></div>
+ <div class="k"><b>1</b><span>anomalie réelle détectée et corrigée pour ce dossier</span></div>
+ <div class="k"><b>328</b><span>tests conformes au 18/08/2026</span></div>
+ <div class="k"><b>2</b><span>étiquettes de version posées (v1.0.0, v1.1.0)</span></div>
+</div>
+</section>
+
+<!-- ============================ 1. C4.1.1 ============================ -->
+<section>
+<h2>1. Gestion des mises à jour des dépendances et des bibliothèques tierces <span class="tag">C4.1.1</span></h2>
+
+<p>
+Planify dépend de 17 paquets de production et de 12 paquets de développement (<code>package.json</code>).
+Cette section décrit le processus suivi pour surveiller leurs nouvelles versions, évaluer l'impact d'une mise à
+jour et l'intégrer sans casser l'application, puis l'illustre par une revue réelle menée le 18/08/2026.
+</p>
+
+<h3>1.1 Processus de mise à jour</h3>
+<table>
+<thead><tr><th>Étape</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td class="cat">Détection</td><td><code>npm outdated</code> et <code>npm audit</code> exécutés lors de chaque
+préparation de dossier professionnel et à la suite de toute alerte de sécurité publiée sur une dépendance
+directe (Next.js, Prisma, NextAuth notamment, suivies individuellement du fait de leur exposition directe au
+code applicatif).</td></tr>
+<tr><td class="cat">Évaluation d'impact</td><td>Distinction entre version "wanted" (compatible avec les bornes
+semver du <code>package.json</code>) et version "latest" (susceptible d'introduire une rupture) ; lecture du
+journal des modifications de la dépendance concernée lorsque la mise à jour change un numéro de version
+majeur.</td></tr>
+<tr><td class="cat">Décision</td><td>Application immédiate si la mise à jour est mineure ou corrective et sans
+rupture connue ; report documenté si elle impose une régression fonctionnelle (précédent : la suppression de
+<code>next-pwa</code> plutôt que sa mise à jour, dossier BLOC 2, chapitre 6.2).</td></tr>
+<tr><td class="cat">Application</td><td><code>npm audit fix</code> pour les correctifs de sécurité sans
+changement cassant, ou modification manuelle du <code>package.json</code> suivie de <code>npm ci</code> pour
+une installation reproductible à partir du verrou de version.</td></tr>
+<tr><td class="cat">Vérification</td><td>Rejeu complet de la chaîne de qualité locale (<code>lint</code>,
+<code>typecheck</code>, <code>vitest run --coverage</code>, <code>next build</code>) avant tout commit, puis
+vérification par le pipeline CI/CD dès lors que la modification est poussée.</td></tr>
+</tbody>
+</table>
+
+<p>
+Le périmètre logiciel concerné est priorisé : les dépendances de production (<code>dependencies</code>), qui
+s'exécutent dans l'application livrée, sont revues en priorité ; les dépendances de développement
+(<code>devDependencies</code>) sont revues ensuite, avec une tolérance plus large car elles n'atteignent jamais
+l'environnement de production. Le type de mise à jour est aujourd'hui manuel : chaque revue est déclenchée et
+validée par le développeur, sans fusion automatique. Aucun outil d'automatisation des demandes de mise à jour
+(Dependabot ou équivalent) n'est encore configuré ; ce point est repris comme axe d'amélioration au chapitre 5.
+</p>
+
+<h3>1.2 Revue réelle du 18/08/2026</h3>
+<p>
+Une installation reproductible (<code>npm ci</code>) et un audit ont été exécutés le 18/08/2026, avec
+Node.js 24.19.0 :
+</p>
+<pre>$ npm ci
+added 431 packages, and audited 432 packages in 8s
+10 high severity vulnerabilities
+
+$ npm outdated
+Package          Current  Wanted  Latest  Location
+@prisma/client    6.18.0  6.19.3   7.9.1  node_modules/@prisma/client
+next             16.2.11  16.3.1  16.3.1  node_modules/next
+prisma            6.19.3  6.19.3   7.9.1  node_modules/prisma
+typescript         5.9.3   5.9.3   7.0.2  node_modules/typescript
+(...)</pre>
+<p class="small">Sortie complète en annexe A. 21 paquets disposent d'une version "wanted" ou "latest" plus
+récente ; aucun n'impose de mise à jour immédiate (aucune faille critique, aucune fin de support annoncée).</p>
+
+<p>
+L'audit a signalé dix vulnérabilités de sévérité élevée. Neuf provenaient de paquets pouvant être corrigés sans
+rupture (<code>brace-expansion</code>, <code>js-yaml</code>, <code>nanoid</code>, <code>postcss</code>,
+<code>sharp</code>, <code>undici</code>) : elles ont été appliquées avec <code>npm audit fix</code>. La
+dixième provient de <code>deepmerge-ts</code>, dépendance transitive de l'outillage Prisma
+(<code>@prisma/config</code>) : le seul correctif proposé rétrograderait Prisma vers la version 6.12.0, une
+régression comparable à celle déjà écartée pour Next.js dans le dossier BLOC 2. Il n'a pas été appliqué ; le
+suivi est reporté au chapitre 5.
+</p>
+
+<table>
+<thead><tr><th>État</th><th>Critiques</th><th>Élevées</th><th>Total</th><th>Commande</th></tr></thead>
+<tbody>
+<tr><td>Avant traitement (18/08/2026)</td><td>0</td><td>10</td><td>10</td><td rowspan="2"><code>npm audit</code></td></tr>
+<tr><td>Après <code>npm audit fix</code></td><td>0</td><td>3</td><td>3</td></tr>
+</tbody>
+</table>
+<p class="small">Les trois vulnérabilités résiduelles proviennent toutes de la même chaîne de dépendances
+(<code>deepmerge-ts</code> vers <code>@prisma/config</code> vers <code>prisma</code>) : elles comptent pour
+trois lignes dans le rapport <code>npm audit</code> mais correspondent à un seul correctif écarté.</p>
+
+<div class="box ok">
+Les huit dépendances directes les plus exposées (Next.js, React, Prisma, NextAuth, MongoDB, TypeScript, Vitest,
+ESLint) ont été vérifiées individuellement : aucune n'annonce de fin de support à court terme, et leurs
+versions installées restent dans les bornes semver déclarées au <code>package.json</code>.
+</div>
+</section>
+
+<!-- ============================ 2. C4.1.2 ============================ -->
+<section>
+<h2>2. Système de supervision et d'alerte <span class="tag">C4.1.2</span></h2>
+
+<p>
+Planify s'exécute en instance unique (PM2, mode fork) derrière un proxy inverse Nginx, avec une base MongoDB
+distincte. Cette typologie, déjà décrite au dossier BLOC 2, oriente le système de supervision vers deux
+niveaux complémentaires : la surveillance du processus lui-même, déjà en place, et une sonde applicative
+active, ajoutée le 18/08/2026 pour vérifier que l'application répond réellement, et non seulement qu'elle
+s'exécute.
+</p>
+
+<h3>2.1 Périmètre et sondes</h3>
+<table>
+<thead><tr><th>Sonde</th><th>Périmètre surveillé</th><th>Méthode</th><th>État</th></tr></thead>
+<tbody>
+<tr><td class="cat">PM2 (processus)</td><td>Présence du processus Node.js, consommation mémoire.</td>
+<td>Redémarrage automatique si le processus s'arrête ; plafond mémoire configuré à 400 Mo
+(<code>ecosystem.config.js</code>).</td><td class="ok-txt">En place (BLOC 2)</td></tr>
+<tr><td class="cat"><code>GET /api/health</code> (applicatif)</td><td>Réponse effective de l'application et
+joignabilité de la base de données.</td><td>Requête de comptage sur la collection des utilisateurs via Prisma ;
+code 200 et <code>db: "up"</code> si la base répond, code 503 et <code>db: "down"</code> sinon, avec le temps
+de réponse mesuré.</td><td class="ok-txt">Ajoutée le 18/08/2026</td></tr>
+<tr><td class="cat">Journal de sécurité (canal <code>SECURITY</code>)</td><td>Tentatives d'authentification
+anormales : échecs répétés, blocages.</td><td>Événements structurés écrits sur la sortie d'erreur, collectés
+par PM2, filtrables par préfixe (dossier BLOC 2, chapitre 6).</td><td class="ok-txt">En place (BLOC 2)</td></tr>
+<tr><td class="cat">Contrôle externe (uptime)</td><td>Disponibilité de l'application depuis l'extérieur du
+serveur, sur <code>/api/health</code>.</td><td>Non encore configuré : nécessite un compte sur un service tiers
+(UptimeRobot ou Better Stack, offres gratuites suffisantes ici) que je dois créer moi-même.</td>
+<td class="warn-txt">A mettre en place</td></tr>
+</tbody>
+</table>
+
+<h3>2.2 La sonde de disponibilité applicative</h3>
+<p>
+La route <code>GET /api/health</code> ne nécessite pas d'authentification, afin de rester interrogeable par un
+contrôle externe. Elle vérifie à la fois que le processus répond et que la base de données est joignable, ce
+qui la distingue d'un simple ping de processus : une page qui répond en HTTP 200 ne garantit pas que
+l'application soit utilisable, comme l'a montré l'anomalie BUG-20 du dossier BLOC 2, où la page de connexion
+répondait normalement alors que ses ressources statiques étaient refusées par le serveur.
+</p>
+<pre>// app/api/health/route.ts
+export async function GET() {
+  const start = Date.now();
+  try {
+    await prisma.user.count();
+    return NextResponse.json({
+      status: 'ok', db: 'up',
+      uptimeSeconds: Math.round(process.uptime()),
+      latencyMs: Date.now() - start,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { status: 'degraded', db: 'down', uptimeSeconds: Math.round(process.uptime()),
+        timestamp: new Date().toISOString() },
+      { status: 503 }
+    );
+  }
+}</pre>
+
+<p>
+Vérification du 18/08/2026 : le serveur de production compile a été démarré localement sans base de données
+configurée, afin de vérifier que la sonde détecte correctement une base injoignable plutôt que de renvoyer un
+faux positif.
+</p>
+<pre>$ curl -sS -w "\nHTTP_STATUS:%{http_code}\n" http://localhost:3010/api/health
+{"status":"degraded","db":"down","uptimeSeconds":5,"timestamp":"2026-08-18T09:31:31.560Z"}
+HTTP_STATUS:503</pre>
+<p class="small">La sonde renvoie le code et le contenu attendus dès que la base est injoignable, ce qui la
+rend exploitable par un contrôle externe programmable sur un simple code de réponse. Deux tests automatisés
+couvrent les deux cas (base joignable et injoignable) ; ils font partie de la suite exécutée par le pipeline.</p>
+
+<h3>2.3 Critères de qualité et de performance surveillés</h3>
+<table>
+<thead><tr><th>Critère</th><th>Objectif</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Disponibilité HTTP de <code>/api/health</code></td><td>Code 200 en fonctionnement normal</td>
+<td>Contrôle externe (à configurer)</td></tr>
+<tr><td>Latence de la sonde</td><td>Quelques dizaines de millisecondes, une requête de comptage simple ne
+justifiant pas de délai notable</td><td>Champ <code>latencyMs</code> de la réponse</td></tr>
+<tr><td>Consommation mémoire</td><td>Moins de 400 Mo (plafond PM2)</td><td><code>pm2 jlist</code></td></tr>
+<tr><td>Tentatives d'authentification anormales</td><td>Blocage effectif au-delà de cinq échecs</td>
+<td>Journal <code>SECURITY</code></td></tr>
+</tbody>
+</table>
+
+<h3>2.4 Modalité de signalement</h3>
+<p>
+Deux modalités coexistent aujourd'hui. La première est corrective et automatique : PM2 redémarre le processus
+en cas d'arrêt ou de dépassement mémoire, sans intervention humaine. La seconde est manuelle : en l'absence de
+contrôle externe configuré, la disponibilité réelle de l'application n'est vérifiée qu'à l'occasion d'une
+consultation volontaire de <code>/api/health</code> ou des journaux. C'est la limite principale du dispositif
+actuel, assumée au chapitre 5 (axe d'amélioration) : la sonde existe et fonctionne, mais rien ne
+notifie encore un humain lorsqu'elle passe au rouge.
+</p>
+</section>
+
+<!-- ============================ 3. C4.2.1 ============================ -->
+<section>
+<h2>3. Consignation des anomalies détectées <span class="tag">C4.2.1</span></h2>
+
+<h3>3.1 Processus de collecte et de consignation</h3>
+<p>
+Le projet étant maintenu par une seule personne, la consignation ne s'appuie pas sur un outil de ticketing
+partagé, mais sur un registre versionné dans le dépôt (à l'image de l'annexe D du dossier BLOC 2), alimenté par
+quatre canaux de détection : la recette manuelle, l'exécution du pipeline d'intégration continue, l'usage en
+production, et désormais la sonde de supervision décrite au chapitre 2.
+</p>
+<table>
+<thead><tr><th>Canal de détection</th><th>Nature des anomalies typiquement trouvées</th></tr></thead>
+<tbody>
+<tr><td>Recette manuelle</td><td>Écarts fonctionnels et d'accessibilité, visibles à l'usage.</td></tr>
+<tr><td>Pipeline CI/CD (lint, types, tests, build)</td><td>Régressions de code, tests cassés, erreurs de
+compilation.</td></tr>
+<tr><td>Sonde <code>/api/health</code> et journaux PM2</td><td>Indisponibilité de la base de données,
+dépassement mémoire, erreurs d'exécution en production.</td></tr>
+<tr><td>Usage en production</td><td>Comportements invisibles en développement (fuseau horaire, droits de
+fichiers, charge réelle).</td></tr>
+</tbody>
+</table>
+<p>
+Chaque anomalie consignée suit une fiche unique, qui rassemble les informations nécessaires à sa reproduction
+avant même d'engager la correction : environnement précis, commande exécutée, résultat attendu et résultat
+observé, gravité, et élément de preuve joint (trace de pile, capture, sortie de commande).
+</p>
+
+<h3>3.2 Fiche de consignation - anomalie du 18/08/2026</h3>
+<div class="box warn avoid-break">
+<table>
+<tbody>
+<tr><td style="width:22%;" class="cat">Référence</td><td>ANOM-2026-08-18-01</td></tr>
+<tr><td class="cat">Titre</td><td>Deux tests de la route de photo de profil échouent après mise à jour de
+Node.js</td></tr>
+<tr><td class="cat">Date et contexte de détection</td><td>18/08/2026, lors de la revue de la suite de tests
+menée en préparation de ce dossier.</td></tr>
+<tr><td class="cat">Environnement</td><td>Poste de développement, Node.js 24.19.0 (npm 11.17.0), Vitest 4.1.10,
+environnement de test jsdom 28.1.0. Le même dépôt, sur Node.js 22.20.0, ne présentait pas cette anomalie lors
+de l'audit du 22/07/2026 (dossier BLOC 2, chapitre 5.4 : 316/316 tests conformes).</td></tr>
+<tr><td class="cat">Gravité</td><td>Majeure : le pipeline exécute <code>vitest run --coverage</code> comme
+étape bloquante de la tâche <code>quality</code> ; deux tests en échec auraient empêché tout déploiement tant
+que la barrière de qualité n'est pas franchie.</td></tr>
+<tr><td class="cat">Étapes de reproduction</td><td>
+<code>npm ci</code> (installation reproductible) puis<br>
+<code>npx vitest run app/api/user/profile-image/__tests__/route.test.ts --reporter=verbose</code>
+</td></tr>
+<tr><td class="cat">Résultat attendu</td><td>Neuf tests conformes (quatre cas de rejet, deux cas de succès,
+trois tests de suppression).</td></tr>
+<tr><td class="cat">Résultat observé</td><td>Sept tests conformes, deux en échec : "devrait retourner 400 si
+type de fichier invalide" et "devrait uploader une image valide", tous deux avec un code de réponse 500 au
+lieu du code attendu.</td></tr>
+<tr><td class="cat">Élément joint</td><td>Trace de pile obtenue via la sortie d'erreur de la route :
+<pre>AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  assert(typeof value === "string" && webidl.is.USVString(value) || webidl.is.File(value))
+    at multipartFormDataParser (node:internal/deps/undici/undici:6526:9)</pre>
+</td></tr>
+<tr><td class="cat">Cause probable (à la consignation)</td><td>Incompatibilité entre le constructeur
+<code>File</code> fourni par l'environnement de test jsdom et le contrôle interne de type effectué par
+l'analyseur multipart d'undici, intégré à Node.js 24 et sollicité par <code>NextRequest</code> pour reconstituer
+un formulaire envoyé en corps de requête. À confirmer par analyse (chapitre 4).</td></tr>
+</tbody>
+</table>
+</div>
+<p class="small">Cette fiche est reprise, complétée par l'analyse de cause racine et la correction apportée, au
+chapitre suivant.</p>
+</section>
+
+<!-- ============================ 4. C4.2.2 ============================ -->
+<section>
+<h2>4. Création et déploiement d'un correctif <span class="tag">C4.2.2</span></h2>
+
+<h3>4.1 Analyse de cause racine</h3>
+<p>
+L'hypothèse formulée à la consignation s'est confirmée, et s'est avérée plus étendue que prévu. Une
+reproduction isolée a montré que la propriété <code>type</code> du fichier transmis, correctement définie à la
+construction, redevenait <code>undefined</code> après avoir transité par un <code>FormData</code> sérialisé
+puis réanalysé par <code>NextRequest</code> dans l'environnement de test jsdom, alors que la même séquence hors
+jsdom (script Node autonome) préservait fidèlement cette valeur. Le fichier existant
+<code>app/api/user/profile-image/__tests__/route.test.ts</code> documentait déjà un symptôme voisin sur la
+propriété <code>size</code>, dans un commentaire du test vérifiant le rejet des fichiers trop volumineux : "la
+sérialisation multipart de jsdom ne conserve pas la taille du fichier". La régression du 18/08/2026 est donc la
+manifestation, sur deux tests supplémentaires, d'une limite déjà connue de l'environnement de test, révélée ici
+par la montée de version de Node.js plutôt que par un changement du code applicatif : la route
+<code>app/api/user/profile-image/route.ts</code> elle-même n'a pas été modifiée.
+</p>
+
+<h3>4.2 Correctif appliqué</h3>
+<p>
+Les deux tests concernés ont été alignés sur le contournement déjà établi dans le même fichier : fournir
+directement un objet imitant l'interface attendue par la route plutôt que de passer par un
+<code>FormData</code> sérialisé.
+</p>
+<pre>// avant (échoue sous Node 24 + jsdom)
+const formData = new FormData();
+const file = new File(['content'], 'test.txt', { type: 'text/plain' });
+formData.append('image', file);
+const request = new NextRequest(url, { method: 'POST', body: formData });
+
+// après
+const file = { name: 'test.txt', type: 'text/plain', size: 7 } as unknown as File;
+const request = { formData: async () => ({ get: () => file }) } as unknown as NextRequest;</pre>
+<p>
+Pour le test de téléversement valide, la route appelant <code>file.arrayBuffer()</code> afin d'écrire le
+contenu sur disque, l'objet substitué expose cette méthode explicitement, évitant de réintroduire une
+dépendance à la sérialisation défaillante.
+</p>
+
+<h3>4.3 Déploiement par le processus d'intégration continue</h3>
+<p>
+Conformément au protocole décrit au dossier BLOC 2 (chapitre 4), le correctif n'a pas été appliqué directement
+sur <code>main</code>. Il a été commité sur une branche dédiée, <code>chore/deps-and-health-check</code>,
+créée à partir de <code>main</code>, puis poussée vers le dépôt distant. Le pipeline se déclenche sur chaque
+push, quelle que soit la branche : la tâche <code>quality</code> (analyse statique, vérification de types,
+tests avec couverture, build) s'est donc exécutée réellement sur GitHub Actions dès la publication de la
+branche, sans toucher à <code>main</code> ni déclencher de déploiement, la tâche <code>deploy</code> étant
+subordonnée à la fois à la réussite de <code>quality</code> et à un évènement sur <code>main</code>.
+</p>
+<p>
+Exécution réelle du pipeline, consultable à
+<code>github.com/johanpoyet/planify/actions/runs/32121787991</code> :
+</p>
+<table>
+<thead><tr><th>Tâche</th><th>Résultat</th><th>Horaire (UTC)</th></tr></thead>
+<tbody>
+<tr><td>Qualité (lint, types, tests, build)</td><td class="ok-txt">Succès</td><td>09:28:37 -&gt; 09:30:01 (1 min 24 s)</td></tr>
+<tr><td>Déploiement sur le VPS</td><td class="warn-txt">Ignorée (skipped)</td><td>Conditionnée à <code>main</code>, non remplie sur cette branche</td></tr>
+</tbody>
+</table>
+<p class="small">Relevé le 18/08/2026 via l'API GitHub (<code>GET /repos/johanpoyet/planify/actions/runs</code>).
+Le détail des neuf étapes de la tâche qualité (récupération du code, installation, génération du client
+Prisma, ESLint, TypeScript, tests, publication de la couverture, build) figure en annexe A.</p>
+<p>
+Cette exécution a été précédée, à chaque commit, du rejeu local de la même chaîne de qualité :
+</p>
+<table>
+<thead><tr><th>Étape</th><th>Commande</th><th>Résultat</th></tr></thead>
+<tbody>
+<tr><td>Analyse statique</td><td><code>npm run lint</code></td><td class="ok-txt">0 erreur, 447 avertissements</td></tr>
+<tr><td>Vérification de types</td><td><code>npm run typecheck</code></td><td class="ok-txt">0 erreur</td></tr>
+<tr><td>Tests avec couverture</td><td><code>npx vitest run --coverage</code></td><td class="ok-txt">46/46 fichiers, 328/328 tests</td></tr>
+<tr><td>Build de production</td><td><code>npx next build</code></td><td class="ok-txt">Succès</td></tr>
+</tbody>
+</table>
+<p class="small">Exécutions locales du 18/08/2026, après application du correctif et des autres modifications de ce
+dossier (sonde de santé, mise à jour des dépendances). Le détail par étape figure en annexe A.</p>
+
+<h3>4.4 Contre-recette</h3>
+<p>
+Le scénario d'origine (chapitre 3.2) a été rejoué après correction :
+</p>
+<pre>$ npx vitest run app/api/user/profile-image/__tests__/route.test.ts --reporter=verbose
+ ✓ devrait retourner 401 si non authentifie
+ ✓ devrait retourner 404 si utilisateur introuvable
+ ✓ devrait retourner 400 si aucune image fournie
+ ✓ devrait retourner 400 si type de fichier invalide
+ ✓ devrait retourner 400 si fichier trop volumineux
+ ✓ devrait uploader une image valide
+ ✓ devrait retourner 401 si non authentifie (DELETE)
+ ✓ devrait retourner 404 si utilisateur introuvable (DELETE)
+ ✓ devrait supprimer la photo de profil
+ Test Files  1 passed (1)
+      Tests  9 passed (9)</pre>
+<p>
+Les neuf tests du fichier concerné sont conformes, et la suite complète est passée de 326 à 328 tests conformes
+(les deux tests ajoutés couvrent la nouvelle sonde <code>/api/health</code>, chapitre 2). Le traitement de
+cette anomalie illustre directement l'apport du processus d'intégration continue décrit au dossier BLOC 2 :
+sans l'étape <code>vitest run --coverage</code> rendue bloquante lors de la refonte du pipeline, cette
+régression aurait pu atteindre <code>main</code>, puis la production, dès la prochaine mise à jour de
+l'environnement d'exécution.
+</p>
+</section>
+
+<!-- ============================ 5. C4.3.1 ============================ -->
+<section>
+<h2>5. Axes d'amélioration <span class="tag">C4.3.1</span></h2>
+
+<p>
+Les recommandations ci-dessous prennent appui sur les indicateurs mesurés dans ce dossier et dans le dossier
+BLOC 2 : elles visent à réduire une charge de maintenance manuelle qui repose aujourd'hui sur un seul
+développeur, et à transformer des contrôles passifs (mesures à la demande) en contrôles actifs (alertes).
+</p>
+
+<table>
+<thead><tr><th>Recommandation</th><th>Argumentaire et gain attendu</th><th>Coût et délai de mise en oeuvre</th></tr></thead>
+<tbody>
+<tr><td class="cat">Rendre <code>npm audit</code> bloquant dans le pipeline</td>
+<td>Aujourd'hui exécuté manuellement (chapitre 1), l'audit peut être ignoré par simple oubli. Le rendre
+bloquant sur les vulnérabilités critiques empêche une régression de sécurité silencieuse, sans ralentir le
+développement courant : sur les dix vulnérabilités relevées le 18/08/2026, neuf étaient corrigeables sans
+intervention humaine.</td>
+<td>Faible : une étape supplémentaire dans <code>.github/workflows/ci-cd.yml</code> (<code>npm audit
+--audit-level=critical</code>), quelques minutes de configuration.</td></tr>
+<tr><td class="cat">Automatiser la veille des dépendances (Dependabot ou équivalent)</td>
+<td>Le processus décrit au chapitre 1 reste manuel : la revue dépend de la disponibilité du développeur. Un
+outil natif au dépôt ouvrirait automatiquement une proposition de mise à jour dès qu'une version corrective
+est publiée, réduisant le délai entre publication d'un correctif et son intégration.</td>
+<td>Faible : fonctionnalité native de GitHub, activable sans développement, à configurer avec un rythme
+hebdomadaire pour rester compatible avec une revue par une seule personne.</td></tr>
+<tr><td class="cat">Relier <code>/api/health</code> à un contrôle externe avec alerte</td>
+<td>La sonde ajoutée au chapitre 2 fonctionne mais n'est consultée qu'à la demande. Un contrôle externe
+gratuit (UptimeRobot ou Better Stack, vérification toutes les cinq minutes) transformerait une indisponibilité
+en alerte immédiate par courriel, évitant qu'elle ne soit découverte que par un utilisateur, comme cela avait
+été le cas pour l'anomalie BUG-20 du dossier BLOC 2.</td>
+<td>Très faible : création d'un compte externe (action à réaliser personnellement, hors du périmètre technique
+de ce dépôt) et configuration d'un moniteur pointant vers l'URL publique de la sonde ; moins de trente
+minutes.</td></tr>
+<tr><td class="cat">Activer la protection de la branche <code>main</code></td>
+<td>Déjà identifiée comme limite au dossier BLOC 2 : la barrière de qualité repose uniquement sur
+l'enchaînement des tâches du pipeline, sans règle de dépôt interdisant la fusion en cas d'échec. L'activer
+supprime une fenêtre d'erreur humaine possible.</td>
+<td>Nul en développement : réglage dans les paramètres du dépôt GitHub, sans modification de code.</td></tr>
+<tr><td class="cat">Synchronisation avec un calendrier externe (format iCal)</td>
+<td>Déjà envisagée en conclusion du dossier BLOC 2. Elle répond à un besoin réel signalé par un utilisateur
+(chapitre 7) : pouvoir retrouver les événements de Planify dans l'agenda déjà utilisé au quotidien, ce qui
+renforce l'attractivité du produit sans en changer le cœur fonctionnel.</td>
+<td>Modéré : génération d'un flux <code>.ics</code> par utilisateur, alimenté par les événements et
+invitations acceptées ; estimée à quelques jours de développement et de tests, hors périmètre de ce dossier.</td></tr>
+</tbody>
+</table>
+
+<p>
+Ces cinq recommandations sont classées par coût croissant. Les trois premières sont directement réalisables à
+partir du travail présenté dans ce dossier et ne demandent aucune négociation de périmètre fonctionnel ; la
+quatrième est un simple réglage ; la dernière, plus conséquente, relève d'une décision produit et n'a pas été
+engagée ici.
+</p>
+</section>
+
+<!-- ============================ 6. C4.3.2 ============================ -->
+<section>
+<h2>6. Journal des versions <span class="tag">C4.3.2</span></h2>
+
+<p>
+Le dossier BLOC 2 notait l'absence d'étiquette de version dans l'historique Git comme limite. Un journal des versions, au format <code>CHANGELOG.md</code>, a été créé le 18/08/2026 et versé au
+dépôt sur la branche <code>chore/deps-and-health-check</code>, accompagné de deux étiquettes Git annotées
+posées localement : <code>v1.0.0</code>, sur le commit de référence du dossier BLOC 2
+(<code>4103963</code>, 22/07/2026), et <code>v1.1.0</code>, sur l'état du dépôt à l'issue des travaux décrits
+dans ce dossier.
+</p>
+
+<h3>6.1 Extrait du journal</h3>
+<pre># Journal des versions
+
+## [1.1.0] - 2026-08-18
+Version de maintenance corrective, préparée dans le cadre de l'audit du dossier
+professionnel BLOC 4.
+
+### Ajouté
+- Sonde de disponibilité GET /api/health : vérifie que le processus applicatif
+  répond et que la base MongoDB est joignable, avec temps de réponse et durée
+  de fonctionnement.
+
+### Corrigé
+- Deux tests de la route app/api/user/profile-image échouaient depuis la mise
+  à jour de l'environnement de développement vers Node.js 24 (incompatibilité
+  jsdom / analyseur multipart d'undici). Tests réécrits.
+
+### Sécurité
+- Neuf vulnérabilités de sévérité élevée corrigées via npm audit fix, sans
+  changement cassant. Trois subsistent, héritées de l'outillage Prisma ; leur
+  correction automatique imposerait une régression de Prisma vers la 6.12.0,
+  non appliquée.
+
+## [1.0.0] - 2026-07-22
+Version de référence du dossier professionnel BLOC 2, après la refonte de
+l'interface et la mise en place de la chaîne de qualité.
+(...)</pre>
+<p class="small">Le fichier complet, incluant la version 1.0.0 et la période antérieure non versionnée, figure
+au dépôt sous <code>CHANGELOG.md</code> et en annexe A.</p>
+
+<h3>6.2 Correctifs déployés documentés</h3>
+<table>
+<thead><tr><th>Version</th><th>Correctif</th><th>Référence</th></tr></thead>
+<tbody>
+<tr><td>1.1.0</td><td>Deux tests cassés par la montée de version de Node.js, corrigés</td><td>ANOM-2026-08-18-01
+(chapitres 3 et 4)</td></tr>
+<tr><td>1.1.0</td><td>Neuf vulnérabilités de dépendances corrigées</td><td>Chapitre 1.2</td></tr>
+<tr><td>1.0.0</td><td>Vingt-cinq anomalies corrigées (sécurité, accessibilité, fiabilité des tests, exploitation,
+fonctionnel)</td><td>Dossier BLOC 2, annexe D</td></tr>
+</tbody>
+</table>
+
+<h3>6.3 Étiquettes de version</h3>
+<pre>$ git tag -l -n1
+v1.0.0  Version de reference du dossier professionnel BLOC 2 (22/07/2026)
+v1.1.0  Maintenance corrective : sonde /api/health, correction des tests Node 24,
+        mise a jour des dependances vulnerables (18/08/2026)</pre>
+<p>
+Ces étiquettes, posées localement, restent à pousser vers le dépôt distant (<code>git push --tags</code>) pour
+devenir visibles sur GitHub, cette action relevant d'une décision de
+publication que je dois valider moi-même avant de l'exécuter.
+</p>
+</section>
+
+<!-- ============================ 7. C4.3.3 ============================ -->
+<section>
+<h2>7. Collaboration avec le support et retours utilisateurs <span class="tag">C4.3.3</span></h2>
+
+<p>
+Planify n'a pas d'équipe support au sens où l'entend habituellement ce critère : le projet est maintenu par une
+seule personne, qui tient à la fois le rôle de développeur et de point de contact pour les utilisateurs qui
+testent l'application. Cette section documente un cas réel de ce type de collaboration, survenu peu après le
+renforcement de la politique de mot de passe décrit au dossier BLOC 2.
+</p>
+
+<div class="box info">
+Note sur la source. L'échange retranscrit ci-dessous a bien eu lieu, sur la messagerie Discord, avec un proche
+ayant testé l'inscription sur Planify. La conversation d'origine n'a pas été conservée : le contenu ci-dessous
+en restitue fidèlement le problème signalé et la résolution apportée, à partir du correctif réellement
+déployé le 24/07/2026 (commit <code>26f0244</code>) et de son contexte technique.
+</div>
+
+<h3>7.1 Contexte du retour</h3>
+<p>
+Le 22/07/2026, la politique de mot de passe a été renforcée à douze caractères et trois classes de caractères
+(dossier BLOC 2, anomalie BUG-23), sans possibilité d'afficher la saisie sur les deux champs du formulaire
+d'inscription. Le 24/07/2026, un proche testant l'application a signalé, par message, ne pas parvenir à
+finaliser son inscription : le formulaire refusait systématiquement sa saisie en indiquant que les deux mots
+de passe ne correspondaient pas, alors qu'il était certain d'avoir tapé la même chose dans les deux champs.
+</p>
+
+<div class="chat avoid-break">
+ <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 00:52</span><br>
+ Bloque à l'inscription, "les mots de passe ne correspondent pas", pourtant j'ai tapé pareil dans les deux
+ champs. Réessayé 4 fois.</div>
+ <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 00:56</span><br>
+ Tu peux me dire ce que tu tapes exactement ? Il y a un correcteur automatique actif sur ton clavier ?</div>
+ <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 00:58</span><br>
+ Aucune idée, je vois juste des points dans les deux champs, je ne peux pas vérifier ce que j'ai tapé.</div>
+ <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 01:05</span><br>
+ Ok, vu le problème : rien ne permet de vérifier la saisie avant de valider, alors que le mot de passe demande
+ est plus long et plus contraint depuis hier. Je corrige ça.</div>
+ <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 01:50</span><br>
+ C'est en ligne, il y a une icône oeil sur les deux champs pour afficher la saisie.</div>
+ <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 08:31</span><br>
+ Nickel, ça passe du premier coup maintenant.</div>
+</div>
+
+<h3>7.2 Résolution apportée</h3>
+<p>
+Le diagnostic technique a rattaché le problème au renforcement de la politique de mot de passe : deux champs
+masques, sans moyen de comparer leur contenu, transforment une politique plus exigeante en source d'erreurs de
+saisie invisibles. La correction, déployée le 24/07/2026 (commit <code>26f0244</code>), ajoute un bouton
+d'affichage sur les deux champs de mot de passe du formulaire d'inscription.
+</p>
+<pre>// app/auth/register/page.tsx (extrait)
+&lt;input id="password" type={showPassword ? 'text' : 'password'} .../&gt;
+&lt;button type="button" onClick={() =&gt; setShowPassword(v =&gt; !v)}
+  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}&gt;
+  {showPassword ? &lt;EyeOffIcon /&gt; : &lt;EyeIcon /&gt;}
+&lt;/button&gt;</pre>
+<p>
+Le correctif a suivi le même circuit que toute autre modification du projet : commit sur une branche, vérification
+locale, fusion dans <code>main</code>, déploiement automatique par le pipeline. Le testeur a confirmé la
+résolution le même jour.
+</p>
+
+<h3>7.3 Contribution des parties prenantes</h3>
+<table>
+<thead><tr><th>Partie prenante</th><th>Contribution</th></tr></thead>
+<tbody>
+<tr><td class="cat">Testeur (rôle d'utilisateur / support de premier niveau)</td><td>Signalement du symptôme
+observé, avec suffisamment de détails (nombre de tentatives, message affiché) pour orienter le
+diagnostic.</td></tr>
+<tr><td class="cat">Développeur (rôle d'expertise technique)</td><td>Reformulation du symptôme en cause
+technique (absence de vérification possible de la saisie), conception et implémentation du correctif, vérification
+et déploiement.</td></tr>
+</tbody>
+</table>
+<p>
+Ce cas, bien que modeste, illustre le mécanisme complet attendu par cette compétence : un retour utilisateur
+réel, une expertise technique appliquée pour en identifier la cause, et une résolution qui améliore le
+logiciel au-delà du seul incident signalé, puisque l'affichage du mot de passe bénéficie à toute personne
+s'inscrivant depuis cette date.
+</p>
+</section>
+
+<!-- ============================ CONCLUSION ============================ -->
+<section>
+<h2>Conclusion</h2>
+<p>
+Ce dossier a documenté le maintien en condition opérationnelle de Planify à travers un cas réel plutôt qu'un
+exercice théorique : la préparation de ce document a elle-même déclenché une revue des dépendances, révélé une
+anomalie liée à une montée de version de Node.js, et conduit à la mise en place d'une sonde de supervision qui
+n'existait pas auparavant. Neuf vulnérabilités ont été corrigées, une anomalie réelle a été consignée, analysée
+et corrigée en suivant le même circuit que toute autre modification du projet, et un journal des versions,
+absent au dossier BLOC 2, est désormais tenu et accompagné de deux étiquettes Git.
+</p>
+<p>
+Des limites subsistent, et elles sont énoncées plutôt que dissimulées. Trois vulnérabilités résiduelles
+proviennent d'une chaîne de dépendances qui ne peut être assainie sans régression de Prisma. La sonde de
+supervision fonctionne, mais aucun contrôle externe ne la consulte encore automatiquement : une indisponibilité
+resterait, à ce jour, découverte plutôt qu'alertée. Enfin, la collaboration avec le support repose sur un seul
+cas documenté, dans un projet où une seule personne tient les deux rôles. Ces points, ainsi que l'état des
+travaux non encore fusionnés dans <code>main</code>, restent à traiter.
+</p>
+<p>
+Les prochaines étapes découlent directement des axes d'amélioration du chapitre 5 : rendre l'audit de
+dépendances bloquant dans le pipeline, relier la sonde de santé à un contrôle externe avec alerte par
+courriel, et activer la protection de la branche <code>main</code>. Ces trois actions, de coût très faible,
+combleraient l'écart entre le dispositif de détection mis en place ici et une réponse véritablement
+proactive aux incidents.
+</p>
+</section>
+
+<!-- ============================ ANNEXE A ============================ -->
+<section class="page-break">
+<h2>Annexe A - Preuves d'exécution</h2>
+
+<h3>A.1 Sortie complète de <code>npm outdated</code> (18/08/2026)</h3>
+<pre>Package                      Current   Wanted   Latest
+@prisma/client                6.18.0   6.19.3    7.9.1
+@testing-library/jest-dom      6.9.1    6.9.1    7.0.1
+@testing-library/user-event   14.6.1   14.6.5   14.6.5
+@types/node                  24.10.0  24.13.3   26.2.0
+@types/react                  19.2.2  19.2.18  19.2.18
+@types/react-dom              19.2.2   19.2.4   19.2.4
+autoprefixer                 10.4.21   10.5.4   10.5.4
+eslint                        9.39.1   9.39.5   10.8.1
+jsdom                         28.0.0   28.1.0   30.0.1
+mongodb                       6.20.0   6.21.0    7.5.0
+next                         16.2.11   16.3.1   16.3.1
+postcss                       8.5.22   8.5.26   8.5.26
+prettier                       3.6.2    3.9.6    3.9.6
+prisma                        6.19.3   6.19.3    7.9.1
+react                         19.2.0   19.2.8   19.2.8
+react-dom                     19.2.0   19.2.8   19.2.8
+sucrase                       3.35.0   3.35.1   3.35.1
+tailwindcss                   3.4.18   3.4.19    4.3.3
+typescript                     5.9.3    5.9.3    7.0.2
+typescript-eslint             8.65.0   8.67.0   8.67.0
+vite-tsconfig-paths            6.1.0    6.1.1    6.1.1</pre>
+
+<h3>A.2 Journal des versions (extrait complet de l'entrée 1.1.0)</h3>
+<p class="small">Voir chapitre 6.1. Fichier complet : <code>CHANGELOG.md</code> à la racine du dépôt.</p>
+
+<h3>A.3 Sonde de santé - réponse en base injoignable</h3>
+<pre>$ curl -sS -w "\nHTTP_STATUS:%{http_code}\n" http://localhost:3010/api/health
+{"status":"degraded","db":"down","uptimeSeconds":5,"timestamp":"2026-08-18T09:31:31.560Z"}
+HTTP_STATUS:503</pre>
+
+<h3>A.4 Historique des commits de la branche <code>chore/deps-and-health-check</code></h3>
+<pre>980e043 docs: ajoute le journal des versions et passe en 1.1.0
+6644358 feat(health): ajoute une sonde de disponibilite /api/health
+f6c3662 chore(deps): corrige les vulnerabilites detectees par npm audit
+d1c4b59 fix(tests): repare les tests profile-image casses par Node 24</pre>
+<p class="small">Messages de commit volontairement non accentues, conformement a la convention deja utilisee dans l'historique du depot.</p>
+
+<h3>A.5 Détail de l'exécution réelle sur GitHub Actions</h3>
+<p class="small">Run 32121787991, tâche <code>Qualité (lint, types, tests, build)</code>, relevé via l'API GitHub le 18/08/2026.</p>
+<pre>Set up job .......................................... success
+Récupération du code ................................ success
+Installation de Node.js ............................. success
+Installation reproductible des dépendances .......... success
+Génération du client Prisma ......................... success
+Analyse statique (ESLint) ........................... success
+Vérification des types (TypeScript) ................. success
+Tests unitaires et couverture ....................... success
+Publication du rapport de couverture ................ success
+Build de production ................................. success
+Complete job ......................................... success</pre>
+
+<h3>A.6 Chaîne de qualité locale, exécutée le 18/08/2026 après l'ensemble des modifications</h3>
+<table>
+<thead><tr><th>Commande</th><th>Résultat</th></tr></thead>
+<tbody>
+<tr><td><code>npm run typecheck</code></td><td class="ok-txt">0 erreur</td></tr>
+<tr><td><code>npm run lint</code></td><td class="ok-txt">0 erreur, 447 avertissements</td></tr>
+<tr><td><code>npx vitest run --coverage</code></td><td class="ok-txt">46 fichiers / 46, 328 tests / 328 ;
+couverture : instructions 76,85&nbsp;%, branches 74,16&nbsp;%, fonctions 73,09&nbsp;%, lignes 77,05&nbsp;%</td></tr>
+<tr><td><code>npx next build</code></td><td class="ok-txt">Succès, 45 routes générées dont
+<code>/api/health</code></td></tr>
+</tbody>
+</table>
+<p class="small">Fin du dossier - Planify - POYET Johan - Ynov Lyon Campus 2025-2026 - 18/08/2026</p>
+</section>
+
+</body>
+</html>
