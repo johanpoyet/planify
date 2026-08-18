@@ -143,12 +143,13 @@
  <div class="toc-line"><span>Annexe A - Preuves d'exécution</span><span class="n">19</span></div>
 
  <div class="box info" style="margin-top:8mm;">
- Note méthodologique. Les résultats chiffres de ce dossier ont été relevés le 18/08/2026 sur le dépôt du
+ Note méthodologique. Les résultats chiffrés de ce dossier ont été relevés le 18/08/2026 sur le dépôt du
  projet, avec Node.js 24.19.0 (npm 11.17.0) sous macOS, soit une version plus récente que celle utilisée lors
  de l'audit du dossier BLOC 2 (Node.js 22.20.0). Chaque mesure indique la commande qui l'a produite. Les
- travaux décrits ici (branche <code>chore/deps-and-health-check</code>) sont commités et poussés sur le
- dépôt distant, sans avoir été fusionnés dans <code>main</code> : aucune mise en production n'a résulté de
- leur seule préparation.
+ travaux décrits dans ce dossier ont été développés sur une branche dédiée
+ (<code>chore/deps-and-health-check</code>), vérifiés localement puis fusionnés dans <code>main</code> le
+ 18/08/2026 : le pipeline d'intégration continue les a validés une seconde fois avant leur déploiement réel
+ en production, décrit au chapitre 4.3.
  </div>
 </section>
 
@@ -179,18 +180,19 @@ lui-même mis au jour une anomalie réelle, corrigée et documentée au fil des 
 <h3>Périmètre et méthode du dossier</h3>
 <p>
 Chaque chapitre est rattaché à une compétence du BLOC 4, signalée par un repère <span class="tag">C4.x.x</span>.
-Les mesures chiffrées proviennent de commandes exécutées sur le dépôt le 18/08/2026 ; lorsqu'un élément attendu
-n'a pas pu être démontré, il est signalé comme tel plutôt que contourné. Les modifications de code
-nécessaires à la démonstration de certaines compétences (sonde de supervision, correction de tests, journal
-des versions) ont été développées sur une branche dédiée, <code>chore/deps-and-health-check</code>, distincte
-de <code>main</code>, et poussées vers le dépôt distant sans y être fusionnées.
+Les mesures chiffrées proviennent de commandes exécutées sur le dépôt et sur le serveur de production le
+18/08/2026 ; lorsqu'un élément attendu n'a pas pu être démontré, il est signalé comme tel plutôt que contourné.
+Les modifications de code nécessaires à la démonstration de certaines compétences (sonde de supervision,
+correction de tests, journal des versions) ont été développées sur une branche dédiée,
+<code>chore/deps-and-health-check</code>, vérifiées par le pipeline, puis fusionnées dans <code>main</code> et
+déployées en production le même jour.
 </p>
 
 <div class="kpi">
  <div class="k"><b>25</b><span>anomalies corrigées en BLOC 2</span></div>
  <div class="k"><b>1</b><span>anomalie réelle détectée et corrigée pour ce dossier</span></div>
  <div class="k"><b>328</b><span>tests conformes au 18/08/2026</span></div>
- <div class="k"><b>2</b><span>étiquettes de version posées (v1.0.0, v1.1.0)</span></div>
+ <div class="k"><b>4</b><span>conteneurs de supervision installés sur le VPS</span></div>
 </div>
 </section>
 
@@ -290,10 +292,11 @@ versions installées restent dans les bornes semver déclarées au <code>package
 
 <p>
 Planify s'exécute en instance unique (PM2, mode fork) derrière un proxy inverse Nginx, avec une base MongoDB
-distincte. Cette typologie, déjà décrite au dossier BLOC 2, oriente le système de supervision vers deux
-niveaux complémentaires : la surveillance du processus lui-même, déjà en place, et une sonde applicative
-active, ajoutée le 18/08/2026 pour vérifier que l'application répond réellement, et non seulement qu'elle
-s'exécute.
+distincte, sur un VPS qui héberge par ailleurs une seconde application sans lien avec Planify. Cette typologie,
+déjà décrite au dossier BLOC 2, oriente le système de supervision vers trois niveaux complémentaires : la
+surveillance du processus lui-même (déjà en place), une sonde applicative interne, et une pile de supervision
+externe au processus, installée le 18/08/2026, qui observe l'application depuis l'extérieur comme le ferait un
+navigateur.
 </p>
 
 <h3>2.1 Périmètre et sondes</h3>
@@ -306,16 +309,29 @@ s'exécute.
 <tr><td class="cat"><code>GET /api/health</code> (applicatif)</td><td>Réponse effective de l'application et
 joignabilité de la base de données.</td><td>Requête de comptage sur la collection des utilisateurs via Prisma ;
 code 200 et <code>db: "up"</code> si la base répond, code 503 et <code>db: "down"</code> sinon, avec le temps
-de réponse mesuré.</td><td class="ok-txt">Ajoutée le 18/08/2026</td></tr>
+de réponse mesuré.</td><td class="ok-txt">Déployée en production le 18/08/2026</td></tr>
 <tr><td class="cat">Journal de sécurité (canal <code>SECURITY</code>)</td><td>Tentatives d'authentification
 anormales : échecs répétés, blocages.</td><td>Événements structurés écrits sur la sortie d'erreur, collectés
 par PM2, filtrables par préfixe (dossier BLOC 2, chapitre 6).</td><td class="ok-txt">En place (BLOC 2)</td></tr>
-<tr><td class="cat">Contrôle externe (uptime)</td><td>Disponibilité de l'application depuis l'extérieur du
-serveur, sur <code>/api/health</code>.</td><td>Non encore configuré : nécessite un compte sur un service tiers
-(UptimeRobot ou Better Stack, offres gratuites suffisantes ici) que je dois créer moi-même.</td>
-<td class="warn-txt">A mettre en place</td></tr>
+<tr><td class="cat">blackbox-exporter (sonde HTTPS)</td><td>Disponibilité de la page d'accueil et de
+<code>/api/health</code>, vues depuis l'extérieur du processus applicatif.</td><td>Requête HTTPS toutes les 15
+secondes vers les deux URL publiques ; DNS, certificat TLS et réponse HTTP traversés à chaque mesure.</td>
+<td class="ok-txt">Installée le 18/08/2026</td></tr>
+<tr><td class="cat">node-exporter</td><td>CPU, mémoire, disque du VPS.</td><td>Anticiper une saturation qui
+casserait Planify sans qu'aucune sonde applicative ne le signale.</td><td class="ok-txt">Installée le
+18/08/2026</td></tr>
 </tbody>
 </table>
+
+<p>
+Le contrôle est auto-hébergé plutôt que confié à un service tiers payant : Prometheus, node-exporter,
+blackbox-exporter et Grafana tournent dans quatre conteneurs Docker dédiés
+(<code>docker-compose.yml</code> et le dossier <code>monitoring/</code>, versionnés sur le VPS), séparés du
+processus PM2 qui sert Planify. La sonde <code>blackbox-exporter</code> interroge les URL publiques par HTTPS,
+et non les conteneurs en interne : elle traverse donc la même résolution DNS, le même certificat et le même
+chemin réseau qu'un utilisateur réel, à ceci près qu'elle part du même serveur plutôt que d'un point du réseau
+géographiquement distinct ; c'est la limite assumée de ce choix, reprise au chapitre 5.
+</p>
 
 <h3>2.2 La sonde de disponibilité applicative</h3>
 <p>
@@ -357,28 +373,50 @@ HTTP_STATUS:503</pre>
 rend exploitable par un contrôle externe programmable sur un simple code de réponse. Deux tests automatisés
 couvrent les deux cas (base joignable et injoignable) ; ils font partie de la suite exécutée par le pipeline.</p>
 
-<h3>2.3 Critères de qualité et de performance surveillés</h3>
+<h3>2.3 Tableau de bord</h3>
+<p>
+Les quatre sondes alimentent un tableau de bord unique, provisionné par fichier plutôt que construit à la
+souris (<code>grafana/provisioning/dashboards/planify-overview.json</code>), reconstructible à l'identique en
+cas de réinstallation du VPS. Il réunit la disponibilité vue de l'extérieur, la latence de la sonde
+applicative et la charge du serveur, afin qu'un seul écran réponde à la question "est-ce que tout va bien ?".
+</p>
+<figure class="shot-fig">
+<img src="img/bloc4-grafana-dashboard.png" alt="Tableau de bord Grafana de Planify">
+<figcaption>Figure 1 - Tableau de bord Grafana "Planify - Vue d'ensemble", capturé le 18/08/2026 juste après le
+déploiement de la sonde <code>/api/health</code> en production : disponibilité de la page d'accueil et de
+l'API de santé, mémoire et disque du VPS, latence de la sonde, historique de disponibilité sur 24 heures. La
+courbe d'historique n'affiche qu'un point : la pile de supervision vient d'être installée et n'a pas encore
+accumulé de recul, ce qui est signalé comme limite au chapitre 5 plutôt que présenté comme un historique
+complet.</figcaption>
+</figure>
+
+<h3>2.4 Critères de qualité et de performance surveillés</h3>
 <table>
 <thead><tr><th>Critère</th><th>Objectif</th><th>Source</th></tr></thead>
 <tbody>
-<tr><td>Disponibilité HTTP de <code>/api/health</code></td><td>Code 200 en fonctionnement normal</td>
-<td>Contrôle externe (à configurer)</td></tr>
+<tr><td>Disponibilité HTTP de <code>/api/health</code> et de la page d'accueil</td><td>Code 200, vu depuis
+l'extérieur du processus</td><td>blackbox-exporter, toutes les 15 s</td></tr>
 <tr><td>Latence de la sonde</td><td>Quelques dizaines de millisecondes, une requête de comptage simple ne
-justifiant pas de délai notable</td><td>Champ <code>latencyMs</code> de la réponse</td></tr>
-<tr><td>Consommation mémoire</td><td>Moins de 400 Mo (plafond PM2)</td><td><code>pm2 jlist</code></td></tr>
+justifiant pas de délai notable</td><td>Champ <code>latencyMs</code> de la réponse et métrique
+<code>probe_duration_seconds</code></td></tr>
+<tr><td>Consommation mémoire du VPS</td><td>Sous le seuil d'alerte pour ne pas dégrader Planify et les autres
+services hébergés</td><td>node-exporter</td></tr>
+<tr><td>Espace disque du VPS</td><td>Marge suffisante pour les journaux et la rétention Prometheus (15
+jours)</td><td>node-exporter</td></tr>
 <tr><td>Tentatives d'authentification anormales</td><td>Blocage effectif au-delà de cinq échecs</td>
 <td>Journal <code>SECURITY</code></td></tr>
 </tbody>
 </table>
 
-<h3>2.4 Modalité de signalement</h3>
+<h3>2.5 Modalité de signalement</h3>
 <p>
-Deux modalités coexistent aujourd'hui. La première est corrective et automatique : PM2 redémarre le processus
-en cas d'arrêt ou de dépassement mémoire, sans intervention humaine. La seconde est manuelle : en l'absence de
-contrôle externe configuré, la disponibilité réelle de l'application n'est vérifiée qu'à l'occasion d'une
-consultation volontaire de <code>/api/health</code> ou des journaux. C'est la limite principale du dispositif
-actuel, assumée au chapitre 5 (axe d'amélioration) : la sonde existe et fonctionne, mais rien ne
-notifie encore un humain lorsqu'elle passe au rouge.
+Deux modalités coexistent. La première est corrective et automatique : PM2 redémarre le processus en cas
+d'arrêt ou de dépassement mémoire, sans intervention humaine. La seconde est désormais visuelle : le tableau
+de bord du chapitre 2.3 rend la disponibilité et la charge consultables en un coup d'oeil, là où seule une
+requête manuelle à <code>/api/health</code> le permettait auparavant. Une alerte poussée automatiquement
+(règle Grafana déclenchée par <code>probe_success</code>, notifiée sur un canal Discord dédié) reste à
+raccorder : c'est la limite qui subsiste sur ce dispositif, reprise au chapitre 5, et la seule étape qui
+sépare aujourd'hui la supervision passive de l'alerte proactive.
 </p>
 </section>
 
@@ -516,6 +554,28 @@ Exécution réelle du pipeline, consultable à
 Le détail des neuf étapes de la tâche qualité (récupération du code, installation, génération du client
 Prisma, ESLint, TypeScript, tests, publication de la couverture, build) figure en annexe A.</p>
 <p>
+La branche a ensuite été fusionnée dans <code>main</code> le même jour, une fois la mise en place de la
+supervision du chapitre 2 terminée et vérifiée. Cette fusion a déclenché une seconde exécution du pipeline,
+cette fois avec la tâche <code>deploy</code> active :
+</p>
+<table>
+<thead><tr><th>Tâche</th><th>Résultat</th></tr></thead>
+<tbody>
+<tr><td>Qualité (lint, types, tests, build)</td><td class="ok-txt">Succès</td></tr>
+<tr><td>Déploiement sur le VPS</td><td class="ok-txt">Succès</td></tr>
+</tbody>
+</table>
+<p class="small">Run <code>32143320615</code>, déclenché par le commit de fusion sur <code>main</code>, relevé
+le 18/08/2026.</p>
+<p>
+Vérification immédiate après déploiement, sur l'application réellement en ligne :
+</p>
+<pre>$ curl -s https://planify.johanpoyet.fr/api/health
+{"status":"ok","db":"up","uptimeSeconds":19,"latencyMs":8,"timestamp":"2026-08-18T13:39:01.757Z"}</pre>
+<p class="small">Le processus PM2 a redémarré proprement (<code>uptimeSeconds: 19</code> au moment du relevé,
+mémoire retombée à 68 Mo), la page de connexion et la page d'accueil ont été revérifiées en HTTP 200, et les
+journaux PM2 ne comportent aucune erreur nouvelle après le rechargement.</p>
+<p>
 Cette exécution a été précédée, à chaque commit, du rejeu local de la même chaîne de qualité :
 </p>
 <table>
@@ -582,14 +642,19 @@ outil natif au dépôt ouvrirait automatiquement une proposition de mise à jour
 est publiée, réduisant le délai entre publication d'un correctif et son intégration.</td>
 <td>Faible : fonctionnalité native de GitHub, activable sans développement, à configurer avec un rythme
 hebdomadaire pour rester compatible avec une revue par une seule personne.</td></tr>
-<tr><td class="cat">Relier <code>/api/health</code> à un contrôle externe avec alerte</td>
-<td>La sonde ajoutée au chapitre 2 fonctionne mais n'est consultée qu'à la demande. Un contrôle externe
-gratuit (UptimeRobot ou Better Stack, vérification toutes les cinq minutes) transformerait une indisponibilité
-en alerte immédiate par courriel, évitant qu'elle ne soit découverte que par un utilisateur, comme cela avait
-été le cas pour l'anomalie BUG-20 du dossier BLOC 2.</td>
-<td>Très faible : création d'un compte externe (action à réaliser personnellement, hors du périmètre technique
-de ce dépôt) et configuration d'un moniteur pointant vers l'URL publique de la sonde ; moins de trente
+<tr><td class="cat">Raccorder une alerte active sur la sonde <code>blackbox-exporter</code></td>
+<td>Le chapitre 2 installe la sonde et le tableau de bord, mais la disponibilité n'y est encore que consultée,
+pas signalée. Une règle Grafana sur <code>probe_success</code>, notifiant un webhook Discord, transformerait
+une indisponibilité en alerte immédiate plutôt qu'en constat a posteriori, évitant qu'elle ne soit découverte
+que par un utilisateur, comme cela avait été le cas pour l'anomalie BUG-20 du dossier BLOC 2.</td>
+<td>Très faible : la règle et le contact Discord se configurent dans Grafana, déjà installé ; moins de trente
 minutes.</td></tr>
+<tr><td class="cat">Diversifier géographiquement la sonde de disponibilité</td>
+<td>La sonde <code>blackbox-exporter</code> installée au chapitre 2 part du même serveur que l'application :
+elle valide DNS, TLS et la réponse HTTP, mais ne détecterait pas une panne réseau propre à cet hébergeur.
+Ajouter un point de contrôle externe (service gratuit type UptimeRobot) couvrirait ce cas résiduel.</td>
+<td>Très faible : création d'un compte externe (action à réaliser personnellement) et configuration d'un
+moniteur pointant vers l'URL publique de la sonde ; moins de trente minutes.</td></tr>
 <tr><td class="cat">Activer la protection de la branche <code>main</code></td>
 <td>Déjà identifiée comme limite au dossier BLOC 2 : la barrière de qualité repose uniquement sur
 l'enchaînement des tâches du pipeline, sans règle de dépôt interdisant la fusion en cas d'échec. L'activer
@@ -672,9 +737,9 @@ v1.0.0  Version de reference du dossier professionnel BLOC 2 (22/07/2026)
 v1.1.0  Maintenance corrective : sonde /api/health, correction des tests Node 24,
         mise a jour des dependances vulnerables (18/08/2026)</pre>
 <p>
-Ces étiquettes, posées localement, restent à pousser vers le dépôt distant (<code>git push --tags</code>) pour
-devenir visibles sur GitHub, cette action relevant d'une décision de
-publication que je dois valider moi-même avant de l'exécuter.
+Ces étiquettes ont été poussées vers le dépôt distant (<code>git push --tags</code>) le 18/08/2026 et sont
+visibles sur GitHub, aux côtés de la branche <code>chore/deps-and-health-check</code> fusionnée dans
+<code>main</code> le même jour.
 </p>
 </section>
 
@@ -765,27 +830,30 @@ s'inscrivant depuis cette date.
 <section>
 <h2>Conclusion</h2>
 <p>
-Ce dossier a documenté le maintien en condition opérationnelle de Planify à travers un cas réel plutôt qu'un
-exercice théorique : la préparation de ce document a elle-même déclenché une revue des dépendances, révélé une
-anomalie liée à une montée de version de Node.js, et conduit à la mise en place d'une sonde de supervision qui
-n'existait pas auparavant. Neuf vulnérabilités ont été corrigées, une anomalie réelle a été consignée, analysée
-et corrigée en suivant le même circuit que toute autre modification du projet, et un journal des versions,
-absent au dossier BLOC 2, est désormais tenu et accompagné de deux étiquettes Git.
+Ce dossier a documenté le maintien en condition opérationnelle de Planify à travers des actions réelles plutôt
+qu'un exercice théorique : la préparation de ce document a déclenché une revue des dépendances, révélé une
+anomalie liée à une montée de version de Node.js, corrigée et déployée par le circuit habituel, puis conduit à
+l'installation d'une pile de supervision auto-hébergée (Prometheus, node-exporter, blackbox-exporter, Grafana)
+qui n'existait pas auparavant. Neuf vulnérabilités ont été corrigées, une anomalie réelle a été consignée,
+analysée et corrigée, un journal des versions absent au dossier BLOC 2 est désormais tenu et accompagné de
+deux étiquettes Git poussées sur le dépôt, et la branche portant l'ensemble de ces travaux a été fusionnée puis
+déployée en production le 18/08/2026, vérifiée par le pipeline et par un contrôle manuel a posteriori.
 </p>
 <p>
 Des limites subsistent, et elles sont énoncées plutôt que dissimulées. Trois vulnérabilités résiduelles
-proviennent d'une chaîne de dépendances qui ne peut être assainie sans régression de Prisma. La sonde de
-supervision fonctionne, mais aucun contrôle externe ne la consulte encore automatiquement : une indisponibilité
-resterait, à ce jour, découverte plutôt qu'alertée. Enfin, la collaboration avec le support repose sur un seul
-cas documenté, dans un projet où une seule personne tient les deux rôles. Ces points, ainsi que l'état des
-travaux non encore fusionnés dans <code>main</code>, restent à traiter.
+proviennent d'une chaîne de dépendances qui ne peut être assainie sans régression de Prisma. Le tableau de bord
+de supervision est en place et vérifié, mais aucune alerte ne notifie encore automatiquement une
+indisponibilité : elle resterait, à ce jour, visible sur le tableau de bord plutôt que poussée activement. La
+sonde de disponibilité part par ailleurs du même serveur que l'application, ce qui la rend aveugle à une panne
+réseau propre à l'hébergeur. Enfin, la collaboration avec le support repose sur un seul cas documenté, dans un
+projet où une seule personne tient les deux rôles.
 </p>
 <p>
 Les prochaines étapes découlent directement des axes d'amélioration du chapitre 5 : rendre l'audit de
-dépendances bloquant dans le pipeline, relier la sonde de santé à un contrôle externe avec alerte par
-courriel, et activer la protection de la branche <code>main</code>. Ces trois actions, de coût très faible,
-combleraient l'écart entre le dispositif de détection mis en place ici et une réponse véritablement
-proactive aux incidents.
+dépendances bloquant dans le pipeline, raccorder une alerte Discord à la règle de disponibilité déjà mesurée
+par Grafana, diversifier géographiquement la sonde externe, et activer la protection de la branche
+<code>main</code>. Ces actions, de coût très faible, combleraient l'écart entre le dispositif de détection mis
+en place ici et une réponse véritablement proactive aux incidents.
 </p>
 </section>
 
@@ -830,7 +898,7 @@ HTTP_STATUS:503</pre>
 6644358 feat(health): ajoute une sonde de disponibilite /api/health
 f6c3662 chore(deps): corrige les vulnerabilites detectees par npm audit
 d1c4b59 fix(tests): repare les tests profile-image casses par Node 24</pre>
-<p class="small">Messages de commit volontairement non accentues, conformement a la convention deja utilisee dans l'historique du depot.</p>
+<p class="small">Messages de commit volontairement non accentués, conformément à la convention déjà utilisée dans l'historique du dépôt.</p>
 
 <h3>A.5 Détail de l'exécution réelle sur GitHub Actions</h3>
 <p class="small">Run 32121787991, tâche <code>Qualité (lint, types, tests, build)</code>, relevé via l'API GitHub le 18/08/2026.</p>
