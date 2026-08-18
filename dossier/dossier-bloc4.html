@@ -2,17 +2,21 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="color-scheme" content="light">
 <title>Dossier BLOC 4 - Planify - POYET Johan</title>
 <style>
  :root{
  --brand:#2563eb; --brand-d:#1e3a8a; --ink:#1f2937; --muted:#6b7280;
  --line:#e5e7eb; --soft:#f8fafc; --code-bg:#f6f8fa; --ok:#059669; --warn:#d97706; --bad:#dc2626;
- --accent:#eef2ff;
+ --accent:#eef2ff; --page-bg:#ffffff;
+ color-scheme: light;
  }
  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
  *{ box-sizing:border-box; }
+ html{ background:var(--page-bg); }
  html,body{ margin:0; padding:0; }
  body{
+ background:var(--page-bg);
  font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
  color:var(--ink); font-size:10.6pt; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact;
  }
