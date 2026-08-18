@@ -390,6 +390,14 @@ accumulé de recul, ce qui est signalé comme limite au chapitre 5 plutôt que p
 complet.</figcaption>
 </figure>
 
+<figure class="shot-fig">
+<img src="img/bloc4-prometheus-targets.png" alt="Cibles Prometheus de Planify, toutes actives">
+<figcaption>Figure 2 - Page "Target health" de Prometheus, capturée le 18/08/2026 : les quatre cibles
+(<code>blackbox-http</code> sur les deux URL publiques, <code>node</code>, <code>prometheus</code> lui-même)
+sont à l'état UP, avec l'horodatage du dernier passage de sonde et sa durée. C'est la preuve que les sondes
+décrites au tableau du chapitre 2.1 fonctionnent réellement, et pas seulement sur le papier.</figcaption>
+</figure>
+
 <h3>2.4 Critères de qualité et de performance surveillés</h3>
 <table>
 <thead><tr><th>Critère</th><th>Objectif</th><th>Source</th></tr></thead>
@@ -567,6 +575,14 @@ cette fois avec la tâche <code>deploy</code> active :
 </table>
 <p class="small">Run <code>32143320615</code>, déclenché par le commit de fusion sur <code>main</code>, relevé
 le 18/08/2026.</p>
+<figure class="shot-fig">
+<img src="img/bloc4-github-actions-run.png" alt="Exécution réussie du pipeline CI/CD sur GitHub Actions">
+<figcaption>Figure 3 - Page GitHub Actions du run <code>32143320615</code> : les deux tâches en succès, durée
+totale de 2 min 31 s (qualité 1 min 23 s, déploiement 59 s), déclenché par le commit de fusion sur
+<code>main</code>. Les douze avertissements listés sont sans lien avec ce dossier (types <code>any</code>
+dans des tests existants, dépréciation de Node.js 20 dans les actions GitHub) ; ils n'ont pas empêché la
+réussite du déploiement.</figcaption>
+</figure>
 <p>
 Vérification immédiate après déploiement, sur l'application réellement en ligne :
 </p>
