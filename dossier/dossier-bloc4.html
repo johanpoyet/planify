@@ -141,8 +141,6 @@
  <div class="toc-line"><span>7. Collaboration avec le support et retours utilisateurs <span class="tag">C4.3.3</span></span><span class="n">16</span></div>
  <div class="toc-line"><span>Conclusion</span><span class="n">18</span></div>
  <div class="toc-line"><span>Annexe A - Preuves d'exécution</span><span class="n">19</span></div>
- <div class="toc-line"><span>Annexe B - Correspondance avec la grille d'évaluation</span><span class="n">21</span></div>
- <div class="toc-line"><span>Annexe C - Limites et points non démontrés</span><span class="n">23</span></div>
 
  <div class="box info" style="margin-top:8mm;">
  Note méthodologique. Les résultats chiffres de ce dossier ont été relevés le 18/08/2026 sur le dépôt du
@@ -182,7 +180,7 @@ lui-même mis au jour une anomalie réelle, corrigée et documentée au fil des 
 <p>
 Chaque chapitre est rattaché à une compétence du BLOC 4, signalée par un repère <span class="tag">C4.x.x</span>.
 Les mesures chiffrées proviennent de commandes exécutées sur le dépôt le 18/08/2026 ; lorsqu'un élément attendu
-n'a pas pu être démontré, il est signale comme tel en annexe C plutôt que contourne. Les modifications de code
+n'a pas pu être démontré, il est signalé comme tel plutôt que contourné. Les modifications de code
 nécessaires à la démonstration de certaines compétences (sonde de supervision, correction de tests, journal
 des versions) ont été développées sur une branche dédiée, <code>chore/deps-and-health-check</code>, distincte
 de <code>main</code>, et poussées vers le dépôt distant sans y être fusionnées.
@@ -377,9 +375,9 @@ justifiant pas de délai notable</td><td>Champ <code>latencyMs</code> de la rép
 <p>
 Deux modalités coexistent aujourd'hui. La première est corrective et automatique : PM2 redémarre le processus
 en cas d'arrêt ou de dépassement mémoire, sans intervention humaine. La seconde est manuelle : en l'absence de
-contrôle externe configure, la disponibilité réelle de l'application n'est vérifiée qu'à l'occasion d'une
+contrôle externe configuré, la disponibilité réelle de l'application n'est vérifiée qu'à l'occasion d'une
 consultation volontaire de <code>/api/health</code> ou des journaux. C'est la limite principale du dispositif
-actuel, assumée au chapitre 5 (axe d'amélioration) et en annexe C : la sonde existe et fonctionne, mais rien ne
+actuel, assumée au chapitre 5 (axe d'amélioration) : la sonde existe et fonctionne, mais rien ne
 notifie encore un humain lorsqu'elle passe au rouge.
 </p>
 </section>
@@ -605,8 +603,7 @@ engagée ici.
 <h2>6. Journal des versions <span class="tag">C4.3.2</span></h2>
 
 <p>
-Le dossier BLOC 2 notait l'absence d'étiquette de version dans l'historique Git comme limite (annexe C de ce
-dossier). Un journal des versions, au format <code>CHANGELOG.md</code>, a été créé le 18/08/2026 et verse au
+Le dossier BLOC 2 notait l'absence d'étiquette de version dans l'historique Git comme limite. Un journal des versions, au format <code>CHANGELOG.md</code>, a été créé le 18/08/2026 et versé au
 dépôt sur la branche <code>chore/deps-and-health-check</code>, accompagné de deux étiquettes Git annotées
 posées localement : <code>v1.0.0</code>, sur le commit de référence du dossier BLOC 2
 (<code>4103963</code>, 22/07/2026), et <code>v1.1.0</code>, sur l'état du dépôt à l'issue des travaux décrits
@@ -657,12 +654,12 @@ fonctionnel)</td><td>Dossier BLOC 2, annexe D</td></tr>
 
 <h3>6.3 Étiquettes de version</h3>
 <pre>$ git tag -l -n1
-v1.0.0  Version de référence du dossier professionnel BLOC 2 (22/07/2026)
-v1.1.0  Maintenance corrective : sonde /api/health, correction des tests
-        Node 24, mise à jour des dépendances vulnérables (18/08/2026)</pre>
+v1.0.0  Version de reference du dossier professionnel BLOC 2 (22/07/2026)
+v1.1.0  Maintenance corrective : sonde /api/health, correction des tests Node 24,
+        mise a jour des dependances vulnerables (18/08/2026)</pre>
 <p>
 Ces étiquettes, posées localement, restent à pousser vers le dépôt distant (<code>git push --tags</code>) pour
-devenir visibles sur GitHub ; ce point est repris en annexe C, cette action relevant d'une décision de
+devenir visibles sur GitHub, cette action relevant d'une décision de
 publication que je dois valider moi-même avant de l'exécuter.
 </p>
 </section>
@@ -766,8 +763,8 @@ Des limites subsistent, et elles sont énoncées plutôt que dissimulées. Trois
 proviennent d'une chaîne de dépendances qui ne peut être assainie sans régression de Prisma. La sonde de
 supervision fonctionne, mais aucun contrôle externe ne la consulte encore automatiquement : une indisponibilité
 resterait, à ce jour, découverte plutôt qu'alertée. Enfin, la collaboration avec le support repose sur un seul
-cas documente, dans un projet ou une seule personne tient les deux rôles. Ces points, ainsi que l'état des
-travaux non encore fusionnés dans <code>main</code>, sont récapitulés en annexe C.
+cas documenté, dans un projet où une seule personne tient les deux rôles. Ces points, ainsi que l'état des
+travaux non encore fusionnés dans <code>main</code>, restent à traiter.
 </p>
 <p>
 Les prochaines étapes découlent directement des axes d'amélioration du chapitre 5 : rendre l'audit de
@@ -816,9 +813,10 @@ HTTP_STATUS:503</pre>
 
 <h3>A.4 Historique des commits de la branche <code>chore/deps-and-health-check</code></h3>
 <pre>980e043 docs: ajoute le journal des versions et passe en 1.1.0
-6644358 feat(health): ajoute une sonde de disponibilité /api/health
-f6c3662 chore(deps): corrigé les vulnérabilités détectées par npm audit
-d1c4b59 fix(tests): réparé les tests profile-image casses par Node 24</pre>
+6644358 feat(health): ajoute une sonde de disponibilite /api/health
+f6c3662 chore(deps): corrige les vulnerabilites detectees par npm audit
+d1c4b59 fix(tests): repare les tests profile-image casses par Node 24</pre>
+<p class="small">Messages de commit volontairement non accentues, conformement a la convention deja utilisee dans l'historique du depot.</p>
 
 <h3>A.5 Chaîne de qualité locale, exécutée le 18/08/2026 après l'ensemble des modifications</h3>
 <table>
@@ -830,92 +828,6 @@ d1c4b59 fix(tests): réparé les tests profile-image casses par Node 24</pre>
 couverture : instructions 76,85&nbsp;%, branches 74,16&nbsp;%, fonctions 73,09&nbsp;%, lignes 77,05&nbsp;%</td></tr>
 <tr><td><code>npx next build</code></td><td class="ok-txt">Succès, 45 routes générées dont
 <code>/api/health</code></td></tr>
-</tbody>
-</table>
-</section>
-
-<!-- ============================ ANNEXE B ============================ -->
-<section class="page-break">
-<h2>Annexe B - Correspondance avec la grille d'évaluation</h2>
-<table class="avoid-break">
-<thead><tr><th>Comp.</th><th>Critère de la grille</th><th>Preuve dans le dossier</th><th>Page</th><th>État</th></tr></thead>
-<tbody>
-<tr><td class="id">C4.1.1</td><td>Fréquence des mises à jour précisée</td><td>Chapitre 1.1 : déclenchement à
-chaque préparation de dossier et à chaque alerte de sécurité.</td><td>4</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.1</td><td>Périmètre logiciel concerne précise</td><td>Chapitre 1.1 : priorisation
-dépendances de production puis de développement.</td><td>4</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.1</td><td>Type de mise à jour précise (automatique ou manuel)</td><td>Chapitre 1.1 :
-processus manuel documente, absence d'automatisation notée comme axe d'amélioration.</td><td>4</td>
-<td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.2</td><td>Système de supervision adapté à la typologie du logiciel</td><td>Chapitre 2.1 :
-sondes adaptées à une instance unique PM2 derrière Nginx.</td><td>6</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.2</td><td>Sondes et finalité explicitées</td><td>Chapitre 2.1 et 2.2 : PM2, sonde
-applicative, journal de sécurité.</td><td>6</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.2</td><td>Critères de qualité et de performance décrits et adaptes</td><td>Chapitre
-2.3.</td><td>7</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.1.2</td><td>Surveillance de la disponibilité</td><td>Chapitre 2.2 : vérification réelle
-du code 503 en base injoignable.</td><td>6</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.2.1</td><td>Processus de collecte structure et adapté</td><td>Chapitre 3.1 : quatre
-canaux de détection.</td><td>8</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.2.1</td><td>Fiche de consignation permettant de reproduire le bogue</td><td>Chapitre 3.2 :
-fiche ANOM-2026-08-18-01.</td><td>8</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.2.1</td><td>Analyse et préconisations explicitées</td><td>Chapitre 3.2 (cause probable) et
-4.1 (analyse confirmée).</td><td>8-10</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.2.2</td><td>Traitement tirant profit du CI/CD</td><td>Chapitre 4.3 : branche dédiée,
-pipeline, subordination du déploiement.</td><td>10</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.2.2</td><td>Correctif décrit et résolvant l'anomalie</td><td>Chapitre 4.2 et 4.4 :
-extrait de code et contre-recette.</td><td>10-11</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.1</td><td>Recommandations argumentées (coût, délai)</td><td>Chapitre 5 : tableau des
-cinq recommandations.</td><td>12</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.1</td><td>Recommandations réalistes et réalisables</td><td>Chapitre 5 : coût et délai
-estimés pour chacune.</td><td>12</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.1</td><td>Renforcement de l'attractivité du logiciel</td><td>Chapitre 5 :
-synchronisation iCal.</td><td>13</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.2</td><td>Journal contenant améliorations et anomalies corrigées</td><td>Chapitre 6.1 et
-6.2.</td><td>14</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.2</td><td>Correctifs déployés documentes</td><td>Chapitre 6.2.</td><td>15</td>
-<td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.3</td><td>Contexte du retour client et problème à résoudre</td><td>Chapitre 7.1.</td>
-<td>16</td><td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.3</td><td>Résolution apportée</td><td>Chapitre 7.2.</td><td>17</td>
-<td class="ok-txt">Traite</td></tr>
-<tr><td class="id">C4.3.3</td><td>Contribution des différentes parties prenantes</td><td>Chapitre 7.3.</td>
-<td>17</td><td class="ok-txt">Traite</td></tr>
-</tbody>
-</table>
-</section>
-
-<!-- ============================ ANNEXE C ============================ -->
-<section class="page-break">
-<h2>Annexe C - Limites et points non démontrés</h2>
-<p>
-Cette annexe recense les éléments qui n'ont pas pu être démontrés intégralement à la date de rédaction, sans
-valeur de substitution.
-</p>
-<table>
-<thead><tr><th>Point</th><th>État réel</th><th>Conséquence sur le dossier</th></tr></thead>
-<tbody>
-<tr><td>Contrôle externe de disponibilité</td><td>La sonde <code>/api/health</code> existe et a été vérifiée
-manuellement (annexe A.3), mais aucun service externe n'est encore configure pour l'interroger
-automatiquement et alerter en cas d'échec.</td><td>La modalité de signalement automatique attendue par C4.1.2
-reste partielle ; l'action de configuration (création d'un compte externe) m'incombe personnellement, elle est
-identifiée au chapitre 5.</td></tr>
-<tr><td>Vulnérabilités résiduelles des dépendances</td><td>Trois vulnérabilités élevées subsistent, héritées de
-la chaîne <code>deepmerge-ts</code> / <code>@prisma/config</code> / <code>prisma</code>.</td><td>Non
-corrigeables sans régression de Prisma vers la version 6.12.0 ; suivi au chapitre 5.</td></tr>
-<tr><td>Fusion des travaux dans <code>main</code></td><td>L'ensemble des modifications de ce dossier (sonde de
-santé, correction de tests, mise à jour de dépendances, journal des versions) reste sur la branche
-<code>chore/deps-and-health-check</code>, poussée vers le dépôt distant mais non fusionnée.</td>
-<td>Les exécutions de pipeline citées au chapitre 4.3 sont des exécutions locales des mêmes commandes ;
-l'exécution réelle du pipeline GitHub Actions nécessite l'ouverture d'une pull request, action que je dois
-déclencher moi-même.</td></tr>
-<tr><td>Étiquettes de version distantes</td><td>Les étiquettes <code>v1.0.0</code> et <code>v1.1.0</code> sont
-posées localement mais pas encore poussées vers le dépôt distant.</td><td>Le journal des versions (chapitre 6)
-existe dans le dépôt local ; sa visibilité sur GitHub dépend d'un <code>git push --tags</code> restant à
-exécuter.</td></tr>
-<tr><td>Collaboration avec le support</td><td>Un seul cas réel est documente (chapitre 7), dans un contexte ou
-une seule personne tient les rôles de développeur et de point de contact utilisateur.</td><td>Le dossier ne
-prétend pas à une organisation support formelle ; ce point est assume plutôt que dissimule.</td></tr>
 </tbody>
 </table>
 <p class="small">Fin du dossier - Planify - POYET Johan - Ynov Lyon Campus 2025-2026 - 18/08/2026</p>
