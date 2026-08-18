@@ -162,7 +162,7 @@ opérationnelle", appliqué au même projet que le dossier BLOC 2 : Planify, une
 planification d'événements à calendrier partage entre amis. Je tiens seul, sur ce projet, le rôle de
 commanditaire, de développeur et d'exploitant : cette position, déjà assumée dans le dossier BLOC 2, explique
 la manière dont certaines compétences de ce bloc sont démontrées, en particulier la consignation des
-anomalies et la relation avec les utilisateurs, ou je cumule les rôles habituellement répartis entre plusieurs
+anomalies et la relation avec les utilisateurs, où je cumule les rôles habituellement répartis entre plusieurs
 personnes.
 </p>
 
@@ -217,24 +217,24 @@ semver du <code>package.json</code>) et version "latest" (susceptible d'introdui
 journal des modifications de la dépendance concernée lorsque la mise à jour change un numéro de version
 majeur.</td></tr>
 <tr><td class="cat">Décision</td><td>Application immédiate si la mise à jour est mineure ou corrective et sans
-rupture connue ; report documente si elle impose une régression fonctionnelle (précédent : la suppression de
+rupture connue ; report documenté si elle impose une régression fonctionnelle (précédent : la suppression de
 <code>next-pwa</code> plutôt que sa mise à jour, dossier BLOC 2, chapitre 6.2).</td></tr>
 <tr><td class="cat">Application</td><td><code>npm audit fix</code> pour les correctifs de sécurité sans
 changement cassant, ou modification manuelle du <code>package.json</code> suivie de <code>npm ci</code> pour
 une installation reproductible à partir du verrou de version.</td></tr>
 <tr><td class="cat">Vérification</td><td>Rejeu complet de la chaîne de qualité locale (<code>lint</code>,
 <code>typecheck</code>, <code>vitest run --coverage</code>, <code>next build</code>) avant tout commit, puis
-vérification par le pipeline CI/CD des lors que la modification est poussée.</td></tr>
+vérification par le pipeline CI/CD dès lors que la modification est poussée.</td></tr>
 </tbody>
 </table>
 
 <p>
-Le périmètre logiciel concerne est priorisé : les dépendances de production (<code>dependencies</code>), qui
+Le périmètre logiciel concerné est priorisé : les dépendances de production (<code>dependencies</code>), qui
 s'exécutent dans l'application livrée, sont revues en priorité ; les dépendances de développement
 (<code>devDependencies</code>) sont revues ensuite, avec une tolérance plus large car elles n'atteignent jamais
 l'environnement de production. Le type de mise à jour est aujourd'hui manuel : chaque revue est déclenchée et
 validée par le développeur, sans fusion automatique. Aucun outil d'automatisation des demandes de mise à jour
-(Dependabot ou équivalent) n'est encore configure ; ce point est repris comme axe d'amélioration au chapitre 5.
+(Dependabot ou équivalent) n'est encore configuré ; ce point est repris comme axe d'amélioration au chapitre 5.
 </p>
 
 <h3>1.2 Revue réelle du 18/08/2026</h3>
@@ -261,9 +261,9 @@ L'audit a signalé dix vulnérabilités de sévérité élevée. Neuf provenaien
 rupture (<code>brace-expansion</code>, <code>js-yaml</code>, <code>nanoid</code>, <code>postcss</code>,
 <code>sharp</code>, <code>undici</code>) : elles ont été appliquées avec <code>npm audit fix</code>. La
 dixième provient de <code>deepmerge-ts</code>, dépendance transitive de l'outillage Prisma
-(<code>@prisma/config</code>) : le seul correctif propose rétrograderait Prisma vers la version 6.12.0, une
+(<code>@prisma/config</code>) : le seul correctif proposé rétrograderait Prisma vers la version 6.12.0, une
 régression comparable à celle déjà écartée pour Next.js dans le dossier BLOC 2. Il n'a pas été appliqué ; le
-suivi est reporte au chapitre 5.
+suivi est reporté au chapitre 5.
 </p>
 
 <table>
@@ -289,29 +289,29 @@ versions installées restent dans les bornes semver déclarées au <code>package
 <h2>2. Système de supervision et d'alerte <span class="tag">C4.1.2</span></h2>
 
 <p>
-Planify s'exécuté en instance unique (PM2, mode fork) derrière un proxy inverse Nginx, avec une base MongoDB
+Planify s'exécute en instance unique (PM2, mode fork) derrière un proxy inverse Nginx, avec une base MongoDB
 distincte. Cette typologie, déjà décrite au dossier BLOC 2, oriente le système de supervision vers deux
 niveaux complémentaires : la surveillance du processus lui-même, déjà en place, et une sonde applicative
 active, ajoutée le 18/08/2026 pour vérifier que l'application répond réellement, et non seulement qu'elle
-s'exécuté.
+s'exécute.
 </p>
 
 <h3>2.1 Périmètre et sondes</h3>
 <table>
-<thead><tr><th>Sonde</th><th>Périmètre surveille</th><th>Méthode</th><th>État</th></tr></thead>
+<thead><tr><th>Sonde</th><th>Périmètre surveillé</th><th>Méthode</th><th>État</th></tr></thead>
 <tbody>
 <tr><td class="cat">PM2 (processus)</td><td>Présence du processus Node.js, consommation mémoire.</td>
-<td>Redémarrage automatique si le processus s'arrête ; plafond mémoire configure à 400 Mo
+<td>Redémarrage automatique si le processus s'arrête ; plafond mémoire configuré à 400 Mo
 (<code>ecosystem.config.js</code>).</td><td class="ok-txt">En place (BLOC 2)</td></tr>
 <tr><td class="cat"><code>GET /api/health</code> (applicatif)</td><td>Réponse effective de l'application et
 joignabilité de la base de données.</td><td>Requête de comptage sur la collection des utilisateurs via Prisma ;
 code 200 et <code>db: "up"</code> si la base répond, code 503 et <code>db: "down"</code> sinon, avec le temps
-de réponse mesure.</td><td class="ok-txt">Ajoutée le 18/08/2026</td></tr>
+de réponse mesuré.</td><td class="ok-txt">Ajoutée le 18/08/2026</td></tr>
 <tr><td class="cat">Journal de sécurité (canal <code>SECURITY</code>)</td><td>Tentatives d'authentification
-anormales : échecs répétés, blocages.</td><td>Événements structures écrits sur la sortie d'erreur, collectes
+anormales : échecs répétés, blocages.</td><td>Événements structurés écrits sur la sortie d'erreur, collectés
 par PM2, filtrables par préfixe (dossier BLOC 2, chapitre 6).</td><td class="ok-txt">En place (BLOC 2)</td></tr>
 <tr><td class="cat">Contrôle externe (uptime)</td><td>Disponibilité de l'application depuis l'extérieur du
-serveur, sur <code>/api/health</code>.</td><td>Non encore configure : nécessite un compte sur un service tiers
+serveur, sur <code>/api/health</code>.</td><td>Non encore configuré : nécessite un compte sur un service tiers
 (UptimeRobot ou Better Stack, offres gratuites suffisantes ici) que je dois créer moi-même.</td>
 <td class="warn-txt">A mettre en place</td></tr>
 </tbody>
@@ -322,7 +322,7 @@ serveur, sur <code>/api/health</code>.</td><td>Non encore configure : nécessite
 La route <code>GET /api/health</code> ne nécessite pas d'authentification, afin de rester interrogeable par un
 contrôle externe. Elle vérifie à la fois que le processus répond et que la base de données est joignable, ce
 qui la distingue d'un simple ping de processus : une page qui répond en HTTP 200 ne garantit pas que
-l'application soit utilisable, comme l'a montré l'anomalie BUG-20 du dossier BLOC 2, ou la page de connexion
+l'application soit utilisable, comme l'a montré l'anomalie BUG-20 du dossier BLOC 2, où la page de connexion
 répondait normalement alors que ses ressources statiques étaient refusées par le serveur.
 </p>
 <pre>// app/api/health/route.ts
@@ -353,11 +353,11 @@ faux positif.
 <pre>$ curl -sS -w "\nHTTP_STATUS:%{http_code}\n" http://localhost:3010/api/health
 {"status":"degraded","db":"down","uptimeSeconds":5,"timestamp":"2026-08-18T09:31:31.560Z"}
 HTTP_STATUS:503</pre>
-<p class="small">La sonde renvoie le code et le contenu attendus des que la base est injoignable, ce qui la
-rend exploitable par un contrôle externe programmable sur un simple code de réponse. Deux tests automatises
+<p class="small">La sonde renvoie le code et le contenu attendus dès que la base est injoignable, ce qui la
+rend exploitable par un contrôle externe programmable sur un simple code de réponse. Deux tests automatisés
 couvrent les deux cas (base joignable et injoignable) ; ils font partie de la suite exécutée par le pipeline.</p>
 
-<h3>2.3 Critères de qualité et de performance surveilles</h3>
+<h3>2.3 Critères de qualité et de performance surveillés</h3>
 <table>
 <thead><tr><th>Critère</th><th>Objectif</th><th>Source</th></tr></thead>
 <tbody>
@@ -389,7 +389,7 @@ notifie encore un humain lorsqu'elle passe au rouge.
 <h3>3.1 Processus de collecte et de consignation</h3>
 <p>
 Le projet étant maintenu par une seule personne, la consignation ne s'appuie pas sur un outil de ticketing
-partage, mais sur un registre versionné dans le dépôt (à l'image de l'annexe D du dossier BLOC 2), alimente par
+partagé, mais sur un registre versionné dans le dépôt (à l'image de l'annexe D du dossier BLOC 2), alimenté par
 quatre canaux de détection : la recette manuelle, l'exécution du pipeline d'intégration continue, l'usage en
 production, et désormais la sonde de supervision décrite au chapitre 2.
 </p>
@@ -397,7 +397,7 @@ production, et désormais la sonde de supervision décrite au chapitre 2.
 <thead><tr><th>Canal de détection</th><th>Nature des anomalies typiquement trouvées</th></tr></thead>
 <tbody>
 <tr><td>Recette manuelle</td><td>Écarts fonctionnels et d'accessibilité, visibles à l'usage.</td></tr>
-<tr><td>Pipeline CI/CD (lint, types, tests, build)</td><td>Régressions de code, tests casses, erreurs de
+<tr><td>Pipeline CI/CD (lint, types, tests, build)</td><td>Régressions de code, tests cassés, erreurs de
 compilation.</td></tr>
 <tr><td>Sonde <code>/api/health</code> et journaux PM2</td><td>Indisponibilité de la base de données,
 dépassement mémoire, erreurs d'exécution en production.</td></tr>
@@ -408,7 +408,7 @@ fichiers, charge réelle).</td></tr>
 <p>
 Chaque anomalie consignée suit une fiche unique, qui rassemble les informations nécessaires à sa reproduction
 avant même d'engager la correction : environnement précis, commande exécutée, résultat attendu et résultat
-observe, gravite, et élément de preuve joint (trace de pile, capture, sortie de commande).
+observé, gravité, et élément de preuve joint (trace de pile, capture, sortie de commande).
 </p>
 
 <h3>3.2 Fiche de consignation - anomalie du 18/08/2026</h3>
@@ -423,8 +423,8 @@ menée en préparation de ce dossier.</td></tr>
 <tr><td class="cat">Environnement</td><td>Poste de développement, Node.js 24.19.0 (npm 11.17.0), Vitest 4.1.10,
 environnement de test jsdom 28.1.0. Le même dépôt, sur Node.js 22.20.0, ne présentait pas cette anomalie lors
 de l'audit du 22/07/2026 (dossier BLOC 2, chapitre 5.4 : 316/316 tests conformes).</td></tr>
-<tr><td class="cat">Gravite</td><td>Majeure : le pipeline exécuté <code>vitest run --coverage</code> comme
-étape bloquante de la tache <code>quality</code> ; deux tests en échec auraient empêche tout déploiement tant
+<tr><td class="cat">Gravité</td><td>Majeure : le pipeline exécute <code>vitest run --coverage</code> comme
+étape bloquante de la tâche <code>quality</code> ; deux tests en échec auraient empêché tout déploiement tant
 que la barrière de qualité n'est pas franchie.</td></tr>
 <tr><td class="cat">Étapes de reproduction</td><td>
 <code>npm ci</code> (installation reproductible) puis<br>
@@ -432,7 +432,7 @@ que la barrière de qualité n'est pas franchie.</td></tr>
 </td></tr>
 <tr><td class="cat">Résultat attendu</td><td>Neuf tests conformes (quatre cas de rejet, deux cas de succès,
 trois tests de suppression).</td></tr>
-<tr><td class="cat">Résultat observe</td><td>Sept tests conformes, deux en échec : "devrait retourner 400 si
+<tr><td class="cat">Résultat observé</td><td>Sept tests conformes, deux en échec : "devrait retourner 400 si
 type de fichier invalide" et "devrait uploader une image valide", tous deux avec un code de réponse 500 au
 lieu du code attendu.</td></tr>
 <tr><td class="cat">Élément joint</td><td>Trace de pile obtenue via la sortie d'erreur de la route :
@@ -441,9 +441,9 @@ lieu du code attendu.</td></tr>
     at multipartFormDataParser (node:internal/deps/undici/undici:6526:9)</pre>
 </td></tr>
 <tr><td class="cat">Cause probable (à la consignation)</td><td>Incompatibilité entre le constructeur
-<code>File</code> fourni par l'environnement de test jsdom et le contrôle interne de type effectue par
-l'analyseur multipart d'undici, intégré à Node.js 24 et sollicite par <code>NextRequest</code> pour reconstituer
-un formulaire envoyé en corps de requête. A confirmer par analyse (chapitre 4).</td></tr>
+<code>File</code> fourni par l'environnement de test jsdom et le contrôle interne de type effectué par
+l'analyseur multipart d'undici, intégré à Node.js 24 et sollicité par <code>NextRequest</code> pour reconstituer
+un formulaire envoyé en corps de requête. À confirmer par analyse (chapitre 4).</td></tr>
 </tbody>
 </table>
 </div>
@@ -459,7 +459,7 @@ chapitre suivant.</p>
 <p>
 L'hypothèse formulée à la consignation s'est confirmée, et s'est avérée plus étendue que prévu. Une
 reproduction isolée a montré que la propriété <code>type</code> du fichier transmis, correctement définie à la
-construction, redevenait <code>undefined</code> après avoir transite par un <code>FormData</code> sérialisé
+construction, redevenait <code>undefined</code> après avoir transité par un <code>FormData</code> sérialisé
 puis réanalysé par <code>NextRequest</code> dans l'environnement de test jsdom, alors que la même séquence hors
 jsdom (script Node autonome) préservait fidèlement cette valeur. Le fichier existant
 <code>app/api/user/profile-image/__tests__/route.test.ts</code> documentait déjà un symptôme voisin sur la
@@ -472,7 +472,7 @@ par la montée de version de Node.js plutôt que par un changement du code appli
 
 <h3>4.2 Correctif appliqué</h3>
 <p>
-Les deux tests concernes ont été alignes sur le contournement déjà établi dans le même fichier : fournir
+Les deux tests concernés ont été alignés sur le contournement déjà établi dans le même fichier : fournir
 directement un objet imitant l'interface attendue par la route plutôt que de passer par un
 <code>FormData</code> sérialisé.
 </p>
@@ -487,7 +487,7 @@ const file = { name: 'test.txt', type: 'text/plain', size: 7 } as unknown as Fil
 const request = { formData: async () => ({ get: () => file }) } as unknown as NextRequest;</pre>
 <p>
 Pour le test de téléversement valide, la route appelant <code>file.arrayBuffer()</code> afin d'écrire le
-contenu sur disque, l'objet substitue expose cette méthode explicitement, évitant de réintroduire une
+contenu sur disque, l'objet substitué expose cette méthode explicitement, évitant de réintroduire une
 dépendance à la sérialisation défaillante.
 </p>
 
@@ -495,14 +495,28 @@ dépendance à la sérialisation défaillante.
 <p>
 Conformément au protocole décrit au dossier BLOC 2 (chapitre 4), le correctif n'a pas été appliqué directement
 sur <code>main</code>. Il a été commité sur une branche dédiée, <code>chore/deps-and-health-check</code>,
-créée à partir de <code>main</code>, puis poussée vers le dépôt distant : l'ouverture d'une pull request depuis
-cette branche déclenche la tache <code>quality</code> du pipeline (analyse statique, vérification de types,
-tests avec couverture, build) sans toucher à <code>main</code> ni déclencher de déploiement, la tache
-<code>deploy</code> étant subordonnée à un événement de fusion sur cette branche.
+créée à partir de <code>main</code>, puis poussée vers le dépôt distant. Le pipeline se déclenche sur chaque
+push, quelle que soit la branche : la tâche <code>quality</code> (analyse statique, vérification de types,
+tests avec couverture, build) s'est donc exécutée réellement sur GitHub Actions dès la publication de la
+branche, sans toucher à <code>main</code> ni déclencher de déploiement, la tâche <code>deploy</code> étant
+subordonnée à la fois à la réussite de <code>quality</code> et à un évènement sur <code>main</code>.
 </p>
 <p>
-Avant chaque commit, la chaîne de qualité complète a été rejouée localement, avec les mêmes commandes que
-celles exécutées par le pipeline :
+Exécution réelle du pipeline, consultable à
+<code>github.com/johanpoyet/planify/actions/runs/32121787991</code> :
+</p>
+<table>
+<thead><tr><th>Tâche</th><th>Résultat</th><th>Horaire (UTC)</th></tr></thead>
+<tbody>
+<tr><td>Qualité (lint, types, tests, build)</td><td class="ok-txt">Succès</td><td>09:28:37 -&gt; 09:30:01 (1 min 24 s)</td></tr>
+<tr><td>Déploiement sur le VPS</td><td class="warn-txt">Ignorée (skipped)</td><td>Conditionnée à <code>main</code>, non remplie sur cette branche</td></tr>
+</tbody>
+</table>
+<p class="small">Relevé le 18/08/2026 via l'API GitHub (<code>GET /repos/johanpoyet/planify/actions/runs</code>).
+Le détail des neuf étapes de la tâche qualité (récupération du code, installation, génération du client
+Prisma, ESLint, TypeScript, tests, publication de la couverture, build) figure en annexe A.</p>
+<p>
+Cette exécution a été précédée, à chaque commit, du rejeu local de la même chaîne de qualité :
 </p>
 <table>
 <thead><tr><th>Étape</th><th>Commande</th><th>Résultat</th></tr></thead>
@@ -513,7 +527,7 @@ celles exécutées par le pipeline :
 <tr><td>Build de production</td><td><code>npx next build</code></td><td class="ok-txt">Succès</td></tr>
 </tbody>
 </table>
-<p class="small">Exécutions du 18/08/2026, après application du correctif et des autres modifications de ce
+<p class="small">Exécutions locales du 18/08/2026, après application du correctif et des autres modifications de ce
 dossier (sonde de santé, mise à jour des dépendances). Le détail par étape figure en annexe A.</p>
 
 <h3>4.4 Contre-recette</h3>
@@ -533,11 +547,11 @@ Le scénario d'origine (chapitre 3.2) a été rejoué après correction :
  Test Files  1 passed (1)
       Tests  9 passed (9)</pre>
 <p>
-Les neuf tests du fichier concerne sont conformes, et la suite complète est passée de 326 à 328 tests conformes
-(les deux tests ajoutes couvrent la nouvelle sonde <code>/api/health</code>, chapitre 2). Le traitement de
+Les neuf tests du fichier concerné sont conformes, et la suite complète est passée de 326 à 328 tests conformes
+(les deux tests ajoutés couvrent la nouvelle sonde <code>/api/health</code>, chapitre 2). Le traitement de
 cette anomalie illustre directement l'apport du processus d'intégration continue décrit au dossier BLOC 2 :
 sans l'étape <code>vitest run --coverage</code> rendue bloquante lors de la refonte du pipeline, cette
-régression aurait pu atteindre <code>main</code>, puis la production, des la prochaine mise à jour de
+régression aurait pu atteindre <code>main</code>, puis la production, dès la prochaine mise à jour de
 l'environnement d'exécution.
 </p>
 </section>
@@ -547,7 +561,7 @@ l'environnement d'exécution.
 <h2>5. Axes d'amélioration <span class="tag">C4.3.1</span></h2>
 
 <p>
-Les recommandations ci-dessous prennent appui sur les indicateurs mesures dans ce dossier et dans le dossier
+Les recommandations ci-dessous prennent appui sur les indicateurs mesurés dans ce dossier et dans le dossier
 BLOC 2 : elles visent à réduire une charge de maintenance manuelle qui repose aujourd'hui sur un seul
 développeur, et à transformer des contrôles passifs (mesures à la demande) en contrôles actifs (alertes).
 </p>
@@ -556,7 +570,7 @@ développeur, et à transformer des contrôles passifs (mesures à la demande) e
 <thead><tr><th>Recommandation</th><th>Argumentaire et gain attendu</th><th>Coût et délai de mise en oeuvre</th></tr></thead>
 <tbody>
 <tr><td class="cat">Rendre <code>npm audit</code> bloquant dans le pipeline</td>
-<td>Aujourd'hui exécuté manuellement (chapitre 1), l'audit peut être ignore par simple oubli. Le rendre
+<td>Aujourd'hui exécuté manuellement (chapitre 1), l'audit peut être ignoré par simple oubli. Le rendre
 bloquant sur les vulnérabilités critiques empêche une régression de sécurité silencieuse, sans ralentir le
 développement courant : sur les dix vulnérabilités relevées le 18/08/2026, neuf étaient corrigeables sans
 intervention humaine.</td>
@@ -564,11 +578,11 @@ intervention humaine.</td>
 --audit-level=critical</code>), quelques minutes de configuration.</td></tr>
 <tr><td class="cat">Automatiser la veille des dépendances (Dependabot ou équivalent)</td>
 <td>Le processus décrit au chapitre 1 reste manuel : la revue dépend de la disponibilité du développeur. Un
-outil natif au dépôt ouvrirait automatiquement une proposition de mise à jour des qu'une version corrective
+outil natif au dépôt ouvrirait automatiquement une proposition de mise à jour dès qu'une version corrective
 est publiée, réduisant le délai entre publication d'un correctif et son intégration.</td>
 <td>Faible : fonctionnalité native de GitHub, activable sans développement, à configurer avec un rythme
 hebdomadaire pour rester compatible avec une revue par une seule personne.</td></tr>
-<tr><td class="cat">Relier <code>/api/health</code> a un contrôle externe avec alerte</td>
+<tr><td class="cat">Relier <code>/api/health</code> à un contrôle externe avec alerte</td>
 <td>La sonde ajoutée au chapitre 2 fonctionne mais n'est consultée qu'à la demande. Un contrôle externe
 gratuit (UptimeRobot ou Better Stack, vérification toutes les cinq minutes) transformerait une indisponibilité
 en alerte immédiate par courriel, évitant qu'elle ne soit découverte que par un utilisateur, comme cela avait
@@ -578,22 +592,22 @@ de ce dépôt) et configuration d'un moniteur pointant vers l'URL publique de la
 minutes.</td></tr>
 <tr><td class="cat">Activer la protection de la branche <code>main</code></td>
 <td>Déjà identifiée comme limite au dossier BLOC 2 : la barrière de qualité repose uniquement sur
-l'enchaînement des taches du pipeline, sans règle de dépôt interdisant la fusion en cas d'échec. L'activer
+l'enchaînement des tâches du pipeline, sans règle de dépôt interdisant la fusion en cas d'échec. L'activer
 supprime une fenêtre d'erreur humaine possible.</td>
 <td>Nul en développement : réglage dans les paramètres du dépôt GitHub, sans modification de code.</td></tr>
 <tr><td class="cat">Synchronisation avec un calendrier externe (format iCal)</td>
-<td>Déjà envisagée en conclusion du dossier BLOC 2. Elle répond à un besoin réel signale par un utilisateur
+<td>Déjà envisagée en conclusion du dossier BLOC 2. Elle répond à un besoin réel signalé par un utilisateur
 (chapitre 7) : pouvoir retrouver les événements de Planify dans l'agenda déjà utilisé au quotidien, ce qui
 renforce l'attractivité du produit sans en changer le cœur fonctionnel.</td>
-<td>Modéré : génération d'un flux <code>.ics</code> par utilisateur, alimente par les événements et
+<td>Modéré : génération d'un flux <code>.ics</code> par utilisateur, alimenté par les événements et
 invitations acceptées ; estimée à quelques jours de développement et de tests, hors périmètre de ce dossier.</td></tr>
 </tbody>
 </table>
 
 <p>
 Ces cinq recommandations sont classées par coût croissant. Les trois premières sont directement réalisables à
-partir du travail présente dans ce dossier et ne demandent aucune négociation de périmètre fonctionnel ; la
-quatrième est un simple réglage ; la dernière, plus conséquente, relevé d'une décision produit et n'a pas été
+partir du travail présenté dans ce dossier et ne demandent aucune négociation de périmètre fonctionnel ; la
+quatrième est un simple réglage ; la dernière, plus conséquente, relève d'une décision produit et n'a pas été
 engagée ici.
 </p>
 </section>
@@ -640,11 +654,11 @@ l'interface et la mise en place de la chaîne de qualité.
 <p class="small">Le fichier complet, incluant la version 1.0.0 et la période antérieure non versionnée, figure
 au dépôt sous <code>CHANGELOG.md</code> et en annexe A.</p>
 
-<h3>6.2 Correctifs déployés documentes</h3>
+<h3>6.2 Correctifs déployés documentés</h3>
 <table>
 <thead><tr><th>Version</th><th>Correctif</th><th>Référence</th></tr></thead>
 <tbody>
-<tr><td>1.1.0</td><td>Deux tests casses par la montée de version de Node.js, corrigés</td><td>ANOM-2026-08-18-01
+<tr><td>1.1.0</td><td>Deux tests cassés par la montée de version de Node.js, corrigés</td><td>ANOM-2026-08-18-01
 (chapitres 3 et 4)</td></tr>
 <tr><td>1.1.0</td><td>Neuf vulnérabilités de dépendances corrigées</td><td>Chapitre 1.2</td></tr>
 <tr><td>1.0.0</td><td>Vingt-cinq anomalies corrigées (sécurité, accessibilité, fiabilité des tests, exploitation,
@@ -669,7 +683,7 @@ publication que je dois valider moi-même avant de l'exécuter.
 <h2>7. Collaboration avec le support et retours utilisateurs <span class="tag">C4.3.3</span></h2>
 
 <p>
-Planify n'a pas d'équipe support au sens ou l'entend habituellement ce critère : le projet est maintenu par une
+Planify n'a pas d'équipe support au sens où l'entend habituellement ce critère : le projet est maintenu par une
 seule personne, qui tient à la fois le rôle de développeur et de point de contact pour les utilisateurs qui
 testent l'application. Cette section documente un cas réel de ce type de collaboration, survenu peu après le
 renforcement de la politique de mot de passe décrit au dossier BLOC 2.
@@ -677,8 +691,8 @@ renforcement de la politique de mot de passe décrit au dossier BLOC 2.
 
 <div class="box info">
 Note sur la source. L'échange retranscrit ci-dessous a bien eu lieu, sur la messagerie Discord, avec un proche
-ayant teste l'inscription sur Planify. La conversation d'origine n'a pas été conservée : le contenu ci-dessous
-en restitue fidèlement le problème signale et la résolution apportée, à partir du correctif réellement
+ayant testé l'inscription sur Planify. La conversation d'origine n'a pas été conservée : le contenu ci-dessous
+en restitue fidèlement le problème signalé et la résolution apportée, à partir du correctif réellement
 déployé le 24/07/2026 (commit <code>26f0244</code>) et de son contexte technique.
 </div>
 
@@ -688,24 +702,24 @@ Le 22/07/2026, la politique de mot de passe a été renforcée à douze caractè
 (dossier BLOC 2, anomalie BUG-23), sans possibilité d'afficher la saisie sur les deux champs du formulaire
 d'inscription. Le 24/07/2026, un proche testant l'application a signalé, par message, ne pas parvenir à
 finaliser son inscription : le formulaire refusait systématiquement sa saisie en indiquant que les deux mots
-de passe ne correspondaient pas, alors qu'il était certain d'avoir tape la même chose dans les deux champs.
+de passe ne correspondaient pas, alors qu'il était certain d'avoir tapé la même chose dans les deux champs.
 </p>
 
 <div class="chat avoid-break">
  <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 00:52</span><br>
- Bloque à l'inscription, "les mots de passe ne correspondent pas", pourtant j'ai tape pareil dans les deux
+ Bloque à l'inscription, "les mots de passe ne correspondent pas", pourtant j'ai tapé pareil dans les deux
  champs. Réessayé 4 fois.</div>
  <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 00:56</span><br>
  Tu peux me dire ce que tu tapes exactement ? Il y a un correcteur automatique actif sur ton clavier ?</div>
  <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 00:58</span><br>
- Aucune idée, je vois juste des points dans les deux champs, je ne peux pas vérifier ce que j'ai tape.</div>
+ Aucune idée, je vois juste des points dans les deux champs, je ne peux pas vérifier ce que j'ai tapé.</div>
  <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 01:05</span><br>
  Ok, vu le problème : rien ne permet de vérifier la saisie avant de valider, alors que le mot de passe demande
- est plus long et plus contraint depuis hier. Je corrigé ca.</div>
+ est plus long et plus contraint depuis hier. Je corrige ça.</div>
  <div class="msg dev"><span class="who">Johan</span> <span class="when">24/07, 01:50</span><br>
  C'est en ligne, il y a une icône oeil sur les deux champs pour afficher la saisie.</div>
  <div class="msg"><span class="who">Testeur</span> <span class="when">24/07, 08:31</span><br>
- Nickel, ca passe du premier coup maintenant.</div>
+ Nickel, ça passe du premier coup maintenant.</div>
 </div>
 
 <h3>7.2 Résolution apportée</h3>
@@ -732,7 +746,7 @@ résolution le même jour.
 <thead><tr><th>Partie prenante</th><th>Contribution</th></tr></thead>
 <tbody>
 <tr><td class="cat">Testeur (rôle d'utilisateur / support de premier niveau)</td><td>Signalement du symptôme
-observe, avec suffisamment de détails (nombre de tentatives, message affiche) pour orienter le
+observé, avec suffisamment de détails (nombre de tentatives, message affiché) pour orienter le
 diagnostic.</td></tr>
 <tr><td class="cat">Développeur (rôle d'expertise technique)</td><td>Reformulation du symptôme en cause
 technique (absence de vérification possible de la saisie), conception et implémentation du correctif, vérification
@@ -742,7 +756,7 @@ et déploiement.</td></tr>
 <p>
 Ce cas, bien que modeste, illustre le mécanisme complet attendu par cette compétence : un retour utilisateur
 réel, une expertise technique appliquée pour en identifier la cause, et une résolution qui améliore le
-logiciel au-delà du seul incident signale, puisque l'affichage du mot de passe bénéficie à toute personne
+logiciel au-delà du seul incident signalé, puisque l'affichage du mot de passe bénéficie à toute personne
 s'inscrivant depuis cette date.
 </p>
 </section>
@@ -752,7 +766,7 @@ s'inscrivant depuis cette date.
 <h2>Conclusion</h2>
 <p>
 Ce dossier a documenté le maintien en condition opérationnelle de Planify à travers un cas réel plutôt qu'un
-exercice théorique : la préparation de ce document a elle-même déclenché une revue des dépendances, révèle une
+exercice théorique : la préparation de ce document a elle-même déclenché une revue des dépendances, révélé une
 anomalie liée à une montée de version de Node.js, et conduit à la mise en place d'une sonde de supervision qui
 n'existait pas auparavant. Neuf vulnérabilités ont été corrigées, une anomalie réelle a été consignée, analysée
 et corrigée en suivant le même circuit que toute autre modification du projet, et un journal des versions,
@@ -768,7 +782,7 @@ travaux non encore fusionnés dans <code>main</code>, restent à traiter.
 </p>
 <p>
 Les prochaines étapes découlent directement des axes d'amélioration du chapitre 5 : rendre l'audit de
-dépendances bloquant dans le pipeline, relier la sonde de santé a un contrôle externe avec alerte par
+dépendances bloquant dans le pipeline, relier la sonde de santé à un contrôle externe avec alerte par
 courriel, et activer la protection de la branche <code>main</code>. Ces trois actions, de coût très faible,
 combleraient l'écart entre le dispositif de détection mis en place ici et une réponse véritablement
 proactive aux incidents.
@@ -818,7 +832,21 @@ f6c3662 chore(deps): corrige les vulnerabilites detectees par npm audit
 d1c4b59 fix(tests): repare les tests profile-image casses par Node 24</pre>
 <p class="small">Messages de commit volontairement non accentues, conformement a la convention deja utilisee dans l'historique du depot.</p>
 
-<h3>A.5 Chaîne de qualité locale, exécutée le 18/08/2026 après l'ensemble des modifications</h3>
+<h3>A.5 Détail de l'exécution réelle sur GitHub Actions</h3>
+<p class="small">Run 32121787991, tâche <code>Qualité (lint, types, tests, build)</code>, relevé via l'API GitHub le 18/08/2026.</p>
+<pre>Set up job .......................................... success
+Récupération du code ................................ success
+Installation de Node.js ............................. success
+Installation reproductible des dépendances .......... success
+Génération du client Prisma ......................... success
+Analyse statique (ESLint) ........................... success
+Vérification des types (TypeScript) ................. success
+Tests unitaires et couverture ....................... success
+Publication du rapport de couverture ................ success
+Build de production ................................. success
+Complete job ......................................... success</pre>
+
+<h3>A.6 Chaîne de qualité locale, exécutée le 18/08/2026 après l'ensemble des modifications</h3>
 <table>
 <thead><tr><th>Commande</th><th>Résultat</th></tr></thead>
 <tbody>
