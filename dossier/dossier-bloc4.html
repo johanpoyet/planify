@@ -153,7 +153,7 @@
  <div class="box info" style="margin-top:8mm;">
  Note méthodologique. Les résultats chiffrés de ce dossier ont été relevés le 18/08/2026 sur le dépôt du
  projet, avec Node.js 24.19.0 (npm 11.17.0) sous macOS, soit une version plus récente que celle utilisée lors
- de l'audit du dossier BLOC 2 (Node.js 22.20.0). Chaque mesure indique la commande qui l'a produite. Les
+ de l'audit précédent (Node.js 22.20.0). Chaque mesure indique la commande qui l'a produite. Les
  travaux décrits dans ce dossier ont été développés sur une branche dédiée
  (<code>chore/deps-and-health-check</code>), vérifiés localement puis fusionnés dans <code>main</code> le
  18/08/2026 : le pipeline d'intégration continue les a validés une seconde fois avant leur déploiement réel
@@ -167,18 +167,17 @@
 
 <p>
 Ce dossier couvre le BLOC 4 du titre RNCP 39583, "Maintenir l'application logicielle en condition
-opérationnelle", appliqué au même projet que le dossier BLOC 2 : Planify, une application web progressive de
-planification d'événements à calendrier partagé entre amis. Je tiens seul, sur ce projet, le rôle de
-commanditaire, de développeur et d'exploitant : cette position, déjà assumée dans le dossier BLOC 2, explique
-la manière dont certaines compétences de ce bloc sont démontrées, en particulier la consignation des
-anomalies et la relation avec les utilisateurs, où je cumule les rôles habituellement répartis entre plusieurs
-personnes.
+opérationnelle", appliqué à Planify, une application web progressive de planification d'événements à
+calendrier partagé entre amis. Je tiens seul, sur ce projet, le rôle de
+commanditaire, de développeur et d'exploitant, ce qui explique la manière dont certaines compétences de ce
+bloc sont démontrées, en particulier la consignation des anomalies et la relation avec les utilisateurs, où je
+cumule les rôles habituellement répartis entre plusieurs personnes.
 </p>
 
 <p>
-Le dossier BLOC 2 s'arrêtait le 22/07/2026, avec une application en production, un pipeline d'intégration et de
-déploiement continu, 316 tests conformes et vingt-cinq anomalies corrigées. Le présent dossier ne reprend pas
-ce travail : il documente l'activité de maintien en condition opérationnelle qui lui succède, avec ses propres
+Le bloc précédent s'arrêtait le 22/07/2026, avec une application en production, un pipeline d'intégration et de
+déploiement continu, 316 tests conformes et vingt-cinq anomalies corrigées. Ce dossier ne reprend pas ce
+travail : il documente l'activité de maintien en condition opérationnelle qui lui succède, avec ses propres
 mesures et sa propre date de référence. Entre le 22/07/2026 et le 18/08/2026, le projet a continué d'évoluer :
 correction de l'accès à la déconnexion sur mobile, ajout de l'affichage du mot de passe à l'inscription,
 renforcement de l'authentification. La préparation de ce dossier a été l'occasion d'un nouvel audit, qui a
@@ -197,7 +196,7 @@ déployées en production le même jour.
 </p>
 
 <div class="kpi">
- <div class="k"><b>25</b><span>anomalies corrigées en BLOC 2</span></div>
+ <div class="k"><b>25</b><span>anomalies corrigées au 22/07/2026</span></div>
  <div class="k"><b>1</b><span>anomalie réelle détectée et corrigée pour ce dossier</span></div>
  <div class="k"><b>328</b><span>tests conformes au 18/08/2026</span></div>
  <div class="k"><b>4</b><span>conteneurs de supervision installés sur le VPS</span></div>
@@ -275,7 +274,7 @@ rupture (<code>brace-expansion</code>, <code>js-yaml</code>, <code>nanoid</code>
 <code>sharp</code>, <code>undici</code>) : elles ont été appliquées avec <code>npm audit fix</code>. La
 dixième provient de <code>deepmerge-ts</code>, dépendance transitive de l'outillage Prisma
 (<code>@prisma/config</code>) : le seul correctif proposé rétrograderait Prisma vers la version 6.12.0, une
-régression comparable à celle déjà écartée pour Next.js dans le dossier BLOC 2. Il n'a pas été appliqué ; le
+régression comparable à celle déjà écartée pour Next.js. Il n'a pas été appliqué ; le
 suivi est reporté au chapitre 5.
 </p>
 
@@ -303,8 +302,8 @@ versions installées restent dans les bornes semver déclarées au <code>package
 
 <p>
 Planify s'exécute en instance unique (PM2, mode fork) derrière un proxy inverse Nginx, avec une base MongoDB
-distincte, sur un VPS qui héberge par ailleurs une seconde application sans lien avec Planify. Cette typologie,
-déjà décrite au dossier BLOC 2, oriente le système de supervision vers trois niveaux complémentaires : la
+distincte, sur un VPS qui héberge par ailleurs une seconde application sans lien avec Planify. Cette typologie
+oriente le système de supervision vers trois niveaux complémentaires : la
 surveillance du processus lui-même (déjà en place), une sonde applicative interne, et une pile de supervision
 externe au processus, installée le 18/08/2026, qui observe l'application depuis l'extérieur comme le ferait un
 navigateur.
@@ -675,7 +674,7 @@ Le scénario d'origine (chapitre 3.2) a été rejoué après correction :
 <p>
 Les neuf tests du fichier concerné sont conformes, et la suite complète est passée de 326 à 328 tests conformes
 (les deux tests ajoutés couvrent la nouvelle sonde <code>/api/health</code>, chapitre 2). Le traitement de
-cette anomalie illustre directement l'apport du pipeline d'intégration et de déploiement continus décrit au dossier BLOC 2 :
+cette anomalie illustre directement l'apport du pipeline d'intégration et de déploiement continus :
 sans l'étape <code>vitest run --coverage</code> rendue bloquante lors de la refonte du pipeline, cette
 régression aurait pu atteindre <code>main</code>, puis la production, dès la prochaine mise à jour de
 l'environnement d'exécution.
@@ -687,9 +686,9 @@ l'environnement d'exécution.
 <h2>5. Axes d'amélioration <span class="tag">C4.3.1</span></h2>
 
 <p>
-Les recommandations ci-dessous prennent appui sur les indicateurs mesurés dans ce dossier et dans le dossier
-BLOC 2 : elles visent à réduire une charge de maintenance manuelle qui repose aujourd'hui sur un seul
-développeur, et à transformer des contrôles passifs (mesures à la demande) en contrôles actifs (alertes).
+Les recommandations ci-dessous prennent appui sur les indicateurs mesurés dans ce dossier : elles visent à
+réduire une charge de maintenance manuelle qui repose aujourd'hui sur un seul développeur, et à transformer
+des contrôles passifs (mesures à la demande) en contrôles actifs (alertes).
 </p>
 
 <table>
@@ -726,13 +725,13 @@ meilleure détection des indisponibilités améliore la fiabilité perçue du se
 <td>Très faible : création d'un compte externe (action à réaliser personnellement) et configuration d'un
 moniteur pointant vers l'URL publique de la sonde ; moins de trente minutes.</td></tr>
 <tr><td class="cat">Activer la protection de la branche <code>main</code></td>
-<td>Déjà identifiée comme limite au dossier BLOC 2 : la barrière de qualité repose uniquement sur
+<td>La barrière de qualité repose uniquement sur
 l'enchaînement des tâches du pipeline, sans règle de dépôt interdisant la fusion en cas d'échec. L'activer
 supprime une fenêtre d'erreur humaine possible. Cette protection réduit le risque de livrer une version
 défectueuse et renforce la stabilité globale de l'application.</td>
 <td>Nul en développement : réglage dans les paramètres du dépôt GitHub, sans modification de code.</td></tr>
 <tr><td class="cat">Synchronisation avec un calendrier externe (format iCal)</td>
-<td>Déjà envisagée en conclusion du dossier BLOC 2. Elle répond à un besoin réel signalé par un utilisateur
+<td>Elle répond à un besoin réel signalé par un utilisateur
 (chapitre 7) : pouvoir retrouver les événements de Planify dans l'agenda déjà utilisé au quotidien, ce qui
 renforce l'attractivité du produit sans en changer le cœur fonctionnel. Cette amélioration renforce
 directement l'attractivité fonctionnelle de Planify en s'intégrant aux outils calendaires déjà utilisés par
@@ -761,9 +760,9 @@ iCal, nécessitent davantage de développement et relèvent davantage d'une déc
 <h2>6. Journal des versions <span class="tag">C4.3.2</span></h2>
 
 <p>
-Le dossier BLOC 2 notait l'absence d'étiquette de version dans l'historique Git comme limite. Un journal des versions, au format <code>CHANGELOG.md</code>, a été créé le 18/08/2026 et versé au
+Aucune étiquette de version n'existait dans l'historique Git avant ce dossier. Un journal des versions, au format <code>CHANGELOG.md</code>, a été créé le 18/08/2026 et versé au
 dépôt sur la branche <code>chore/deps-and-health-check</code>, accompagné de deux étiquettes Git annotées
-posées localement : <code>v1.0.0</code>, sur le commit de référence du dossier BLOC 2
+posées localement : <code>v1.0.0</code>, sur le commit de référence
 (<code>4103963</code>, 22/07/2026), et <code>v1.1.0</code>, sur l'état du dépôt à l'issue des travaux décrits
 dans ce dossier.
 </p>
@@ -837,7 +836,7 @@ L'étiquette <code>v1.1.0</code> pointe sur le dernier commit de la branche
 Planify n'a pas d'équipe support au sens où l'entend habituellement ce critère : le projet est maintenu par une
 seule personne, qui tient à la fois le rôle de développeur et de point de contact pour les utilisateurs qui
 testent l'application. Cette section documente un cas réel de ce type de collaboration, survenu peu après le
-renforcement de la politique de mot de passe décrit au dossier BLOC 2.
+renforcement de la politique de mot de passe détaillé au chapitre 7.1.
 </p>
 
 <div class="box info">
