@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
 import ConditionalNav from './components/ConditionalNav';
@@ -38,6 +39,13 @@ export default function RootLayout({
           </BodyWrapper>
           <ConditionalNav />
         </Providers>
+        {/* Mesure d'audience Umami (auto-hébergée, sans cookie), seulement sur le domaine de prod. */}
+        <Script
+          src="https://stats.johanpoyet.fr/script.js"
+          data-website-id="4fd2f43a-381e-46d6-9311-b380595fa2a1"
+          data-domains="planify.johanpoyet.fr"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

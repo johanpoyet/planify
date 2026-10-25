@@ -34,14 +34,15 @@ const nextConfig = {
             // qui sont aujourd'hui prérendues. Les autres directives restent
             // strictes et bloquent l'injection de balise <base>, l'inclusion dans
             // une iframe, le détournement de formulaire et les greffons.
+            // stats.johanpoyet.fr : mesure d'audience Umami auto-hébergée.
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-inline' https://stats.johanpoyet.fr",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self' data:",
-              "connect-src 'self'",
+              "connect-src 'self' https://stats.johanpoyet.fr",
               "worker-src 'self'",
               "manifest-src 'self'",
               "frame-ancestors 'none'",
