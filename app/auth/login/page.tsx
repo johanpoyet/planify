@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/lib/themeContext';
+import PlanifyLogo from '@/app/components/PlanifyLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,13 +45,7 @@ export default function LoginPage() {
       >
         {/* Brand */}
         <div className="flex items-center gap-2.5">
-          <div
-            className="flex items-center justify-center text-sm font-bold"
-            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: 'var(--pf-on-accent)' }}
-          >
-            P
-          </div>
-          <span className="font-semibold text-base" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+          <PlanifyLogo />
         </div>
 
         {/* Tagline */}
@@ -109,13 +104,7 @@ export default function LoginPage() {
       <div className="flex flex-col justify-center flex-1 px-8 py-12 lg:px-20" style={{ maxWidth: '100%' }}>
         {/* Mobile brand */}
         <div className="flex items-center gap-2.5 mb-12 lg:hidden">
-          <div
-            className="flex items-center justify-center text-sm font-bold"
-            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: 'var(--pf-on-accent)' }}
-          >
-            P
-          </div>
-          <span className="font-semibold" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+          <PlanifyLogo />
         </div>
 
         <div style={{ maxWidth: 380, width: '100%' }}>

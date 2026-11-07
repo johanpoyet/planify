@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/lib/themeContext';
+import PlanifyLogo from '@/app/components/PlanifyLogo';
 
 const EyeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -72,13 +73,7 @@ export default function RegisterPage() {
       <div style={{ maxWidth: 400, width: '100%' }}>
         {/* Brand */}
         <div className="flex items-center gap-2.5 mb-10">
-          <div
-            className="flex items-center justify-center text-sm font-bold"
-            style={{ width: 28, height: 28, borderRadius: 8, background: primaryColor, color: 'var(--pf-on-accent)' }}
-          >
-            P
-          </div>
-          <span className="font-semibold" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+          <PlanifyLogo />
         </div>
 
         <h2 className="font-semibold mb-1.5" style={{ fontSize: 28, color: 'var(--pf-text)', letterSpacing: '-0.025em' }}>
