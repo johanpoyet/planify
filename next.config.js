@@ -1,3 +1,7 @@
+// En dev, React a besoin d'eval() (piles d'appel, debogage) et le site tourne
+// en HTTP sur localhost : la CSP est assouplie uniquement dans ce cas.
+const isDev = process.env.NODE_ENV !== 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -38,7 +42,9 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://stats.johanpoyet.fr",
+              isDev
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://stats.johanpoyet.fr"
+                : "script-src 'self' 'unsafe-inline' https://stats.johanpoyet.fr",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self' data:",
@@ -49,7 +55,7 @@ const nextConfig = {
               "base-uri 'self'",
               "form-action 'self'",
               "object-src 'none'",
-              'upgrade-insecure-requests',
+              ...(isDev ? [] : ['upgrade-insecure-requests']),
             ].join('; '),
           },
           { key: 'X-Content-Type-Options', value: 'nosniff' },

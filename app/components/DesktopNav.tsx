@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from '@/lib/themeContext'
+import PlanifyLogo from './PlanifyLogo'
 import { useFriendRequests } from '@/lib/useFriendRequests'
 import { useEventInvitations } from '@/lib/useEventInvitations'
 
@@ -119,18 +120,7 @@ export default function DesktopNav() {
     >
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--pf-border)' }}>
-        <div
-          className="flex items-center justify-center font-bold text-sm"
-          style={{
-            width: 28, height: 28, borderRadius: 8,
-            background: primaryColor,
-            color: '#fff',
-            flexShrink: 0,
-          }}
-        >
-          P
-        </div>
-        <span className="font-semibold text-base" style={{ color: 'var(--pf-text)', letterSpacing: '-0.02em' }}>Planify</span>
+        <PlanifyLogo />
       </div>
 
       {/* Main nav */}
