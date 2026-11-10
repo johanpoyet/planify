@@ -329,7 +329,7 @@ export default function PollsPage() {
 
         {/* Topbar */}
         <div
-          className="sticky top-0 z-10 flex items-center justify-between px-8"
+          className="sticky sticky-below-status-bar z-10 flex items-center justify-between px-8"
           style={{ height: 56, borderBottom: '1px solid var(--pf-border)', background: 'var(--pf-bg)' }}
         >
           <div className="flex items-center gap-3">

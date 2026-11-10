@@ -30,8 +30,6 @@ export const viewport: Viewport = {
   themeColor: '#7454F5',
   width: 'device-width',
   initialScale: 1,
-  minimumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 };
 
@@ -46,6 +44,8 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
+        {/* Masque la zone de la barre d'etat iOS en mode PWA plein ecran. */}
+        <div className="status-bar-backdrop" aria-hidden="true" />
         <Providers>
           <DesktopNav />
           <BodyWrapper>

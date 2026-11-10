@@ -136,6 +136,24 @@
     padding-top: env(safe-area-inset-top);
   }
 
+  /* Fond opaque derriere la barre d'etat iOS (PWA en plein ecran avec
+     viewport-fit=cover) : le contenu qui defile ne passe plus sous l'heure. */
+  .status-bar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background: var(--pf-bg);
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  /* En-tetes collants : ils s'arretent sous la barre d'etat. */
+  .sticky-below-status-bar {
+    top: env(safe-area-inset-top);
+  }
+
   /* Amélioration du scroll sur mobile */
   .smooth-scroll {
     -webkit-overflow-scrolling: touch;
