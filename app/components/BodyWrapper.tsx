@@ -18,7 +18,7 @@ export default function BodyWrapper({ children }: Readonly<{ children: React.Rea
     // <main> fournit le repère principal (landmark) attendu par le RGAA sur
     // toutes les pages ; il ne doit donc pas être dupliqué dans les pages enfants.
     <main
-      className={`min-h-screen transition-colors ${shouldPad ? 'pb-20 md:pb-0 md:ml-[260px]' : ''}`}
+      className={`min-h-screen transition-colors safe-area-top ${shouldPad ? 'pb-20 md:pb-0 md:ml-[260px]' : ''}`}
       style={{ backgroundColor: 'var(--pf-bg)', color: 'var(--pf-text)' }}
     >
       {children}

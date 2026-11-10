@@ -32,7 +32,7 @@ export default function PollPage({ params }: Props) {
 
       {/* ── Desktop topbar ──────────────────────────────────────────────── */}
       <div
-        className="hidden md:flex sticky top-0 z-10 items-center px-8"
+        className="hidden md:flex sticky sticky-below-status-bar z-10 items-center px-8"
         style={{ height: 56, gap: 8, fontSize: 14, borderBottom: "1px solid var(--pf-border)", background: "var(--pf-bg)" }}
       >
         <Link href="/polls" style={{ color: "var(--pf-text-dim)" }}>Sondages</Link>

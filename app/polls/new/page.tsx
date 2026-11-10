@@ -25,7 +25,7 @@ export default function NewPollPage() {
 
       {/* ── Desktop topbar ──────────────────────────────────────────────── */}
       <div
-        className="hidden md:flex sticky top-0 z-10 items-center px-8"
+        className="hidden md:flex sticky sticky-below-status-bar z-10 items-center px-8"
         style={{ height: 56, borderBottom: "1px solid var(--pf-border)", background: "var(--pf-bg)", gap: 8, fontSize: 14 }}
       >
         <Link href="/polls" style={{ color: "var(--pf-text-dim)" }}>Sondages</Link>
